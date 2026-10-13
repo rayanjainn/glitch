@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Compiles the engine-independent BugReport.Core sources outside Unity.
+    netstandard2.1 + C# 9 mirrors Unity 6's scripting profile, so code that
+    uses newer APIs or language features fails here before it reaches Unity.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>BugReport.Core</RootNamespace>
+    <AssemblyName>BugReport.Core</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../Assets/_Project/Scripts/Core/**/*.cs" />
+  </ItemGroup>
+</Project>
