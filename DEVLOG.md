@@ -201,3 +201,14 @@
 - I had flagged this exact risk in M1 and dismissed it because the assembly didn't reference SRP Core then.
 - **Fix:** renamed ours to `DiagnosticsOverlay`, moving the file and `.meta` together so scenes keep the reference. The compile-check stubs now include SRP's `DebugOverlay`/`DebugManager`/`DebugUI` so such clashes reproduce outside Unity.
 - **Rule:** when an assembly gains a new reference, re-check project type names against the newly imported namespaces.
+
+## 2026-10-13 — Milestone 6 pass 1 merged; pass 2: UI Toolkit game UI (Editor verification pending)
+
+- PR #6 merged after the owner's Unity run: all EditMode and PlayMode tests passing.
+- **Pass 2** on `feature/ui-toolkit-hud` replaces every gameplay IMGUI placeholder with UI Toolkit:
+  - `UiLayer` base + `GameHud`, `GameMenus`, `InspectionOverlay` on one `UIDocument`;
+  - the tree is built in C# (type-checked, testable by element name); all styling is in `BugReportUI.uss`;
+  - new for players: a glitch dock showing every glitch and its cooldown, short feedback messages (rejection reasons such as OCCUPIED were previously only in the debug overlay), and a controls list on the pause screen.
+- **Decision I'm reversing:** ARCHITECTURE said the designed UI would wait until the layout had been playtested. I did it first because the information layout is the same as before (plus the dock and messages), and future layout changes are now USS edits instead of IMGUI rect maths. If the playtest changes what the HUD should show, that is a code change either way.
+- **Verified here:** Core tests 135/135; stub compile 0 errors / 0 warnings, now including UI Toolkit stubs; filename check OK. The stub compile caught a wrong enum name and a definite-assignment error before Unity did.
+- **Not verified:** anything visual; USS parsing (Unity reports bad properties as import warnings); UI Toolkit's Input System backend for mouse and gamepad menu navigation (Unity 6 documents it as default when no EventSystem exists).

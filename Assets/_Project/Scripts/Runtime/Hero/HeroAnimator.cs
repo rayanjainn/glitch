@@ -6,7 +6,7 @@ namespace BugReport.Hero
     /// <summary>
     /// Procedural body language for the placeholder hero, so its state reads at a glance
     /// (GDD 2.2: readable, expressive). Moves only the visual pivot, never the
-    /// CharacterController, so it cannot affect gameplay. A small icon shows over its head:
+    /// CharacterController, so it cannot affect gameplay. <see cref="CurrentIcon"/> (drawn by the UI) reads:
     /// "?" confused, "..." waiting at an obstacle, "!" setting off again.
     /// </summary>
     public sealed class HeroAnimator : MonoBehaviour
@@ -14,22 +14,19 @@ namespace BugReport.Hero
         [SerializeField] private HeroController hero;
         [SerializeField] private Transform visual;
         [SerializeField, OptionalReference] private VisualSettings settings;
-        [SerializeField, OptionalReference] private Camera viewCamera;
 
         private Vector3 restPosition;
         private Quaternion restRotation;
         private float stateTime;
         private HeroState lastState;
         private float exclaimUntil;
-        private GUIStyle iconStyle;
 
         public string CurrentIcon { get; private set; } = string.Empty;
 
-        public void Configure(HeroController newHero, Transform newVisual, Camera newCamera)
+        public void Configure(HeroController newHero, Transform newVisual)
         {
             hero = newHero;
             visual = newVisual;
-            viewCamera = newCamera;
         }
 
         private void Awake()
@@ -95,19 +92,6 @@ namespace BugReport.Hero
                 : hero.State == HeroState.Blocked ? "..."
                 : time < exclaimUntil ? "!"
                 : string.Empty;
-        }
-
-        private void OnGUI()
-        {
-            if (string.IsNullOrEmpty(CurrentIcon) || Event.current.type != EventType.Repaint) return;
-            var cam = viewCamera != null ? viewCamera : Camera.main;
-            if (!WorldLabel.TryGetRect(cam, transform.position + Vector3.up * 1.6f, new Vector2(60f, 34f), 40f, out var rect)) return;
-            if (iconStyle == null)
-            {
-                iconStyle = new GUIStyle(GUI.skin.label) { fontSize = 26, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
-                iconStyle.normal.textColor = new Color(1f, 0.85f, 0.2f);
-            }
-            GUI.Label(rect, CurrentIcon, iconStyle);
         }
     }
 }

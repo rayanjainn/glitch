@@ -427,9 +427,11 @@ namespace BugReport.EditorTools.Setup
             public SelectionController Selection;
             public GlitchController Glitches;
             public ContainmentDirector Containment;
+            public ObjectiveDirector Objectives;
+            public string LevelTitle;
         }
 
-        /// <summary>Bootstrap, state, selection, glitches, containment, presenters, HUD, menus, audio, kill plane.</summary>
+        /// <summary>Bootstrap, state, selection, glitches, containment, presenters, audio, kill plane. The UI is added by PresentationBuilder.</summary>
         internal static Systems BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, HeroController hero,
             GlitchDefinition[] glitchDefinitions, ContainmentSettingsAsset containmentSettings, ObjectiveDirector objectives,
             bool debugOverlayVisible, string levelTitle)
@@ -448,8 +450,6 @@ namespace BugReport.EditorTools.Setup
 
             var containment = systems.AddComponent<ContainmentDirector>();
             Wire(containment, "settings", containmentSettings);
-            var containmentHud = systems.AddComponent<ContainmentPresenter>();
-            Wire(containmentHud, "director", containment);
 
             var highlight = systems.AddComponent<EntityHighlightPresenter>();
             Wire(highlight, "lineMaterial", mats.Line);
@@ -459,19 +459,6 @@ namespace BugReport.EditorTools.Setup
             var pulses = systems.AddComponent<GlitchPulsePresenter>();
             Wire(pulses, "lineMaterial", mats.Line);
             Wire(pulses, "glitches", glitchController);
-
-            var reticle = systems.AddComponent<ReticlePresenter>();
-            Wire(reticle, "glitches", glitchController);
-
-            var hud = systems.AddComponent<LevelHud>();
-            if (objectives != null) Wire(hud, "objectives", objectives);
-            Wire(hud, "glitches", glitchController);
-
-            var menus = systems.AddComponent<LevelMenus>();
-            if (objectives != null) Wire(menus, "objectives", objectives);
-            var menuSo = new SerializedObject(menus);
-            menuSo.FindProperty("levelTitle").stringValue = levelTitle;
-            menuSo.ApplyModifiedPropertiesWithoutUndo();
 
             var audio = systems.AddComponent<AudioFeedback>();
             Wire(audio, "selection", selection);
@@ -490,7 +477,11 @@ namespace BugReport.EditorTools.Setup
             overlaySo.FindProperty("visible").boolValue = debugOverlayVisible;
             overlaySo.ApplyModifiedPropertiesWithoutUndo();
 
-            return new Systems { Root = systems, Selection = selection, Glitches = glitchController, Containment = containment };
+            return new Systems
+            {
+                Root = systems, Selection = selection, Glitches = glitchController, Containment = containment,
+                Objectives = objectives, LevelTitle = levelTitle,
+            };
         }
 
         /// <summary>Adds the player controller to the anomaly and connects it.</summary>

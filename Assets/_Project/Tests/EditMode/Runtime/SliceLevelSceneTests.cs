@@ -7,6 +7,7 @@ using BugReport.EditorTools.Setup;
 using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.Level;
+using BugReport.UI;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -50,7 +51,8 @@ namespace BugReport.Tests.EditMode
             {
                 (All<GameBootstrap>().Count, "GameBootstrap"), (All<GlitchController>().Count, "GlitchController"),
                 (All<ContainmentDirector>().Count, "ContainmentDirector"), (All<ObjectiveDirector>().Count, "ObjectiveDirector"),
-                (All<HeroController>().Count, "HeroController"), (All<LevelMenus>().Count, "LevelMenus"), (All<LevelHud>().Count, "LevelHud"),
+                (All<HeroController>().Count, "HeroController"), (All<GameMenus>().Count, "GameMenus"), (All<GameHud>().Count, "GameHud"),
+                (All<InspectionOverlay>().Count, "InspectionOverlay"), (All<UnityEngine.UIElements.UIDocument>().Count, "UIDocument"),
             })
                 Assert.That(count.Item1, Is.EqualTo(1), count.Item2);
         }

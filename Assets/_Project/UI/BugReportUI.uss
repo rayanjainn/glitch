@@ -1,0 +1,457 @@
+/*
+ * BUG//REPORT game UI (UI Toolkit). Reference resolution 1920x1080 (PS_BugReport).
+ * Built in code by the UI layers in Scripts/Runtime/UI; element names and classes are
+ * the hooks used here. Palette: cyan system accent, red containment, green success.
+ */
+
+.br-root {
+    --br-accent: #40F2FF;
+    --br-text: #DFF7FF;
+    --br-text-soft: #CDEAF5;
+    --br-text-dim: #7FA3B5;
+    --br-alert: #FF4057;
+    --br-success: #7CFFB2;
+    --br-panel: rgba(5, 12, 20, 0.78);
+    font-size: 16px;
+    color: var(--br-text);
+}
+
+.br-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.br-root Label {
+    padding: 0;
+    margin: 0;
+}
+
+/* ---------------------------------------------------------------- shared */
+
+.br-panel {
+    background-color: var(--br-panel);
+    border-radius: 4px;
+    border-left-width: 3px;
+    border-left-color: var(--br-accent);
+    padding: 12px 16px;
+}
+
+.br-hud--no-panels .br-panel {
+    background-color: rgba(0, 0, 0, 0);
+    border-left-width: 0;
+}
+
+.br-caption {
+    font-size: 12px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    color: var(--br-text-dim);
+}
+
+.br-key {
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: #0A1620;
+    background-color: var(--br-text-soft);
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin-right: 8px;
+    min-width: 22px;
+}
+
+/* ---------------------------------------------------------------- containment (top) */
+
+.br-alert {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    width: 440px;
+    translate: -50% 0;
+    align-items: center;
+}
+
+.br-alert__stage {
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    color: var(--br-alert);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.6);
+}
+
+.br-alert--flash .br-alert__stage {
+    color: #FFFFFF;
+}
+
+.br-alert__track {
+    width: 100%;
+    height: 6px;
+    margin-top: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.br-alert__fill {
+    height: 100%;
+    background-color: #FFFFFF;
+}
+
+.br-alert--stage1 .br-alert__fill { background-color: #FFD24A; }
+.br-alert--stage2 .br-alert__fill { background-color: #FF9A3D; }
+.br-alert--stage3 .br-alert__fill { background-color: var(--br-alert); }
+.br-alert--stage4 .br-alert__fill { background-color: #FF1F4B; }
+
+.br-alert__detail {
+    margin-top: 4px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #FFB3BD;
+}
+
+/* ---------------------------------------------------------------- reticle (centre) */
+
+.br-reticle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 26px;
+    height: 26px;
+    translate: -50% -50%;
+    transition-property: scale;
+    transition-duration: 0.12s;
+}
+
+.br-reticle__tick,
+.br-reticle__dot {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.br-reticle__tick--left  { left: 0;   top: 12px; width: 9px; height: 2px; }
+.br-reticle__tick--right { right: 0;  top: 12px; width: 9px; height: 2px; }
+.br-reticle__tick--up    { left: 12px; top: 0;   width: 2px; height: 9px; }
+.br-reticle__tick--down  { left: 12px; bottom: 0; width: 2px; height: 9px; }
+.br-reticle__dot         { left: 12px; top: 12px; width: 2px; height: 2px; }
+
+.br-reticle--valid { scale: 1.2 1.2; }
+.br-reticle--valid .br-reticle__tick,
+.br-reticle--valid .br-reticle__dot { background-color: var(--br-accent); }
+.br-reticle--invalid .br-reticle__tick,
+.br-reticle--invalid .br-reticle__dot { background-color: #FF4D59; }
+
+/* ---------------------------------------------------------------- feedback (centre) */
+
+.br-toasts {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 57%;
+    align-items: center;
+}
+
+.br-toast {
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    margin-bottom: 4px;
+    border-radius: 3px;
+    background-color: rgba(5, 12, 20, 0.6);
+}
+
+.br-toast--negative { border-left-width: 3px; border-left-color: var(--br-alert); }
+.br-toast--positive { border-left-width: 3px; border-left-color: var(--br-accent); }
+
+.br-banner {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 22%;
+    font-size: 26px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 3px;
+    color: var(--br-success);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.7);
+}
+
+/* ---------------------------------------------------------------- objective (bottom-left) */
+
+.br-objective {
+    position: absolute;
+    left: 24px;
+    bottom: 24px;
+    width: 560px;
+}
+
+.br-objective__title {
+    margin-top: 2px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+}
+
+.br-objective__hint {
+    margin-top: 4px;
+    font-size: 14px;
+    white-space: normal;
+    color: var(--br-text-soft);
+}
+
+/* ---------------------------------------------------------------- glitch dock (bottom) */
+
+.br-dock {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    translate: -50% 0;
+    align-items: center;
+}
+
+.br-dock__row,
+.br-dock__slots {
+    flex-direction: row;
+    align-items: center;
+}
+
+.br-slot {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 12px;
+    margin: 0 3px;
+    border-radius: 3px;
+    border-bottom-width: 3px;
+    background-color: rgba(5, 12, 20, 0.7);
+    opacity: 0.6;
+    transition-property: opacity, scale;
+    transition-duration: 0.12s;
+}
+
+.br-slot--active {
+    opacity: 1;
+    scale: 1.06 1.06;
+}
+
+.br-slot__swatch {
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 5px;
+}
+
+.br-slot__name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    color: #FFFFFF;
+}
+
+.br-slot--cooling .br-slot__name { color: var(--br-text-dim); }
+
+.br-slot__timer {
+    margin-left: 6px;
+    font-size: 12px;
+    color: #FFB3BD;
+}
+
+.br-prompt {
+    margin-top: 8px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    color: var(--br-text-soft);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.6);
+}
+
+.br-prompt--invalid { color: #FF6B76; }
+
+/* ---------------------------------------------------------------- inspection (world + panel) */
+
+.br-tags {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.br-tag {
+    position: absolute;
+    translate: -50% -100%;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border-left-width: 2px;
+    border-left-color: var(--br-accent);
+    background-color: rgba(5, 12, 20, 0.75);
+}
+
+.br-tag__line,
+.br-tag__pips {
+    flex-direction: row;
+    align-items: center;
+}
+
+.br-tag__name { font-size: 12px; -unity-font-style: bold; }
+.br-tag__id   { font-size: 11px; margin-left: 6px; color: var(--br-success); }
+.br-tag__pips { margin-top: 3px; }
+
+.br-pip {
+    width: 10px;
+    height: 6px;
+    margin-right: 4px;
+    border-radius: 1px;
+}
+
+.br-hero-icon {
+    position: absolute;
+    translate: -50% -100%;
+    font-size: 30px;
+    -unity-font-style: bold;
+    color: #FFD933;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.7);
+}
+
+.br-inspect {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 340px;
+}
+
+.br-inspect__head {
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.br-inspect__name { font-size: 18px; -unity-font-style: bold; color: #FFFFFF; }
+.br-inspect__id   { font-size: 12px; margin-left: 8px; color: var(--br-success); }
+
+.br-inspect__description {
+    margin: 4px 0;
+    font-size: 13px;
+    -unity-font-style: italic;
+    white-space: normal;
+    color: var(--br-text-soft);
+}
+
+.br-inspect__chips {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.br-chip {
+    font-size: 11px;
+    -unity-font-style: bold;
+    padding: 2px 6px;
+    margin: 0 4px 4px 0;
+    border-left-width: 3px;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.br-inspect__state {
+    margin-top: 6px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #9FDCF0;
+}
+
+.br-inspect__state--altered { color: #FFD24A; }
+
+/* ---------------------------------------------------------------- menus */
+
+.br-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(2, 6, 10, 0.72);
+}
+
+.br-card {
+    min-width: 520px;
+    padding: 28px 36px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(64, 242, 255, 0.35);
+    border-left-width: 4px;
+    border-left-color: var(--br-accent);
+    background-color: rgba(8, 18, 28, 0.96);
+}
+
+.br-card--success { border-left-color: var(--br-success); }
+
+.br-title {
+    margin-bottom: 18px;
+    font-size: 40px;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    color: #FFFFFF;
+}
+
+.br-card__body {
+    margin-bottom: 18px;
+    font-size: 16px;
+    color: var(--br-text-soft);
+}
+
+.br-card__columns { flex-direction: row; }
+.br-card__buttons { width: 340px; }
+
+.br-button.unity-button {
+    height: 44px;
+    margin: 0 0 8px 0;
+    padding: 0 0 0 16px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    letter-spacing: 2px;
+    color: var(--br-text);
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: rgba(64, 242, 255, 0.35);
+    background-color: rgba(64, 242, 255, 0.08);
+    transition-property: background-color, border-color;
+    transition-duration: 0.12s;
+}
+
+.br-button.unity-button:hover {
+    background-color: rgba(64, 242, 255, 0.22);
+}
+
+.br-button.unity-button:focus {
+    border-color: var(--br-accent);
+    border-left-width: 4px;
+    background-color: rgba(64, 242, 255, 0.18);
+}
+
+.br-button.unity-button:active {
+    background-color: rgba(64, 242, 255, 0.35);
+}
+
+.br-controls { margin-left: 32px; }
+
+.br-controls__row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.br-controls .br-key { min-width: 120px; }
+
+.br-controls__action {
+    font-size: 13px;
+    color: var(--br-text-soft);
+}
