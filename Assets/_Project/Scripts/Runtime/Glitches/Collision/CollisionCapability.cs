@@ -33,7 +33,6 @@ namespace BugReport.Glitches
         [SerializeField] private string solidLayerName = GameLayers.World;
 
         private int[] solidLayers;
-        private bool[] authoredDynamic;
         private ModifierStack<CollisionMode> channel;
         private bool initialized;
         private bool loggedMissingLayer;
@@ -55,18 +54,25 @@ namespace BugReport.Glitches
         }
 
         /// <summary>
-        /// True if any collider belongs to a rigidbody that was dynamic when authored. Uses the
-        /// authored state, not the current one: a frozen (temporarily kinematic) crate is still
-        /// dynamic and would fall through the floor once unfrozen while intangible.
+        /// True if any collider belongs to a dynamic rigidbody, i.e. it would fall through the world
+        /// if it lost its collision. Evaluated live (bodies can be added after initialisation), and a
+        /// body that is only kinematic because it is frozen still counts as dynamic: otherwise
+        /// "freeze crate, make it intangible, unfreeze" drops it through the floor.
         /// </summary>
         public bool HasDynamicBody
         {
             get
             {
-                EnsureInitialized();
-                for (int i = 0; i < authoredDynamic.Length; i++)
+                for (int i = 0; i < colliders.Length; i++)
                 {
-                    if (authoredDynamic[i]) return true;
+                    var c = colliders[i];
+                    if (c == null) continue;
+                    // attachedRigidbody is null for inactive colliders; GetComponentInParent(true) is not.
+                    var body = c.attachedRigidbody != null ? c.attachedRigidbody : c.GetComponentInParent<Rigidbody>(true);
+                    if (body == null) continue;
+                    var freeze = body.GetComponent<FreezeCapability>();
+                    bool kinematic = freeze != null && freeze.IsFrozen ? freeze.KinematicBeforeFreeze : body.isKinematic;
+                    if (!kinematic) return true;
                 }
                 return false;
             }
@@ -97,13 +103,10 @@ namespace BugReport.Glitches
             int fallbackSolid = GameLayers.Index(solidLayerName);
             if (fallbackSolid < 0) fallbackSolid = 0;
             solidLayers = new int[colliders.Length];
-            authoredDynamic = new bool[colliders.Length];
             for (int i = 0; i < colliders.Length; i++)
             {
                 var c = colliders[i];
                 solidLayers[i] = authoredMode == CollisionMode.Solid && c != null ? c.gameObject.layer : fallbackSolid;
-                var body = c != null ? c.attachedRigidbody : null;
-                authoredDynamic[i] = body != null && !body.isKinematic;
             }
 
             channel = new ModifierStack<CollisionMode>(authoredMode, ConflictPolicy.Exclusive, ApplyMode);

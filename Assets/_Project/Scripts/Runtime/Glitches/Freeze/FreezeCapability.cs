@@ -39,6 +39,8 @@ namespace BugReport.Glitches
         }
 
         public bool IsFrozen => channel != null && channel.Effective;
+        /// <summary>The body's isKinematic value before the current freeze. Only meaningful while frozen.</summary>
+        public bool KinematicBeforeFreeze => bodyWasKinematic;
         public float TimeScale => IsFrozen ? 0f : 1f;
         public float DeltaTime => Time.deltaTime * TimeScale;
         public float FixedDeltaTime => Time.fixedDeltaTime * TimeScale;

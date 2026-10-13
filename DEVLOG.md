@@ -123,3 +123,12 @@
   - A despawn lease skips copies that are already unregistering, to avoid double destruction.
 - **Moved files:** collision scripts now live in `Runtime/Glitches/Collision/`, moved together with their `.meta` files so the committed scene keeps its references.
 - **Not verified:** Unity compile, the new PlayMode/EditMode tests, prefab generation via `PrefabUtility`, the visuals, and the playtest checklist.
+
+## 2026-10-13 — Milestone 3 first Unity run: 2 failures, one regression
+
+- **Failures:** `CollisionTransferTests.DynamicSource_IsRejected` and `FreezeTests.FrozenDynamicBody_StillCountsAsDynamicForCollisionTransfer`.
+- **Cause:** both came from M3 changing `CollisionCapability.HasDynamicBody` to a snapshot taken at initialisation.
+  - The snapshot missed bodies added later (DynamicSource, a regression of a passing M2 test).
+  - `attachedRigidbody` is null for colliders on inactive objects, which is when the capability initialises.
+- **Fix:** evaluate live again. Fall back to `GetComponentInParent<Rigidbody>(true)`, and treat a body that is kinematic only because of a freeze as dynamic (`FreezeCapability.KinematicBeforeFreeze`).
+- **Lesson:** snapshotting state at init is fragile with deferred activation; prefer live queries plus explicit ownership information.
