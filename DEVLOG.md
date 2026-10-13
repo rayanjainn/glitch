@@ -1,0 +1,28 @@
+# BUG//REPORT — Development Log
+
+## 2026-10-13 — Milestone 0 + Milestone 1 (code)
+
+**Context:** The repository was empty. The dev container has no Unity Editor, and the Unity package registry is unreachable from it. I installed the .NET 8 SDK to compile and test engine-free code.
+
+**Done**
+- Wrote the plan, architecture, and tasks.
+- Engine-free Core: entity ids/registry, capability flags, target validation, selection model, game state machine, progress monitor.
+- Unity runtime: services/bootstrap, GameEntity, InputReader + actions asset, anomaly motor/camera/controller/visual, target scanner, selection controller, placeholder hero, presenters (state, highlights, reticle), debug overlay.
+- Editor tooling: project configuration (layers, collision matrix, environment validation) and a procedural test-room builder.
+- Tests: 49 Core unit tests, 3 EditMode fixtures, 5 PlayMode fixtures.
+
+**Verified here**
+- `Tools/CoreTests/run-core-tests.sh`: Core compiles as netstandard2.1 / C# 9 with warnings-as-errors. **49 passed, 0 failed.**
+- `Tools/CompileCheck`: all 47 project C# files type-check against hand-written Unity API stubs (0 errors). This catches mistakes in our own code only, not wrong assumptions about Unity's API.
+- A script cross-checked every serialized field name the scene builder wires through `SerializedObject`.
+
+**Not verified (needs the Editor)**
+- Unity compile, EditMode/PlayMode test runs, scene generation, visuals, input feel, gamepad.
+
+**Decisions**
+- Core is engine-free (`noEngineReferences`) so the most important rules are testable without Unity.
+- Packages/ProjectSettings come from Unity's own URP template instead of being hand-written (PROJECT_PLAN §2).
+- Namespaces `BugReport.EditorTools` and `BugReport.InputHandling` avoid shadowing `UnityEditor.Editor` and `UnityEngine.Input`.
+- The floor and outer walls are not entities, which keeps selection outlines readable.
+- Targeting includes the Intangible layer so collision-removed objects stay restorable.
+- `AnomalyMotor` derives post-collision velocity from its own displacement and delta time, not `CharacterController.velocity`, so it stays deterministic under manual ticking in tests.
