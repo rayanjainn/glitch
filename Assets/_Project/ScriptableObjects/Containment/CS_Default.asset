@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2696a9a72e8fa4166a145e6e7d8ac7d8, type: 3}
+  m_Name: CS_Default
+  m_EditorClassIdentifier: BugReport.Runtime::BugReport.Containment.ContainmentSettingsAsset
+  enterThresholds:
+  - 20
+  - 45
+  - 70
+  - 90
+  exitThresholds:
+  - 12
+  - 35
+  - 60
+  - 80
+  maxPressure: 100
+  decayPerSecond: 1.5
+  applyImpulsePerWeight: 10
+  activePerWeightPerSecond: 1
+  perProductPerSecond: 0.5
+  sightedPerSecond: 8
+  restrictedImpulse: 15
+  patchRelief: 15
+  patchInterval:
+  - 0
+  - 0
+  - 0
+  - 6
+  - 3
+  cooldownScale:
+  - 1
+  - 1
+  - 1.5
+  - 1.5
+  - 2
