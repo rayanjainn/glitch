@@ -69,10 +69,16 @@ namespace BugReport.Hero
             ResetRoute();
         }
 
+        /// <summary>
+        /// Created lazily, not only in Awake: non-serialized fields come back null after a script
+        /// recompile during Play mode ("Recompile And Continue Playing"), and Awake does not run again.
+        /// </summary>
+        private ProgressMonitor Progress =>
+            progress ??= new ProgressMonitor(Mathf.Max(0.001f, minProgress), Mathf.Max(0.1f, blockedTimeout));
+
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
-            progress = new ProgressMonitor(minProgress, blockedTimeout);
             ResetRoute();
         }
 
@@ -85,7 +91,7 @@ namespace BugReport.Hero
         {
             WaypointIndex = 0;
             timer = startDelay;
-            progress?.Reset();
+            Progress.Reset();
             SetState(HeroState.Idle);
         }
 
@@ -143,7 +149,7 @@ namespace BugReport.Hero
                 return Vector3.zero;
             }
 
-            if (progress.Tick(distance, deltaTime))
+            if (Progress.Tick(distance, deltaTime))
             {
                 timer = retryDelay;
                 SetState(HeroState.Blocked);
@@ -163,7 +169,7 @@ namespace BugReport.Hero
                 SetState(HeroState.Arrived);
                 return;
             }
-            progress.Reset();
+            Progress.Reset();
             SetState(HeroState.Walking);
         }
 

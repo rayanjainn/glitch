@@ -55,3 +55,10 @@
 - **Likely cause (unconfirmed):** the builder loaded the `.inputactions` asset *before* creating materials and folders, and those operations can trigger re-imports that invalidate already-loaded asset objects.
 - **Fix:** create all assets and folders first, then load referenced assets. The builder now refuses to save the scene if any project component has an unassigned object reference, and lists them.
 - Also fixed the compile-check stubs, which had `Scene` in `UnityEngine` instead of `UnityEngine.SceneManagement`.
+
+## 2026-10-13 — Fourth Unity run: hero NullReferenceException
+
+- `NullReferenceException` in `PlaceholderHero.BeginWalk`: the `ProgressMonitor` field was null.
+- **Likely cause (unconfirmed):** scripts recompiled while Play mode was running (Unity's default "Recompile And Continue Playing"). That nulls non-serialized fields and does not re-run Awake. The other possibility is an earlier exception in Awake.
+- **Fix:** `ProgressMonitor` is now created lazily, with its parameters clamped, instead of only in Awake.
+- **Project policy:** in-play-mode recompilation is not supported, since static services can't survive it. Owners should set Preferences ▸ General ▸ Script Changes While Playing = *Recompile After Finished Playing*.

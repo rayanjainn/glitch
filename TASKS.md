@@ -99,6 +99,7 @@ See PROJECT_PLAN §3. Not broken down yet, deliberately, to avoid planning again
 ---
 
 ## Manual playtest checklist (Milestone 1)
+0. One-time: Edit/Unity ▸ Preferences ▸ General ▸ **Script Changes While Playing = Recompile After Finished Playing** (hot-reloading during Play mode is not supported).
 1. Open `Assets/_Project/Scenes/TestRoom.unity` → Play. The Console should show no errors. One warning appears if layers are missing.
 2. Click the Game view to capture the mouse. Fly with WASD, Space/Ctrl, Shift. Bump into walls and the ceiling, and fly over the firewall.
 3. Orbit the camera into a wall corner. The view should pull in rather than show the inside of geometry.
