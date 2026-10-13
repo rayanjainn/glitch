@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/Level_01_TrainingLab.unity
+    guid: 20ecb22bc2626497abc729fb7febfe73
+  - enabled: 1
     path: Assets/_Project/Scenes/TestRoom.unity
     guid: 8c78bcf6da2354d7db410ad7df1ae096
   m_configObjects: {}
