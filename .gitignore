@@ -41,3 +41,6 @@ Tools/**/TestResults/
 # ---- OS ----
 .DS_Store
 Thumbs.db
+
+# Unity command-line test output
+/TestResults/

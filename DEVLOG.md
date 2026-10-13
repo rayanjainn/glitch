@@ -26,3 +26,11 @@
 - The floor and outer walls are not entities, which keeps selection outlines readable.
 - Targeting includes the Intangible layer so collision-removed objects stay restorable.
 - `AnomalyMotor` derives post-collision velocity from its own displacement and delta time, not `CharacterController.velocity`, so it stays deterministic under manual ticking in tests.
+
+## 2026-10-13 — Owner answers, testing workflow
+
+- Unity 6.6 is confirmed. The exact build is pending until `ProjectVersion.txt` is committed.
+- Git LFS was adopted: binary image, 3D, audio, video, font and lighting-data patterns now route through LFS.
+- Added TESTING.md, a novice-friendly path from "new empty Unity project" to "branch tested, ready to merge".
+- Added `Tools/UnityTests/run-unity-tests.{ps1,sh}` for headless EditMode/PlayMode runs. **Not executed** (no Unity here); first real run will be on the owner's machine.
+- Licence/automation: no credentials are shared in chat. Preferred path is running Claude Code on the owner's machine; GameCI with GitHub secrets is a later option.

@@ -15,6 +15,8 @@
 
 ## 2. Bootstrapping the Unity project (one-time, manual)
 
+Beginner-friendly version with exact clicks and commands: **TESTING.md**.
+
 Hand-writing `ProjectSettings/*` and `Packages/manifest.json` for an editor version I cannot run risks wrong package versions and a broken URP setup. The reliable path is to let Unity 6.6 generate them from its URP template:
 
 1. Unity Hub → **New project** → Editor **6.6.x** → template **Universal 3D** (URP) → create it anywhere, e.g. `~/tmp/BugReportTemplate`. Close Unity.
@@ -41,7 +43,7 @@ Each milestone ends playable, tested, and documented, and is merged to `main` on
 | 7 | Content expansion | Further glitches/levels, only after the slice proves fun | — |
 | 8 | Release prep | Settings + save persistence, rebinding UI, error handling, reproducible build | Clean build from a script; external playtest checklist |
 
-Detailed, checkable tasks are in TASKS.md.
+Detailed, checkable tasks are in TASKS.md. How to test a branch before merging: TESTING.md.
 
 ## 4. First playable vertical slice (target: end of Milestone 5)
 
@@ -116,9 +118,11 @@ Detailed, checkable tasks are in TASKS.md.
 - `main` holds verified, releasable code only. Work goes on descriptive feature branches (e.g. `foundation/vertical-slice-setup`) and is merged to `main` once verified in the Editor.
 - Commit author: Rayan Jain `<rayansjain@gmail.com>`.
 
-## 9. Open questions for the project owner
+## 9. Decisions and open questions
 
-1. Exact Unity version installed, e.g. `6000.6.0f1`? I'll pin it in docs and CI.
-2. Should binary art and audio go through **Git LFS** (recommended before M6)?
-3. Is there a Unity licence and machine (or GameCI secrets) for automated test runs?
-4. Merge flow: should I open PRs into `main`, or will you merge feature branches yourself after Editor verification?
+| Question | Status |
+|---|---|
+| Unity version | Unity 6.6 confirmed; exact build (e.g. `6000.6.0f1`) will be read from `ProjectSettings/ProjectVersion.txt` once it's committed |
+| Git LFS for binaries | **Yes.** Rules are in `.gitattributes`; every contributor runs `git lfs install` once |
+| Automated Unity test runs | Option A: run Claude Code on the owner's machine (Claude Desktop app, or `claude remote-control` in the repo folder) so it can call `Tools/UnityTests/run-unity-tests.*` directly. Option B (later): GitHub Actions with GameCI, using the Unity licence and login stored as **GitHub repository secrets**, never pasted into chat |
+| Merge flow | Owner tests the branch (TESTING.md) → I open a PR into `main` → owner merges |
