@@ -222,3 +222,15 @@
   - `compile-check.py` replaces the single project. It generates one project per `.asmdef` with the same references; `noEngineReferences` assemblies get no Unity stubs. Verified: with the old `internal` it reproduces the same 5 errors; with the fix it reports 0.
   - It also catches a missing `.asmdef` reference between our own assemblies. It cannot catch a missing Unity package reference, because the stubs are one assembly.
 - **Warning UAC0005** (Unity analyzer) in `ScriptFileNameTests`: `AppDomain.GetAssemblies()` replaced with `TypeCache.GetTypesDerivedFrom<T>()`.
+
+## 2026-10-14 — First human playthrough (macOS build)
+
+- The owner built the game as a macOS app and finished TRAINING LAB: all three objectives, completion screen. This is the **first manual playthrough** of the slice. Before this, only the automated playthrough had finished it.
+- **Bug seen in the screenshots:** spacing missing on the pause and complete screens (title touching the first button, key labels touching their descriptions, summary touching the buttons).
+  - **Cause:** the USS reset `.br-root Label { margin: 0; padding: 0 }` has higher specificity (class + type) than single-class rules such as `.br-key` and `.br-title`, so it removed their spacing.
+  - **Fix:** the reset is now a single class (`.br-label`) declared first, so later rules override it.
+- **Readability:** the prompt under the glitch dock was hard to read over the light floor. It now sits on a dark pill.
+- **Still open (needs the owner's feedback, not more guessing):**
+  - The anomaly sits just under the reticle and covers part of the view.
+  - The hero's "..." icon is small.
+  - Whether the puzzles were understandable without the guide.

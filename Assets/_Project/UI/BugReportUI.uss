@@ -24,7 +24,10 @@
     bottom: 0;
 }
 
-.br-root Label {
+/* Resets the theme's label spacing. Declared first and with a single class, so any later
+   class rule (.br-key, .br-title, ...) can set its own margin/padding. A descendant selector
+   here (".br-root Label") would outrank those rules and silently remove their spacing. */
+.br-label {
     padding: 0;
     margin: 0;
 }
@@ -263,13 +266,16 @@
 
 .br-prompt {
     margin-top: 8px;
+    padding: 3px 10px;
+    border-radius: 3px;
     font-size: 14px;
     -unity-font-style: bold;
     letter-spacing: 1px;
-    color: var(--br-text-soft);
-    -unity-text-outline-width: 1px;
-    -unity-text-outline-color: rgba(0, 0, 0, 0.6);
+    color: var(--br-text);
+    background-color: rgba(5, 12, 20, 0.7);
 }
+
+.br-hud--no-panels .br-prompt { background-color: rgba(0, 0, 0, 0); }
 
 .br-prompt--invalid { color: #FF6B76; }
 

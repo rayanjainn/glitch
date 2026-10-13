@@ -106,6 +106,7 @@ namespace BugReport.UI
         public static Label Text(string name, string text, params string[] classes)
         {
             var l = new Label(text) { name = name, pickingMode = PickingMode.Ignore };
+            l.AddToClassList("br-label");
             foreach (var c in classes) l.AddToClassList(c);
             return l;
         }
