@@ -1,6 +1,7 @@
 using System;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
+using BugReport.Core.Glitches;
 using BugReport.Core.Interaction;
 using UnityEngine;
 
@@ -24,11 +25,13 @@ namespace BugReport
             Registry = new EntityRegistry();
             Selection = new SelectionModel(Registry, TargetRequirement.Selection);
             State = new GameStateMachine(initialState);
+            Glitches = new GlitchManager(Registry);
         }
 
         public EntityRegistry Registry { get; }
         public SelectionModel Selection { get; }
         public GameStateMachine State { get; }
+        public GlitchManager Glitches { get; }
         public bool IsDisposed { get; private set; }
 
         public static GameServices Current => current;
@@ -71,6 +74,8 @@ namespace BugReport
             if (IsDisposed) return;
             IsDisposed = true;
             Uninstall(this);
+            // Glitches first: ending operations restores objects while they are still registered.
+            Glitches.Dispose();
             Selection.Dispose();
             Registry.Clear();
         }

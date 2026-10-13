@@ -47,6 +47,24 @@ namespace BugReport
             }
         }
 
+        /// <summary>
+        /// Things that may not be inside a collider when it becomes solid: the hero, the
+        /// anomaly and movable props. Static world geometry is excluded on purpose (authored overlaps).
+        /// </summary>
+        public static int OccupantMask
+        {
+            get
+            {
+                int mask = 0;
+                foreach (var layer in new[] { Hero, Anomaly, Props })
+                {
+                    int index = Index(layer);
+                    if (index >= 0) mask |= 1 << index;
+                }
+                return mask != 0 ? mask : Physics.AllLayers & ~(1 << IgnoreRaycastLayer);
+            }
+        }
+
         /// <summary>Geometry the camera must not clip through. Falls back to Default if layers are missing.</summary>
         public static int CameraObstructionMask
         {

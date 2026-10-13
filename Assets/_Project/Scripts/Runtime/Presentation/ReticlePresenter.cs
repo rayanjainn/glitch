@@ -1,5 +1,6 @@
 using System;
 using BugReport.Core.Interaction;
+using BugReport.Glitches;
 using UnityEngine;
 
 namespace BugReport.Presentation
@@ -16,6 +17,8 @@ namespace BugReport.Presentation
         [SerializeField] private Color invalidColor = new Color(1f, 0.3f, 0.35f, 1f);
         [SerializeField, Min(2f)] private float size = 14f;
         [SerializeField, Min(1f)] private float thickness = 2f;
+        [Tooltip("When a complete glitch target set is aimed at, the reticle shows whether applying would succeed.")]
+        [SerializeField] private GlitchController glitches;
 
         private GameServices services;
         private Action<GameServices> bindCallback;
@@ -38,8 +41,10 @@ namespace BugReport.Presentation
             if (Event.current.type != EventType.Repaint) return;
 
             var validation = services.Selection.HoveredValidation;
-            var color = validation.Failure == TargetValidationFailure.NoTarget ? neutralColor
-                : validation.IsValid ? validColor : invalidColor;
+            Color color;
+            if (validation.Failure == TargetValidationFailure.NoTarget) color = neutralColor;
+            else if (glitches != null && glitches.HasPreview) color = glitches.Preview.Succeeded ? validColor : invalidColor;
+            else color = validation.IsValid ? validColor : invalidColor;
 
             var center = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
             float half = size * 0.5f;

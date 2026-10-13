@@ -4,6 +4,7 @@ using System.Linq;
 using BugReport.Anomaly;
 using BugReport.Core.Entities;
 using BugReport.EditorTools.Setup;
+using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.InputHandling;
 using BugReport.Interaction;
@@ -57,6 +58,7 @@ namespace BugReport.Tests.EditMode
             Assert.That(All<SelectionController>().Count, Is.EqualTo(1), "SelectionController");
             Assert.That(All<InputReader>().Count, Is.EqualTo(1), "InputReader");
             Assert.That(All<PlaceholderHero>().Count, Is.EqualTo(1), "PlaceholderHero");
+            Assert.That(All<GlitchController>().Count, Is.EqualTo(1), "GlitchController");
         }
 
         [Test]
@@ -116,6 +118,22 @@ namespace BugReport.Tests.EditMode
             var entities = All<GameEntity>();
             Assert.That(entities.Any(e => e.Capabilities.HasAll(EntityCapabilities.Inspectable) && e.Category != EntityCategory.Anomaly), Is.True);
             Assert.That(entities.Any(e => !e.Capabilities.HasAll(EntityCapabilities.Inspectable)), Is.True, "need a non-inspectable entity to exercise invalid feedback");
+        }
+
+        [Test]
+        public void CollisionTransferPuzzle_IsAuthored()
+        {
+            var byName = All<GameEntity>().ToDictionary(e => e.DisplayName);
+            Assert.That(byName["FIREWALL_01"].GetComponent<CollisionCapability>().AuthoredMode, Is.EqualTo(CollisionMode.Solid));
+            Assert.That(byName["SHADOW_DECAL"].GetComponent<CollisionCapability>().AuthoredMode, Is.EqualTo(CollisionMode.Intangible));
+            Assert.That(byName["HOLO_PANEL"].GetComponent<CollisionCapability>().AuthoredMode, Is.EqualTo(CollisionMode.Intangible));
+
+            // Every entity declaring the capability must actually implement it.
+            foreach (var e in All<GameEntity>())
+            {
+                if (e.Capabilities.HasAll(EntityCapabilities.CollisionTransferable))
+                    Assert.That(e.GetComponent<CollisionCapability>(), Is.Not.Null, e.DisplayName + " declares CollisionTransferable without a CollisionCapability");
+            }
         }
 
         [Test]

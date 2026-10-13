@@ -1,4 +1,5 @@
 using System;
+using BugReport.Glitches;
 using BugReport.InputHandling;
 using BugReport.Interaction;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace BugReport.Anomaly
         [SerializeField] private AnomalyMotor motor;
         [SerializeField] private AnomalyCameraRig cameraRig;
         [SerializeField] private SelectionController selection;
+        [SerializeField] private GlitchController glitches;
 
         private GameServices services;
         private Action<GameServices> bindCallback;
@@ -25,9 +27,9 @@ namespace BugReport.Anomaly
         {
             if (input == null) input = GetComponent<InputReader>();
             if (motor == null) motor = GetComponent<AnomalyMotor>();
-            if (input == null || motor == null || cameraRig == null || selection == null)
+            if (input == null || motor == null || cameraRig == null || selection == null || glitches == null)
             {
-                Debug.LogError("[BUG REPORT] AnomalyPlayerController is missing references (input, motor, cameraRig, selection).", this);
+                Debug.LogError("[BUG REPORT] AnomalyPlayerController is missing references (input, motor, cameraRig, selection, glitches).", this);
             }
         }
 
@@ -40,6 +42,9 @@ namespace BugReport.Anomaly
             input.CancelPerformed += OnCancel;
             input.ToggleInspectionPerformed += OnToggleInspection;
             input.PausePerformed += OnPause;
+            input.ApplyPerformed += OnApply;
+            input.RevertPerformed += OnRevert;
+            input.GlitchWheelPerformed += OnGlitchWheel;
         }
 
         private void OnDisable()
@@ -51,6 +56,9 @@ namespace BugReport.Anomaly
             input.CancelPerformed -= OnCancel;
             input.ToggleInspectionPerformed -= OnToggleInspection;
             input.PausePerformed -= OnPause;
+            input.ApplyPerformed -= OnApply;
+            input.RevertPerformed -= OnRevert;
+            input.GlitchWheelPerformed -= OnGlitchWheel;
         }
 
         private void Update()
@@ -73,6 +81,22 @@ namespace BugReport.Anomaly
         private void OnCancel()
         {
             if (selection != null) selection.CancelSelection();
+        }
+
+        private void OnApply()
+        {
+            if (glitches != null) glitches.ApplyCurrent();
+        }
+
+        private void OnRevert()
+        {
+            if (glitches != null) glitches.RevertLatest();
+        }
+
+        private void OnGlitchWheel()
+        {
+            // Milestone 2: cycles. The radial glitch wheel UI arrives with the HUD (Milestone 5).
+            if (glitches != null) glitches.CycleGlitch();
         }
 
         private void OnToggleInspection()

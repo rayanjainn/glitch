@@ -1,6 +1,6 @@
 # BUG//REPORT — Technical Architecture
 
-Status: **Milestone 1 implemented (unverified in Unity)**. Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
+Status: **Milestone 1 verified in Unity 6000.6.0f1. Milestone 2 (glitch framework + Collision Transfer) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
 
 Engine: Unity 6.6 (6000.6.x) · C# 9 (Unity's language level) · URP · Input System.
 
@@ -102,7 +102,7 @@ Camera ─▶ TargetScanner ──(GameEntity)──▶ SelectionController ─�
 
 ---
 
-## 5. Glitch system *(planned, M2–M3)*
+## 5. Glitch system *(framework + Collision Transfer implemented in M2; Duplication/Freeze planned for M3)*
 
 ### 5.1 Data and runtime objects
 
@@ -150,15 +150,28 @@ Consequences:
   - `Stack` resolves by priority.
 - Operations on different channels of the same object (freeze plus collision) compose naturally.
 
-### 5.4 Collision Transfer *(M2)*
+### 5.4 Collision Transfer *(implemented, M2)*
 
-- Semantics: source A gives its **collision profile** to target B. A becomes intangible and B becomes solid in A's role.
-- Implementation: swap the `PhysicsLayer` channel of **explicitly listed colliders** on each `CollisionCapability`. Children are never discovered automatically. Intangible means moving to the `Intangible` layer, which collides with nothing but is still targetable.
-- Objects with no natural collider (the "shadow" decal) carry an authored **latent collider** that is disabled until it receives a profile. Colliders are never generated at runtime.
-- Safety checks before applying:
-  - Making something solid while the hero, anomaly, or a dynamic body overlaps it is **rejected** ("OCCUPIED"), using an overlap test against the target's colliders.
-  - Making a **dynamic** rigidbody intangible would let it fall through the floor. Policy: either the capability also adds a kinematic modifier for the duration, or the definition forbids dynamic sources. Decide during M2 implementation and record it in TASKS.md.
-- Never call `Physics.IgnoreLayerCollision` at runtime. The matrix is project configuration only, so no global side effects.
+- **Semantics:** select a SOURCE (E), aim at a TARGET, apply (LMB).
+  - The source must currently be **solid**; it becomes intangible.
+  - The target must currently be **intangible**; it becomes solid.
+  - R reverts the most recent glitch.
+- **Implementation:** `CollisionCapability` owns an exclusive `ModifierStack<CollisionMode>` over an **explicit, authored collider list**. Children are never discovered automatically.
+  - Solid: each collider sits on its solid layer, captured from authoring, or `solidLayerName` for objects authored intangible.
+  - Intangible: each collider sits on the `Intangible` layer, which collides with nothing but stays targetable.
+- **"Latent" colliders:** objects authored intangible (shadow decal, holo panel) already carry their collider on the Intangible layer. No colliders are ever created at runtime.
+- **Safety, decided and tested:**
+  - **Occupancy:** a target cannot turn solid while the hero, the anomaly or a prop is inside it ("TARGET OCCUPIED BY …"). `PhysicsOccupancy` uses oriented boxes for BoxColliders and an AABB fallback otherwise, shrunk by 2 cm so touching doesn't count.
+  - **Blocked revert:** a normal revert or expiry **waits** while something is inside the source, since it would turn solid around it ("CANNOT RESTORE …"). Expiry retries every frame. Forced endings (target lost, level unload) always proceed.
+  - **Dynamic bodies:** a source with a non-kinematic Rigidbody is **rejected** ("MOVING OBJECTS CANNOT LOSE COLLISION"). It would fall through the floor. Revisit when Freeze (M3) can supply a kinematic modifier.
+  - **Capability check:** an entity declaring `CollisionTransferable` without a `CollisionCapability` is rejected with a clear message, and an EditMode test fails the scene.
+- `Physics.IgnoreLayerCollision` is never called at runtime. The matrix is project configuration only.
+- **Data:** `CollisionTransferDefinition` (ScriptableObject) at `Assets/_Project/ScriptableObjects/Glitches/GL_CollisionTransfer.asset`. The builder never overwrites it once it exists.
+- **Feedback (placeholder):**
+  - `CollisionModeVisual` swaps materials: ghost when intangible, glowing when solidified.
+  - Glitched entities keep an electric-blue outline.
+  - `GlitchPulsePresenter` fires a 0.6 s beam from source to target.
+  - The reticle turns red or cyan from the live apply preview.
 
 ### 5.5 Duplication *(M3)*
 

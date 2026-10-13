@@ -20,7 +20,11 @@ namespace UnityEngine
         public static T Instantiate<T>(T original) where T : Object => throw null;
         public int GetInstanceID() => throw null;
     }
-    public class ScriptableObject : Object { }
+    public class ScriptableObject : Object { public static T CreateInstance<T>() where T : ScriptableObject => throw null; }
+    public class Sprite : Object { }
+    [AttributeUsage(AttributeTargets.Class)] public class CreateAssetMenuAttribute : Attribute { public string menuName; public string fileName; public int order; }
+    public static class ColorUtility { public static string ToHtmlStringRGB(Color c) => throw null; }
+
     // Unity 6.x engine type. Present so a project type with the same simple name
     // produces the same CS0104 ambiguity here that it does in Unity.
     public struct EntityId { }
@@ -52,6 +56,8 @@ namespace UnityEngine
         public T AddComponent<T>() where T : Component => throw null;
         public T GetComponent<T>() => throw null;
         public T[] GetComponentsInChildren<T>(bool includeInactive) => throw null;
+        public T[] GetComponentsInChildren<T>() => throw null;
+        public T[] GetComponents<T>() => throw null;
         public static GameObject CreatePrimitive(PrimitiveType t) => throw null;
         public bool CompareTag(string t) => throw null;
     }
@@ -63,6 +69,8 @@ namespace UnityEngine
         public Quaternion rotation { get => throw null; set { } }
         public Quaternion localRotation { get => throw null; set { } }
         public Vector3 localScale { get => throw null; set { } }
+        public Vector3 lossyScale => throw null;
+        public Vector3 TransformPoint(Vector3 p) => throw null;
         public void SetParent(Transform p, bool worldPositionStays) { }
         public void SetPositionAndRotation(Vector3 p, Quaternion r) { }
         public bool IsChildOf(Transform t) => throw null;
@@ -88,6 +96,7 @@ namespace UnityEngine
         public static Vector3 forward => default; public static Vector3 back => default;
         public float magnitude => throw null; public float sqrMagnitude => throw null; public Vector3 normalized => throw null;
         public static Vector3 Cross(Vector3 a, Vector3 b) => throw null;
+        public static Vector3 Scale(Vector3 a, Vector3 b) => throw null;
         public static float Distance(Vector3 a, Vector3 b) => throw null;
         public static Vector3 MoveTowards(Vector3 a, Vector3 b, float d) => throw null;
         public static Vector3 SmoothDamp(Vector3 c, Vector3 t, ref Vector3 v, float s) => throw null;
@@ -117,14 +126,14 @@ namespace UnityEngine
         public float r, g, b, a;
         public Color(float r, float g, float b) { this.r = r; this.g = g; this.b = b; a = 1; }
         public Color(float r, float g, float b, float a) { this.r = r; this.g = g; this.b = b; this.a = a; }
-        public static Color white => default;
+        public static Color white => default; public static Color blue => default;
         public static Color operator *(Color c, float f) => throw null;
     }
     public struct Rect { public Rect(float x, float y, float w, float h) { } }
     public struct Bounds
     {
         public Bounds(Vector3 c, Vector3 s) { }
-        public Vector3 center => throw null; public Vector3 size => throw null; public Vector3 min => throw null; public Vector3 max => throw null;
+        public Vector3 center => throw null; public Vector3 size => throw null; public Vector3 extents => throw null; public Vector3 min => throw null; public Vector3 max => throw null;
         public void Encapsulate(Bounds b) { } public void Expand(float a) { }
     }
     public struct Ray { }
@@ -144,6 +153,7 @@ namespace UnityEngine
         public static bool SphereCast(Vector3 o, float r, Vector3 d, out RaycastHit h, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static int SphereCastNonAlloc(Ray ray, float r, RaycastHit[] results, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static void IgnoreLayerCollision(int a, int b, bool ignore) { }
+        public static int OverlapBoxNonAlloc(Vector3 center, Vector3 halfExtents, Collider[] results, Quaternion orientation, int mask, QueryTriggerInteraction q) => throw null;
         public static bool GetIgnoreLayerCollision(int a, int b) => throw null;
     }
     public static class Mathf
@@ -160,16 +170,19 @@ namespace UnityEngine
     public enum CursorLockMode { None, Locked, Confined }
     public static class Cursor { public static CursorLockMode lockState { get => throw null; set { } } public static bool visible { get => throw null; set { } } }
     public static class Screen { public static int width => throw null; public static int height => throw null; }
-    public static class Application { public static string unityVersion => throw null; }
+    public static class Application { public static string unityVersion => throw null; public static bool isPlaying => throw null; }
+    public enum LogType { Error = 0, Assert = 1, Warning = 2, Log = 3, Exception = 4 }
     public static class Debug
     {
         public static void Log(object m) { } public static void Log(object m, Object c) { }
         public static void LogWarning(object m) { } public static void LogWarning(object m, Object c) { }
         public static void LogError(object m) { } public static void LogError(object m, Object c) { }
         public static void LogException(Exception e) { }
+        public static void LogException(Exception e, Object c) { }
     }
-    public class Collider : Component { public bool enabled { get => throw null; set { } } public Bounds bounds => throw null; }
-    public class BoxCollider : Collider { }
+    public class Collider : Component { public bool enabled { get => throw null; set { } } public Bounds bounds => throw null; public Rigidbody attachedRigidbody => throw null; public bool isTrigger { get => throw null; set { } } }
+    public class BoxCollider : Collider { public Vector3 center { get => throw null; set { } } public Vector3 size { get => throw null; set { } } }
+    public class MeshCollider : Collider { }
     public class CharacterController : Collider
     {
         public float height { get => throw null; set { } } public float radius { get => throw null; set { } }
@@ -180,11 +193,12 @@ namespace UnityEngine
     }
     public enum RigidbodyInterpolation { None, Interpolate, Extrapolate }
     public enum CollisionDetectionMode { Discrete, Continuous, ContinuousDynamic, ContinuousSpeculative }
-    public class Rigidbody : Component { public float mass { get => throw null; set { } } public RigidbodyInterpolation interpolation { get => throw null; set { } } public CollisionDetectionMode collisionDetectionMode { get => throw null; set { } } }
+    public class Rigidbody : Component { public bool isKinematic { get => throw null; set { } } public float mass { get => throw null; set { } } public RigidbodyInterpolation interpolation { get => throw null; set { } } public CollisionDetectionMode collisionDetectionMode { get => throw null; set { } } }
     public class Renderer : Component
     {
         public bool enabled { get => throw null; set { } } public Bounds bounds => throw null;
         public Material sharedMaterial { get => throw null; set { } }
+        public Material[] sharedMaterials { get => throw null; set { } }
         public Rendering.ShadowCastingMode shadowCastingMode { get => throw null; set { } }
         public bool receiveShadows { get => throw null; set { } } public bool allowOcclusionWhenDynamic { get => throw null; set { } }
     }
@@ -199,6 +213,7 @@ namespace UnityEngine
         public int numCornerVertices { get => throw null; set { } } public int numCapVertices { get => throw null; set { } }
         public Color startColor { get => throw null; set { } } public Color endColor { get => throw null; set { } }
         public void SetPositions(Vector3[] p) { }
+        public void SetPosition(int i, Vector3 p) { }
     }
     public class Camera : Behaviour
     {
@@ -227,6 +242,9 @@ namespace UnityEngine
         public MaterialGlobalIlluminationFlags globalIlluminationFlags { get => throw null; set { } }
         public void SetColor(string n, Color c) { } public void SetFloat(string n, float f) { }
         public void EnableKeyword(string k) { } public void CopyPropertiesFromMaterial(Material m) { }
+        public int renderQueue { get => throw null; set { } }
+        public void SetOverrideTag(string tag, string value) { }
+        public string GetTag(string tag, bool searchFallbacks) => throw null;
     }
     public static class QualitySettings
     {
@@ -283,6 +301,8 @@ namespace UnityEngine
 namespace UnityEngine.Rendering
 {
     public enum ShadowCastingMode { Off, On, TwoSided, ShadowsOnly }
+    public enum BlendMode { Zero = 0, One = 1, DstColor = 2, SrcColor = 3, OneMinusDstColor = 4, SrcAlpha = 5, OneMinusSrcColor = 6, DstAlpha = 7, OneMinusDstAlpha = 8, SrcAlphaSaturate = 9, OneMinusSrcAlpha = 10 }
+    public enum RenderQueue { Background = 1000, Geometry = 2000, AlphaTest = 2450, GeometryLast = 2500, Transparent = 3000, Overlay = 4000 }
     public enum AmbientMode { Skybox = 0, Trilight = 1, Flat = 3, Custom = 4 }
     public class RenderPipelineAsset : ScriptableObject { }
     public static class GraphicsSettings { public static RenderPipelineAsset defaultRenderPipeline { get => throw null; set { } } public static RenderPipelineAsset currentRenderPipeline => throw null; }
@@ -302,6 +322,7 @@ namespace UnityEngine.SceneManagement
 
 namespace UnityEngine.TestTools
 {
+    public static class LogAssert { public static void Expect(UnityEngine.LogType type, System.Text.RegularExpressions.Regex message) { } public static void Expect(UnityEngine.LogType type, string message) { } }
     [AttributeUsage(AttributeTargets.Method)] public class UnityTestAttribute : Attribute { }
 }
 

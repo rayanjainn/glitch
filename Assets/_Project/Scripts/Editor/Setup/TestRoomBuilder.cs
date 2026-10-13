@@ -4,6 +4,7 @@ using BugReport.Anomaly;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
 using BugReport.DebugTools;
+using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.InputHandling;
 using BugReport.Interaction;
@@ -28,6 +29,8 @@ namespace BugReport.EditorTools.Setup
         public const string ScenePath = "Assets/_Project/Scenes/TestRoom.unity";
         public const string InputActionsPath = "Assets/_Project/Input/BugReportControls.inputactions";
         public const string MaterialFolder = "Assets/_Project/Art/Materials/Generated";
+        public const string GlitchFolder = "Assets/_Project/ScriptableObjects/Glitches";
+        public const string CollisionTransferPath = GlitchFolder + "/GL_CollisionTransfer.asset";
 
         private const float RoomHalfX = 12f;
         private const float RoomHalfZ = 8f;
@@ -95,6 +98,8 @@ namespace BugReport.EditorTools.Setup
                 return false;
             }
 
+            var collisionTransfer = LoadOrCreateCollisionTransfer();
+
             BuildLighting();
             var environment = new GameObject("--- ENVIRONMENT ---").transform;
             BuildRoom(environment, mats);
@@ -103,13 +108,14 @@ namespace BugReport.EditorTools.Setup
             var hero = BuildHero(mats);
             var anomaly = BuildAnomaly(mats, actions, out var motor);
             var cameraRig = BuildCamera(anomaly.transform, out var scanner);
-            BuildSystems(mats, scanner, motor, hero, out var selection);
+            BuildSystems(mats, scanner, motor, hero, collisionTransfer, out var selection, out var glitchController);
 
             var controller = anomaly.AddComponent<AnomalyPlayerController>();
             Wire(controller, "input", anomaly.GetComponent<InputReader>());
             Wire(controller, "motor", motor);
             Wire(controller, "cameraRig", cameraRig);
             Wire(controller, "selection", selection);
+            Wire(controller, "glitches", glitchController);
 
             var missing = FindUnassignedReferences(scene);
             if (missing.Count > 0)
@@ -193,6 +199,15 @@ namespace BugReport.EditorTools.Setup
             AddEntity(firewall, "FIREWALL_01", EntityCategory.Structure,
                 EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
                 "Blocks the hero's route to the exit. Its collision looks... negotiable.");
+            AddCollision(firewall, CollisionMode.Solid, mats);
+
+            // Hologram across the hero's route: intangible now. Making it solid (the "wrong" transfer
+            // target) blocks the hero again, which teaches what the transfer does.
+            var holo = Block("HoloPanel", parent, new Vector3(6f, 1.25f, 0f), new Vector3(0.15f, 2.5f, 4f), mats.Ghost, GameLayers.Index(GameLayers.Intangible));
+            AddEntity(holo, "HOLO_PANEL", EntityCategory.Decoration,
+                EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
+                "A projected panel. Everything passes through it.");
+            AddCollision(holo, CollisionMode.Intangible, mats);
 
             // Exit objective: pad plus a glowing frame against the east wall.
             var exitRoot = new GameObject("ExitDoor");
@@ -234,11 +249,16 @@ namespace BugReport.EditorTools.Setup
             AddEntity(pillar, "DECOR_PILLAR", EntityCategory.Decoration, EntityCapabilities.None, "Decorative. Nothing to see here.");
 
             // Lives on the Intangible layer: selectable, but nothing collides with it.
-            var shadow = Primitive(PrimitiveType.Quad, "Shadow", parent, new Vector3(4f, 0.02f, 3f), new Vector3(3f, 3f, 1f), mats.Shadow, intangible);
+            var shadow = Primitive(PrimitiveType.Quad, "Shadow", parent, new Vector3(4f, 0.02f, 3f), new Vector3(3f, 3f, 1f), mats.Shadow, intangible, keepCollider: false);
             shadow.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            // A thin slab (quad-local z = world up) works both as a targeting surface and as a solid platform.
+            var slab = shadow.AddComponent<BoxCollider>();
+            slab.center = Vector3.zero;
+            slab.size = new Vector3(1f, 1f, 0.02f);
             AddEntity(shadow, "SHADOW_DECAL", EntityCategory.Decoration,
                 EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
                 "A shadow. Harmless. Not solid. Yet.");
+            AddCollision(shadow, CollisionMode.Intangible, mats);
         }
 
         // ---------------------------------------------------------------- actors
@@ -355,7 +375,8 @@ namespace BugReport.EditorTools.Setup
             return rig;
         }
 
-        private static void BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, PlaceholderHero hero, out SelectionController selection)
+        private static void BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, PlaceholderHero hero,
+            GlitchDefinition collisionTransfer, out SelectionController selection, out GlitchController glitchController)
         {
             var systems = new GameObject("--- SYSTEMS ---");
             var bootstrap = systems.AddComponent<GameBootstrap>();
@@ -365,15 +386,47 @@ namespace BugReport.EditorTools.Setup
             selection = systems.AddComponent<SelectionController>();
             Wire(selection, "scanner", scanner);
 
+            glitchController = systems.AddComponent<GlitchController>();
+            WireArray(glitchController, "glitches", new Object[] { collisionTransfer });
+            Wire(glitchController, "selection", selection);
+
             var highlight = systems.AddComponent<EntityHighlightPresenter>();
             Wire(highlight, "lineMaterial", mats.Line);
 
-            systems.AddComponent<ReticlePresenter>();
+            var pulses = systems.AddComponent<GlitchPulsePresenter>();
+            Wire(pulses, "lineMaterial", mats.Line);
+            Wire(pulses, "glitches", glitchController);
+
+            var reticle = systems.AddComponent<ReticlePresenter>();
+            Wire(reticle, "glitches", glitchController);
 
             var overlay = systems.AddComponent<DebugOverlay>();
             Wire(overlay, "anomaly", motor);
             Wire(overlay, "selection", selection);
             Wire(overlay, "hero", hero);
+            Wire(overlay, "glitches", glitchController);
+        }
+
+        private static void AddCollision(GameObject go, CollisionMode authoredMode, MaterialSet mats)
+        {
+            var capability = go.AddComponent<CollisionCapability>();
+            capability.Configure(go.GetComponents<Collider>(), authoredMode, GameLayers.World);
+            var visual = go.AddComponent<CollisionModeVisual>();
+            visual.Configure(go.GetComponentsInChildren<Renderer>(), mats.Ghost, mats.Solidified);
+        }
+
+        /// <summary>Loads the designer asset if it exists (never overwrites tuning), otherwise creates it with defaults.</summary>
+        private static GlitchDefinition LoadOrCreateCollisionTransfer()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<CollisionTransferDefinition>(CollisionTransferPath);
+            if (existing != null) return existing;
+
+            EnsureFolder(GlitchFolder);
+            var definition = ScriptableObject.CreateInstance<CollisionTransferDefinition>();
+            definition.ApplyDefaults();
+            AssetDatabase.CreateAsset(definition, CollisionTransferPath);
+            AssetDatabase.SaveAssets();
+            return AssetDatabase.LoadAssetAtPath<CollisionTransferDefinition>(CollisionTransferPath);
         }
 
         // ---------------------------------------------------------------- helpers
@@ -523,7 +576,7 @@ namespace BugReport.EditorTools.Setup
         /// <summary>Generated placeholder materials. Updated in place if they already exist.</summary>
         private sealed class MaterialSet
         {
-            public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line;
+            public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified;
 
             public bool Create(out string error)
             {
@@ -556,6 +609,9 @@ namespace BugReport.EditorTools.Setup
                 AnomalyCore = Lit(lit, "M_AnomalyCore", new Color(0.8f, 1f, 1f), 0.9f, new Color(0.3f, 0.95f, 1f) * 3f);
                 AnomalyFragment = Lit(lit, "M_AnomalyFragment", new Color(0.9f, 0.3f, 1f), 0.9f, new Color(0.9f, 0.2f, 1f) * 1.5f);
                 Line = Save(new Material(lineShader) { name = "M_DebugLine" }, "M_DebugLine");
+                // Collision Transfer placeholder looks (electric blue): see-through ghost, glowing solid.
+                Ghost = Transparent(lit, "M_CollisionGhost", new Color(0.2f, 0.55f, 1f, 0.28f), new Color(0.1f, 0.35f, 1f) * 0.4f);
+                Solidified = Lit(lit, "M_CollisionSolidified", new Color(0.15f, 0.4f, 0.95f), 0.8f, new Color(0.15f, 0.5f, 1f) * 1.6f);
                 AssetDatabase.SaveAssets();
                 return true;
             }
@@ -574,6 +630,27 @@ namespace BugReport.EditorTools.Setup
                 return Save(m, name);
             }
 
+            /// <summary>URP Lit configured for alpha blending (what the material inspector does for Surface Type = Transparent).</summary>
+            private static Material Transparent(Shader shader, string name, Color baseColor, Color emission)
+            {
+                var m = new Material(shader) { name = name };
+                m.SetColor("_BaseColor", baseColor);
+                m.SetFloat("_Smoothness", 0.9f);
+                m.SetFloat("_Surface", 1f);
+                m.SetFloat("_Blend", 0f);
+                m.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+                m.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+                m.SetFloat("_SrcBlendAlpha", (float)BlendMode.One);
+                m.SetFloat("_DstBlendAlpha", (float)BlendMode.OneMinusSrcAlpha);
+                m.SetFloat("_ZWrite", 0f);
+                m.SetOverrideTag("RenderType", "Transparent");
+                m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                m.EnableKeyword("_EMISSION");
+                m.SetColor("_EmissionColor", emission);
+                m.renderQueue = (int)RenderQueue.Transparent;
+                return Save(m, name);
+            }
+
             private static Material Save(Material material, string name)
             {
                 string path = MaterialFolder + "/" + name + ".mat";
@@ -587,6 +664,8 @@ namespace BugReport.EditorTools.Setup
                 existing.CopyPropertiesFromMaterial(material);
                 existing.shaderKeywords = material.shaderKeywords;
                 existing.globalIlluminationFlags = material.globalIlluminationFlags;
+                existing.renderQueue = material.renderQueue;
+                existing.SetOverrideTag("RenderType", material.GetTag("RenderType", false));
                 EditorUtility.SetDirty(existing);
                 Object.DestroyImmediate(material);
                 return existing;

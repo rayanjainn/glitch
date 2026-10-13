@@ -3,6 +3,7 @@ using System.Text;
 using BugReport.Anomaly;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
+using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.Interaction;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace BugReport.DebugTools
         [SerializeField] private AnomalyMotor anomaly;
         [SerializeField] private SelectionController selection;
         [SerializeField] private PlaceholderHero hero;
+        [SerializeField] private GlitchController glitches;
         [SerializeField] private bool visible = true;
         [SerializeField, Min(0.5f)] private float feedbackDuration = 2.5f;
 
@@ -120,6 +122,36 @@ namespace BugReport.DebugTools
                 text.Append("> <color=").Append(color).Append('>').Append(fb.Message).Append("</color>\n");
             }
 
+            if (glitches != null)
+            {
+                var def = glitches.CurrentDefinition;
+                text.Append("GLITCH   ").Append(def != null ? def.DisplayName : "-").Append("  [Q] next  [LMB] apply  [R] revert\n");
+                if (glitches.HasPreview)
+                {
+                    var p = glitches.Preview;
+                    text.Append("         ").Append(p.Succeeded ? "<color=#5ff>READY</color>" : "<color=#ff6070>" + p.Describe() + "</color>").Append('\n');
+                }
+                else if (!string.IsNullOrEmpty(glitches.Prompt))
+                {
+                    text.Append("         ").Append(glitches.Prompt).Append('\n');
+                }
+
+                if (Time.unscaledTime - glitches.LastFeedbackTime < feedbackDuration)
+                {
+                    var gf = glitches.LastFeedback;
+                    text.Append("> <color=#").Append(ColorUtility.ToHtmlStringRGB(gf.Color)).Append('>').Append(gf.Message).Append("</color>\n");
+                }
+
+                var manager = services.Glitches;
+                for (int i = 0; i < manager.ActiveCount; i++)
+                {
+                    var op = manager.GetActive(i);
+                    float remaining = op.Remaining(Time.time);
+                    text.Append("  ").Append(op.Id.ToString()).Append(' ').Append(op.Spec.DisplayName)
+                        .Append(float.IsPositiveInfinity(remaining) ? "  (until reverted)" : "  " + remaining.ToString("0.0") + "s").Append('\n');
+                }
+            }
+
             if (hero != null)
             {
                 text.Append("HERO     ").Append(hero.State.ToString().ToUpperInvariant())
@@ -127,7 +159,7 @@ namespace BugReport.DebugTools
             }
 
             text.Append("\nWASD move  Mouse look  Space/Ctrl up/down  Shift boost\n");
-            text.Append("E select  RMB clear  Tab inspect  Esc pause");
+            text.Append("E select  RMB clear  LMB apply  R revert  Q glitch  Tab inspect  Esc pause");
         }
 
         private void AppendEntity(IEntityDescriptor entity)
