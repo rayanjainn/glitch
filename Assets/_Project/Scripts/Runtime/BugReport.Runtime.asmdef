@@ -1,0 +1,17 @@
+{
+    "name": "BugReport.Runtime",
+    "rootNamespace": "BugReport",
+    "references": [
+        "BugReport.Core",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
