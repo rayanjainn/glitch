@@ -47,3 +47,11 @@
 - All assemblies compile in **Unity 6000.6.0f1**: the BUG REPORT menu ran, so the Editor assembly loaded.
 - Configure Project added the World/Props/Hero/Anomaly/Intangible layers at slots 8–12 and set the Intangible collision rule. The second run was idempotent ("OK layer exists").
 - It reported `ERROR no render pipeline asset assigned`. The check only read `GraphicsSettings.defaultRenderPipeline`; it now reads `GraphicsSettings.currentRenderPipeline` (quality-level asset first, Graphics default as fallback) and logs both. Root cause on the owner's machine still to be confirmed: a URP asset may genuinely be missing.
+
+## 2026-10-13 — Third Unity run: URP OK, input asset not wired
+
+- Configure Project shows **OK URP active: PC_RPAsset** (assigned per quality level). The "Graphics default empty" warning is harmless here.
+- Play mode logged `InputReader has no InputActionAsset assigned`, so the builder saved the scene with a null reference.
+- **Likely cause (unconfirmed):** the builder loaded the `.inputactions` asset *before* creating materials and folders, and those operations can trigger re-imports that invalidate already-loaded asset objects.
+- **Fix:** create all assets and folders first, then load referenced assets. The builder now refuses to save the scene if any project component has an unassigned object reference, and lists them.
+- Also fixed the compile-check stubs, which had `Scene` in `UnityEngine` instead of `UnityEngine.SceneManagement`.

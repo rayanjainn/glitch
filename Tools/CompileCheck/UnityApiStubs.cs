@@ -47,7 +47,7 @@ namespace UnityEngine
         public string tag { get => throw null; set { } }
         public bool activeInHierarchy => throw null;
         public bool activeSelf => throw null;
-        public Scene scene => throw null;
+        public SceneManagement.Scene scene => throw null;
         public void SetActive(bool v) { }
         public T AddComponent<T>() where T : Component => throw null;
         public T GetComponent<T>() => throw null;
@@ -55,7 +55,6 @@ namespace UnityEngine
         public static GameObject CreatePrimitive(PrimitiveType t) => throw null;
         public bool CompareTag(string t) => throw null;
     }
-    public struct Scene { public bool isLoaded => throw null; public bool IsValid() => throw null; public int buildIndex => throw null; public string path => throw null; public GameObject[] GetRootGameObjects() => throw null; }
     public enum PrimitiveType { Sphere, Capsule, Cylinder, Cube, Plane, Quad }
     public class Transform : Component, System.Collections.IEnumerable
     {
@@ -290,6 +289,8 @@ namespace UnityEngine.Rendering
 
 namespace UnityEngine.SceneManagement
 {
+    public struct Scene { public bool isLoaded => throw null; public bool IsValid() => throw null; public int buildIndex => throw null; public string path => throw null; public GameObject[] GetRootGameObjects() => throw null; }
+
     public static class SceneManager
     {
         public static Scene GetActiveScene() => throw null;
@@ -379,6 +380,7 @@ namespace UnityEditor
 namespace UnityEditor.SceneManagement
 {
     using UnityEngine;
+    using UnityEngine.SceneManagement;
     public enum NewSceneSetup { EmptyScene, DefaultGameObjects }
     public enum NewSceneMode { Single, Additive }
     public enum OpenSceneMode { Single, Additive, AdditiveWithoutLoading }

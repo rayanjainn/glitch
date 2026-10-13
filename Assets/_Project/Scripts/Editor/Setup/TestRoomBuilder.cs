@@ -65,17 +65,20 @@ namespace BugReport.EditorTools.Setup
         public static bool Build(out string error)
         {
             error = null;
+
+            // Create every asset/folder BEFORE loading assets we reference: CreateAsset, CreateFolder and
+            // SaveAssets can trigger re-imports, which invalidate previously loaded asset objects.
+            var mats = new MaterialSet();
+            if (!mats.Create(out error)) return false;
+            EnsureFolder("Assets/_Project/Scenes");
+
             var actions = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
             if (actions == null)
             {
-                error = "Input actions not found at " + InputActionsPath;
+                error = "Input actions not found at " + InputActionsPath + ". Select it in the Project window and check the Console for import errors.";
                 return false;
             }
 
-            var mats = new MaterialSet();
-            if (!mats.Create(out error)) return false;
-
-            EnsureFolder("Assets/_Project/Scenes");
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             BuildLighting();
@@ -93,6 +96,13 @@ namespace BugReport.EditorTools.Setup
             Wire(controller, "motor", motor);
             Wire(controller, "cameraRig", cameraRig);
             Wire(controller, "selection", selection);
+
+            var missing = FindUnassignedReferences(scene);
+            if (missing.Count > 0)
+            {
+                error = "Scene NOT saved; unassigned references:\n  " + string.Join("\n  ", missing);
+                return false;
+            }
 
             if (!EditorSceneManager.SaveScene(scene, ScenePath))
             {
@@ -353,6 +363,31 @@ namespace BugReport.EditorTools.Setup
         }
 
         // ---------------------------------------------------------------- helpers
+
+        /// <summary>Every null object-reference field on project components (same rule as TestRoomSceneTests).</summary>
+        public static List<string> FindUnassignedReferences(UnityEngine.SceneManagement.Scene scene)
+        {
+            var problems = new List<string>();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var behaviour in root.GetComponentsInChildren<MonoBehaviour>(true))
+                {
+                    if (behaviour == null) continue;
+                    var ns = behaviour.GetType().Namespace ?? string.Empty;
+                    if (!ns.StartsWith("BugReport")) continue;
+
+                    var so = new SerializedObject(behaviour);
+                    var prop = so.GetIterator();
+                    while (prop.NextVisible(true))
+                    {
+                        if (prop.propertyType != SerializedPropertyType.ObjectReference || prop.name == "m_Script") continue;
+                        if (prop.objectReferenceValue == null)
+                            problems.Add(behaviour.GetType().Name + " on '" + behaviour.name + "': " + prop.propertyPath);
+                    }
+                }
+            }
+            return problems;
+        }
 
         private static void InvisibleBox(string name, Transform parent, Vector3 position, Vector3 size, int layer)
         {
