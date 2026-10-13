@@ -94,8 +94,9 @@ namespace BugReport.Tests.PlayMode
         {
             var dynamicBody = Body("Dynamic", new Vector3(0, 10, 0));
             var kinematicBody = Body("Kinematic", new Vector3(3, 10, 0), kinematic: true);
-            Freeze(dynamicBody);
-            Freeze(kinematicBody);
+            Assert.That(Freeze(dynamicBody, now: 0f).Succeeded, Is.True);
+            Assert.That(Freeze(kinematicBody, now: 1f).Succeeded, Is.True, "second freeze must be past the cooldown");
+            Assert.That(kinematicBody.IsFrozen, Is.True);
 
             services.Glitches.EndAll(GlitchEndReason.Reverted);
 

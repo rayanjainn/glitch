@@ -136,6 +136,7 @@ namespace UnityEngine
         public Color(float r, float g, float b, float a) { this.r = r; this.g = g; this.b = b; this.a = a; }
         public static Color white => default; public static Color blue => default; public static Color magenta => default;
         public static Color operator *(Color c, float f) => throw null;
+        public static Color Lerp(Color a, Color b, float t) => throw null;
     }
     public struct Rect { public Rect(float x, float y, float w, float h) { } }
     public struct Bounds
@@ -161,6 +162,7 @@ namespace UnityEngine
         public static bool SphereCast(Vector3 o, float r, Vector3 d, out RaycastHit h, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static int SphereCastNonAlloc(Ray ray, float r, RaycastHit[] results, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static void IgnoreLayerCollision(int a, int b, bool ignore) { }
+        public static bool CapsuleCast(Vector3 p1, Vector3 p2, float radius, Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction q) => throw null;
         public static bool CheckBox(Vector3 center, Vector3 halfExtents, Quaternion orientation, int mask, QueryTriggerInteraction q) => throw null;
         public static int OverlapBoxNonAlloc(Vector3 center, Vector3 halfExtents, Collider[] results, Quaternion orientation, int mask, QueryTriggerInteraction q) => throw null;
         public static bool GetIgnoreLayerCollision(int a, int b) => throw null;
@@ -170,6 +172,8 @@ namespace UnityEngine
         public const float PI = 3.14159265f;
         public static float Max(float a, float b) => throw null; public static int Max(int a, int b) => throw null;
         public static float Clamp(float v, float a, float b) => throw null;
+        public static int Clamp(int v, int a, int b) => throw null;
+        public static float Min(float a, float b) => throw null;
         public static float Abs(float v) => throw null; public static float Sin(float v) => throw null; public static float Cos(float v) => throw null;
         public static float Repeat(float t, float l) => throw null; public static float MoveTowards(float a, float b, float d) => throw null;
         public static float Lerp(float a, float b, float t) => throw null;
@@ -180,6 +184,12 @@ namespace UnityEngine
     public static class Cursor { public static CursorLockMode lockState { get => throw null; set { } } public static bool visible { get => throw null; set { } } }
     public static class Screen { public static int width => throw null; public static int height => throw null; }
     public static class Application { public static string unityVersion => throw null; public static bool isPlaying => throw null; }
+    public static class Gizmos
+    {
+        public static Color color { get => throw null; set { } }
+        public static void DrawWireSphere(Vector3 c, float r) { }
+        public static void DrawLine(Vector3 a, Vector3 b) { }
+    }
     public enum LogType { Error = 0, Assert = 1, Warning = 2, Log = 3, Exception = 4 }
     public static class Debug
     {

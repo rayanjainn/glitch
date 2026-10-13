@@ -21,7 +21,7 @@ namespace BugReport.DebugTools
     {
         [SerializeField] private AnomalyMotor anomaly;
         [SerializeField] private SelectionController selection;
-        [SerializeField] private PlaceholderHero hero;
+        [SerializeField] private HeroController hero;
         [SerializeField] private GlitchController glitches;
         [SerializeField] private bool visible = true;
         [SerializeField, Min(0.5f)] private float feedbackDuration = 2.5f;
@@ -155,8 +155,13 @@ namespace BugReport.DebugTools
             if (hero != null)
             {
                 text.Append("HERO     ").Append(hero.State.ToString().ToUpperInvariant())
-                    .Append("  waypoint ").Append(hero.WaypointIndex + 1).Append('/').Append(hero.RouteLength).Append('\n');
+                    .Append("  route ").Append(hero.RouteIndex).Append('/').Append(hero.RouteLength)
+                    .Append(hero.PathComplete ? "" : " (partial)").Append('\n');
             }
+
+            var containment = services.Containment;
+            text.Append("CONTAIN  stage ").Append(containment.Stage).Append("  pressure ").Append(containment.Pressure.ToString("0"))
+                .Append("  cooldown x").Append(services.Glitches.CooldownScale.ToString("0.0")).Append('\n');
 
             text.Append("\nWASD move  Mouse look  Space/Ctrl up/down  Shift boost\n");
             text.Append("E select  RMB clear  LMB apply  R revert  Q glitch  Tab inspect  Esc pause");

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BugReport.Containment;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
 using BugReport.Glitches;
@@ -29,9 +30,14 @@ namespace BugReport.Presentation
         [SerializeField] private Color glitchedColor = new Color(0.15f, 0.5f, 1f, 0.9f);
         [Tooltip("Supplies each glitch's colour for the outlines of what it changed or created.")]
         [SerializeField] private GlitchController glitches;
+        [Tooltip("Patched objects flash red/white briefly.")]
+        [SerializeField] private ContainmentDirector containment;
+        [SerializeField] private Color patchedColor = new Color(1f, 0.2f, 0.25f, 1f);
+        [SerializeField, Min(0.1f)] private float patchFlashSeconds = 1.2f;
 
         private readonly List<BoundsOutline> pool = new List<BoundsOutline>();
         private readonly List<IEntityDescriptor> buffer = new List<IEntityDescriptor>();
+        private readonly List<(GameEntityId id, float until)> patchFlashes = new List<(GameEntityId, float)>();
         private GameServices services;
         private Action<GameServices> bindCallback;
         private int used;
@@ -40,10 +46,19 @@ namespace BugReport.Presentation
         {
             bindCallback = s => services = s;
             GameServices.WhenReady(bindCallback);
+            if (containment != null) containment.Patched += OnPatched;
+        }
+
+        private void OnPatched(Core.Glitches.GlitchOperation operation)
+        {
+            float until = Time.unscaledTime + patchFlashSeconds;
+            for (int i = 0; i < operation.TargetCount; i++) patchFlashes.Add((operation.Target(i), until));
         }
 
         private void OnDisable()
         {
+            if (containment != null) containment.Patched -= OnPatched;
+            patchFlashes.Clear();
             GameServices.CancelWhenReady(bindCallback);
             services = null;
             for (int i = 0; i < pool.Count; i++) pool[i].Hide();
@@ -92,6 +107,20 @@ namespace BugReport.Presentation
                     if (services.Registry.TryGet(id, out var target) && target is GameEntity glitchedEntity)
                         Draw(glitchedEntity, color);
                 }
+            }
+
+            // Containment patches: red/white flash on what was just restored.
+            float now = Time.unscaledTime;
+            for (int i = patchFlashes.Count - 1; i >= 0; i--)
+            {
+                var flash = patchFlashes[i];
+                if (now >= flash.until)
+                {
+                    patchFlashes.RemoveAt(i);
+                    continue;
+                }
+                if (services.Registry.TryGet(flash.id, out var patchedTarget) && patchedTarget is GameEntity patchedEntity)
+                    Draw(patchedEntity, Mathf.Repeat(now * 8f, 1f) < 0.5f ? patchedColor : Color.white);
             }
 
             bool gameplay = state == GameState.Playing || state == GameState.Inspection;

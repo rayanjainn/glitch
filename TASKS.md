@@ -94,7 +94,7 @@ After **BUG REPORT ▸ Setup ▸ 2. Build Test Room Scene → Rebuild**, press P
    - LMB with nothing selected (prompt).
 8. Esc pause → LMB/R do nothing. Resume works.
 
-## Milestone 3 — Duplication + Freeze (current)
+## Milestone 3 — Duplication + Freeze ✅ (verified in Unity, merged)
 - [x] Core: operation products (`AddProduct`, `Involves`, `CountActiveOn`); losing a product ends the operation; copy-of-copy chains collapse. 4 new tests (91 total) [auto]
 - [~] `FreezeCapability` (exclusive frozen channel, kinematic + animator handling, release at rest), `ITimeScaled` + `PingPongMover`, `FreezeDefinition` (duration, release policy), `FreezeEffect` (velocity snapshot in the operation) [editor]
 - [~] `DuplicationProfile` (prefab, per-source cap, objective policy, inherit velocity), `DuplicationCapability`, `DuplicateMarker`, `DuplicationDefinition` (global cap), `DuplicationEffect` (prefab-only spawn under inactive holder, free-space placement, despawn lease) [editor]
@@ -118,11 +118,29 @@ After **Build Test Room Scene → Rebuild**, press Play:
 8. Invalid cases: duplicating the firewall, freezing the hero, freezing the pillar → red reticle and a reason.
 9. F5 restart: no copies remain, nothing stays frozen, ENTITIES count matches a fresh load.
 
-## Milestone 4 — Hero behaviour + Containment
-- [ ] Navigation spike: NavMesh carving vs waypoint graph with runtime passability. Decide and record it [editor]
-- [ ] Hero FSM (Idle, Patrol, Investigate, Confused, …) driven by objectives [editor]
-- [ ] Core `ContainmentModel` with decay, thresholds, hysteresis, reset + tests [auto]
-- [ ] Containment responders: UI warning, audio, PatchAction via `GlitchManager` [editor]
+## Milestone 4 — Hero behaviour + Containment (current)
+- [x] Navigation decision: authored waypoint graph + live capsule-sweep passability (not NavMesh); see ARCHITECTURE §6 [auto]
+- [x] Core `NavGraph` (A*, partial paths, deterministic). 8 tests [auto]
+- [x] Core `ContainmentModel` + `ContainmentSettings` (explicit sources, decay, hysteresis, patch relief, reset). 12 tests [auto]
+- [x] Core: `GlitchSpec.ContainmentWeight`, `GlitchManager.CooldownScale` / `ActiveContainmentWeight` / `ActiveProductCount`. 2 tests (113 total) [auto]
+- [~] `HeroNavNode`, `HeroNavGraph`, `HeroController` FSM (Idle/Walking/Blocked/Confused/Arrived); replaces `PlaceholderHero` [editor]
+- [~] `ContainmentSettingsAsset`, `ContainmentDirector` (cooldown scaling, patches oldest revertible glitch, skips vetoed), `ContainmentPresenter`, patched-object flash [editor][visual]
+- [~] Test room: 7-node hero graph (firewall is the only way east; the holo panel can be bypassed north/south), containment settings asset [editor]
+- [~] Tests: HeroControllerTests (7), ContainmentDirectorTests (7), CollisionTransferTests migrated to the new hero, scene tests (graph connectivity, systems) [editor]
+- [ ] Remove unused template packages (Visual Scripting, Collab Proxy) [editor]
+
+### Manual playtest checklist (Milestone 4)
+After **Build Test Room Scene → Rebuild**, press Play:
+1. The hero walks from spawn to just before the firewall and stops: overlay `HERO BLOCKED … (partial)`.
+2. Transfer FIREWALL_01 → SHADOW_DECAL: within about 0.3 s the hero re-plans and walks to the exit (**ARRIVED**).
+3. Restart. Transfer FIREWALL_01 → HOLO_PANEL: the hero passes the firewall and **walks around** the now-solid panel (north or south), then arrives.
+4. Restart. Duplicate a crate and push or drop copies so they sit on the hero's path: it goes CONFUSED, then re-routes or waits.
+5. Containment:
+   - apply several glitches quickly → the pressure bar rises → "// ANOMALY DETECTED //", then "LOCAL INVESTIGATION" (cooldowns x1.5 in the overlay);
+   - keep going → "PATCH DEPLOYMENT" with a countdown → the oldest glitch is reverted, flashes red/white, "PATCHED BY SYSTEM".
+6. Stop glitching → pressure falls back to 0 and the banner disappears.
+7. Stand inside the ghost firewall when a patch is due: it patches something else instead, never the wall around you.
+8. F5 restart: containment back to stage 0.
 
 ## Milestone 5 — Vertical-slice level
 - [ ] Objective system (explicit conditions) [auto/editor]

@@ -132,3 +132,21 @@
   - `attachedRigidbody` is null for colliders on inactive objects, which is when the capability initialises.
 - **Fix:** evaluate live again. Fall back to `GetComponentInParent<Rigidbody>(true)`, and treat a body that is kinematic only because of a freeze as dynamic (`FreezeCapability.KinematicBeforeFreeze`).
 - **Lesson:** snapshotting state at init is fragile with deferred activation; prefer live queries plus explicit ownership information.
+
+## 2026-10-13 — Milestone 3 merged; Milestone 4 implemented (Editor verification pending)
+
+- PR #3 merged; the owner reported all Unity tests passing.
+- **Milestone 4** on `feature/hero-ai-containment`:
+  - **Navigation decision:** waypoint graph + live physics passability instead of NavMesh (ARCHITECTURE §6).
+  - **Core:** `NavGraph`, `ContainmentModel`, spec containment weight, manager cooldown scale and containment inputs. **113/113 tests pass.**
+  - **Hero:** `HeroController` FSM over `HeroNavGraph`, replacing `PlaceholderHero` (script and tests removed; collision tests migrated).
+  - **Containment:** settings asset, director (cooldown scaling, oldest-first patches that skip vetoed reverts), HUD presenter, patch flash outlines.
+- **Behaviour choice found while writing tests:** when blocked mid-route with no closer reachable node, the hero waits at the obstacle instead of walking back to its last node.
+- **Not verified:** Unity compile, 14 new PlayMode tests and the updated EditMode tests, the routes in the real room, and the containment HUD/feel. Thresholds will likely need tuning by playtest.
+
+## 2026-10-13 — Milestone 4 first Unity run: 2 test bugs
+
+- **Failures:** `ContainmentDirectorTests.PatchDeployment_…` and `BlockedPatch_…` failed with "COOLDOWN 0.5s". The tests applied two transfers at the same `Time.time`, and the cooldown correctly rejected the second. That's a test bug, not a game bug.
+- **Fix:** the test helper uses an explicit clock advancing 1 s per apply.
+- **Audit:** the same pattern made M3's `FreezeTests.Unfreeze_RestoresTheKinematicFlagItFound` pass vacuously (its second freeze was silently rejected). It now asserts both freezes succeed.
+- **Rule:** tests that apply several glitches must pass explicit, increasing `now` values and assert each apply succeeded.
