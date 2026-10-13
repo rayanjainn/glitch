@@ -34,3 +34,10 @@
 - Added TESTING.md, a novice-friendly path from "new empty Unity project" to "branch tested, ready to merge".
 - Added `Tools/UnityTests/run-unity-tests.{ps1,sh}` for headless EditMode/PlayMode runs. **Not executed** (no Unity here); first real run will be on the owner's machine.
 - Licence/automation: no credentials are shared in chat. Preferred path is running Claude Code on the owner's machine; GameCI with GitHub secrets is a later option.
+
+## 2026-10-13 — First Unity compile (owner's machine, Unity 6.6)
+
+- **Result:** 8 errors in `BugReport.Runtime`. All came from `CS0104: 'EntityId' is an ambiguous reference between 'BugReport.Core.Entities.EntityId' and 'UnityEngine.EntityId'`. Unity 6.x added its own `UnityEngine.EntityId`.
+- **Fix:** renamed our type to `GameEntityId`, including the file and its tests.
+- **Gap:** the stub compile check missed this because the stubs didn't contain `UnityEngine.EntityId`. Added it so this class of collision now reproduces in `Tools/CompileCheck`.
+- Editor and test assemblies never compiled (they depend on Runtime), so more errors may still appear on the next import.

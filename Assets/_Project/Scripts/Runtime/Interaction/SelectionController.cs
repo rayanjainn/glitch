@@ -16,10 +16,10 @@ namespace BugReport.Interaction
     public readonly struct SelectionFeedback
     {
         public readonly SelectionFeedbackKind Kind;
-        public readonly EntityId Target;
+        public readonly GameEntityId Target;
         public readonly string Message;
 
-        public SelectionFeedback(SelectionFeedbackKind kind, EntityId target, string message)
+        public SelectionFeedback(SelectionFeedbackKind kind, GameEntityId target, string message)
         {
             Kind = kind;
             Target = target;
@@ -64,7 +64,7 @@ namespace BugReport.Interaction
         {
             if (services == null || services.IsDisposed || !services.State.IsGameplayActive) return;
             var target = scanner != null ? scanner.CurrentTarget : null;
-            services.Selection.SetHovered(target != null && target.IsRegistered ? target.Id : EntityId.None);
+            services.Selection.SetHovered(target != null && target.IsRegistered ? target.Id : GameEntityId.None);
         }
 
         /// <summary>Select what the reticle is on; selecting the current selection again deselects it.</summary>

@@ -65,8 +65,8 @@ namespace BugReport.Core.Tests
         [Test]
         public void Unregister_UnknownId_ReturnsFalse()
         {
-            Assert.That(registry.Unregister(new EntityId(99)), Is.False);
-            Assert.That(registry.Unregister(EntityId.None), Is.False);
+            Assert.That(registry.Unregister(new GameEntityId(99)), Is.False);
+            Assert.That(registry.Unregister(GameEntityId.None), Is.False);
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace BugReport.Core.Tests
         public void TryGet_DeadEntity_IsPrunedAndReported()
         {
             var a = new FakeEntity("A").RegisterIn(registry);
-            var removed = new List<EntityId>();
+            var removed = new List<GameEntityId>();
             registry.Unregistered += (id, _) => removed.Add(id);
 
             a.IsAlive = false;

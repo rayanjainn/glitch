@@ -21,6 +21,9 @@ namespace UnityEngine
         public int GetInstanceID() => throw null;
     }
     public class ScriptableObject : Object { }
+    // Unity 6.x engine type. Present so a project type with the same simple name
+    // produces the same CS0104 ambiguity here that it does in Unity.
+    public struct EntityId { }
     public class Component : Object
     {
         public GameObject gameObject => throw null;

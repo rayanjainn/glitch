@@ -22,7 +22,7 @@ namespace BugReport
         private readonly List<Collider> colliders = new List<Collider>();
         private EntityRegistry registeredWith;
 
-        public EntityId Id { get; private set; }
+        public GameEntityId Id { get; private set; }
         public string DisplayName => string.IsNullOrEmpty(displayName) ? name : displayName;
         public EntityCategory Category => category;
         public EntityCapabilities Capabilities => capabilities;
@@ -107,7 +107,7 @@ namespace BugReport
             var registry = registeredWith;
             var id = Id;
             registeredWith = null;
-            Id = EntityId.None;
+            Id = GameEntityId.None;
             if (registry != null && id.IsValid) registry.Unregister(id);
         }
     }

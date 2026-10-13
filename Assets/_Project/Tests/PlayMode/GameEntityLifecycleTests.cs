@@ -62,7 +62,7 @@ namespace BugReport.Tests.PlayMode
 
             Assert.That(services.Registry.Contains(id), Is.False);
             Assert.That(services.Selection.HasSelection, Is.False);
-            Assert.That(entity.Id, Is.EqualTo(EntityId.None));
+            Assert.That(entity.Id, Is.EqualTo(GameEntityId.None));
         }
 
         [UnityTest]

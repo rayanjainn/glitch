@@ -15,14 +15,14 @@ namespace BugReport.Core.Entities
     /// </summary>
     public sealed class EntityRegistry
     {
-        private readonly Dictionary<EntityId, IEntityDescriptor> entities = new Dictionary<EntityId, IEntityDescriptor>();
-        private readonly Dictionary<IEntityDescriptor, EntityId> idsByEntity = new Dictionary<IEntityDescriptor, EntityId>(ReferenceEqualityComparer.Instance);
+        private readonly Dictionary<GameEntityId, IEntityDescriptor> entities = new Dictionary<GameEntityId, IEntityDescriptor>();
+        private readonly Dictionary<IEntityDescriptor, GameEntityId> idsByEntity = new Dictionary<IEntityDescriptor, GameEntityId>(ReferenceEqualityComparer.Instance);
         private int nextId = 1;
 
         /// <summary>Raised with the new id (the entity may not have stored it yet).</summary>
-        public event Action<EntityId, IEntityDescriptor> Registered;
+        public event Action<GameEntityId, IEntityDescriptor> Registered;
         /// <summary>Raised with the id and the (possibly destroyed) entity.</summary>
-        public event Action<EntityId, IEntityDescriptor> Unregistered;
+        public event Action<GameEntityId, IEntityDescriptor> Unregistered;
 
         public int Count => entities.Count;
 
@@ -30,13 +30,13 @@ namespace BugReport.Core.Entities
         /// Registers an entity and returns its new id. Registering an entity that
         /// is already registered returns its existing id.
         /// </summary>
-        public EntityId Register(IEntityDescriptor entity)
+        public GameEntityId Register(IEntityDescriptor entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
             if (idsByEntity.TryGetValue(entity, out var existing)) return existing;
             if (nextId == int.MaxValue) throw new InvalidOperationException("Entity id space exhausted.");
 
-            var id = new EntityId(nextId++);
+            var id = new GameEntityId(nextId++);
             entities.Add(id, entity);
             idsByEntity.Add(entity, id);
             Registered?.Invoke(id, entity);
@@ -44,7 +44,7 @@ namespace BugReport.Core.Entities
         }
 
         /// <summary>Returns false if the id is unknown (already removed or never registered).</summary>
-        public bool Unregister(EntityId id)
+        public bool Unregister(GameEntityId id)
         {
             if (!entities.TryGetValue(id, out var entity)) return false;
             entities.Remove(id);
@@ -53,10 +53,10 @@ namespace BugReport.Core.Entities
             return true;
         }
 
-        public bool Contains(EntityId id) => TryGet(id, out _);
+        public bool Contains(GameEntityId id) => TryGet(id, out _);
 
         /// <summary>Resolves a live entity. Dead entities are pruned and reported as missing.</summary>
-        public bool TryGet(EntityId id, out IEntityDescriptor entity)
+        public bool TryGet(GameEntityId id, out IEntityDescriptor entity)
         {
             if (entities.TryGetValue(id, out entity))
             {
@@ -67,10 +67,10 @@ namespace BugReport.Core.Entities
             return false;
         }
 
-        public bool TryGetId(IEntityDescriptor entity, out EntityId id)
+        public bool TryGetId(IEntityDescriptor entity, out GameEntityId id)
         {
             if (entity != null && idsByEntity.TryGetValue(entity, out id)) return true;
-            id = EntityId.None;
+            id = GameEntityId.None;
             return false;
         }
 
@@ -94,7 +94,7 @@ namespace BugReport.Core.Entities
             if (deadCount == 0) return 0;
 
             // Snapshot first: Unregistered handlers may re-enter the registry.
-            var dead = new EntityId[deadCount];
+            var dead = new GameEntityId[deadCount];
             int i = 0;
             foreach (var pair in entities)
             {
@@ -114,7 +114,7 @@ namespace BugReport.Core.Entities
         {
             if (entities.Count == 0) return;
             // Snapshot first: Unregistered handlers may re-enter the registry.
-            var all = new EntityId[entities.Count];
+            var all = new GameEntityId[entities.Count];
             entities.Keys.CopyTo(all, 0);
             for (int i = 0; i < all.Length; i++) Unregister(all[i]);
         }

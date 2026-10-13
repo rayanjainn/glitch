@@ -6,7 +6,7 @@ namespace BugReport.Core.Entities
     /// </summary>
     public interface IEntityDescriptor
     {
-        EntityId Id { get; }
+        GameEntityId Id { get; }
         string DisplayName { get; }
         EntityCategory Category { get; }
         EntityCapabilities Capabilities { get; }

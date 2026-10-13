@@ -21,7 +21,7 @@ Status: `[x]` done and verified · `[~]` implemented, verification pending · `[
 - [ ] Commit generated `.meta` files, ProjectSettings, Packages [editor]
 
 ### Core (engine-free)
-- [x] `EntityId`, `EntityCategory`, `EntityCapabilities`, `IEntityDescriptor` [auto]
+- [x] `GameEntityId`, `EntityCategory`, `EntityCapabilities`, `IEntityDescriptor` [auto]
 - [x] `EntityRegistry`: unique, never-reused ids, dead-entity pruning, reentrancy-safe clear [auto]
 - [x] `TargetRequirement` + `TargetValidator` with typed failure reasons [auto]
 - [x] `SelectionModel`: hover/selection by id, auto-clear on unregister [auto]

@@ -14,7 +14,7 @@ namespace BugReport.Core.Tests
             IsAlive = true;
         }
 
-        public EntityId Id { get; set; }
+        public GameEntityId Id { get; set; }
         public string DisplayName { get; }
         public EntityCategory Category { get; set; }
         public EntityCapabilities Capabilities { get; set; }

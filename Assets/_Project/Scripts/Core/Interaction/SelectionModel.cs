@@ -23,17 +23,17 @@ namespace BugReport.Core.Interaction
             HoveredValidation = new TargetValidationResult(TargetValidationFailure.NoTarget);
         }
 
-        public EntityId Hovered { get; private set; }
-        public EntityId Selected { get; private set; }
+        public GameEntityId Hovered { get; private set; }
+        public GameEntityId Selected { get; private set; }
         public TargetRequirement Requirement => requirement;
 
         /// <summary>Validation of the hovered entity against the current requirement.</summary>
         public TargetValidationResult HoveredValidation { get; private set; }
 
         /// <summary>(previous, current) selected ids.</summary>
-        public event Action<EntityId, EntityId> SelectionChanged;
+        public event Action<GameEntityId, GameEntityId> SelectionChanged;
         /// <summary>(previous, current) hovered ids.</summary>
-        public event Action<EntityId, EntityId> HoverChanged;
+        public event Action<GameEntityId, GameEntityId> HoverChanged;
 
         public bool HasSelection => Selected.IsValid;
 
@@ -48,8 +48,8 @@ namespace BugReport.Core.Interaction
             if (Selected.IsValid && !Validate(Selected).IsValid) ClearSelection();
         }
 
-        /// <summary>Called every frame by the scanner. Passing <see cref="EntityId.None"/> clears the hover.</summary>
-        public void SetHovered(EntityId id)
+        /// <summary>Called every frame by the scanner. Passing <see cref="GameEntityId.None"/> clears the hover.</summary>
+        public void SetHovered(GameEntityId id)
         {
             var previous = Hovered;
             Hovered = id;
@@ -57,7 +57,7 @@ namespace BugReport.Core.Interaction
             if (previous != id) HoverChanged?.Invoke(previous, id);
         }
 
-        public TargetValidationResult Validate(EntityId id)
+        public TargetValidationResult Validate(GameEntityId id)
         {
             if (!id.IsValid) return new TargetValidationResult(TargetValidationFailure.NoTarget);
             if (!registry.TryGet(id, out var entity)) return new TargetValidationResult(TargetValidationFailure.Destroyed);
@@ -65,7 +65,7 @@ namespace BugReport.Core.Interaction
         }
 
         /// <summary>Selects <paramref name="id"/> if it passes validation. Selection is unchanged on failure.</summary>
-        public TargetValidationResult TrySelect(EntityId id)
+        public TargetValidationResult TrySelect(GameEntityId id)
         {
             var result = Validate(id);
             if (!result.IsValid) return result;
@@ -85,8 +85,8 @@ namespace BugReport.Core.Interaction
         {
             if (!Selected.IsValid) return false;
             var previous = Selected;
-            Selected = EntityId.None;
-            SelectionChanged?.Invoke(previous, EntityId.None);
+            Selected = GameEntityId.None;
+            SelectionChanged?.Invoke(previous, GameEntityId.None);
             return true;
         }
 
@@ -115,9 +115,9 @@ namespace BugReport.Core.Interaction
 
         private void RefreshHoverValidation() => HoveredValidation = Validate(Hovered);
 
-        private void OnEntityUnregistered(EntityId id, IEntityDescriptor _)
+        private void OnEntityUnregistered(GameEntityId id, IEntityDescriptor _)
         {
-            if (Hovered == id) SetHovered(EntityId.None);
+            if (Hovered == id) SetHovered(GameEntityId.None);
             if (Selected == id) ClearSelection();
         }
     }

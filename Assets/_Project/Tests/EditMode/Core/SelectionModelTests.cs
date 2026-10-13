@@ -23,7 +23,7 @@ namespace BugReport.Core.Tests
         [Test]
         public void Initially_NothingHoveredOrSelected()
         {
-            Assert.That(selection.Hovered, Is.EqualTo(EntityId.None));
+            Assert.That(selection.Hovered, Is.EqualTo(GameEntityId.None));
             Assert.That(selection.HasSelection, Is.False);
             Assert.That(selection.HoveredValidation.Failure, Is.EqualTo(TargetValidationFailure.NoTarget));
         }
@@ -32,14 +32,14 @@ namespace BugReport.Core.Tests
         public void TrySelect_ValidTarget_SelectsAndRaisesOnce()
         {
             var crate = new FakeEntity("Crate").RegisterIn(registry);
-            var events = new List<(EntityId, EntityId)>();
+            var events = new List<(GameEntityId, GameEntityId)>();
             selection.SelectionChanged += (p, c) => events.Add((p, c));
 
             Assert.That(selection.TrySelect(crate.Id).IsValid, Is.True);
             Assert.That(selection.TrySelect(crate.Id).IsValid, Is.True); // re-select: no extra event
 
             Assert.That(selection.Selected, Is.EqualTo(crate.Id));
-            Assert.That(events, Is.EqualTo(new[] { (EntityId.None, crate.Id) }));
+            Assert.That(events, Is.EqualTo(new[] { (GameEntityId.None, crate.Id) }));
         }
 
         [Test]
@@ -58,8 +58,8 @@ namespace BugReport.Core.Tests
         [Test]
         public void TrySelect_UnknownId_ReportsDestroyed()
         {
-            Assert.That(selection.TrySelect(new EntityId(42)).Failure, Is.EqualTo(TargetValidationFailure.Destroyed));
-            Assert.That(selection.TrySelect(EntityId.None).Failure, Is.EqualTo(TargetValidationFailure.NoTarget));
+            Assert.That(selection.TrySelect(new GameEntityId(42)).Failure, Is.EqualTo(TargetValidationFailure.Destroyed));
+            Assert.That(selection.TrySelect(GameEntityId.None).Failure, Is.EqualTo(TargetValidationFailure.NoTarget));
         }
 
         [Test]
@@ -94,14 +94,14 @@ namespace BugReport.Core.Tests
             var crate = new FakeEntity("Crate").RegisterIn(registry);
             selection.SetHovered(crate.Id);
             selection.TrySelect(crate.Id);
-            EntityId cleared = crate.Id;
+            GameEntityId cleared = crate.Id;
             selection.SelectionChanged += (p, c) => cleared = c;
 
             registry.Unregister(crate.Id);
 
             Assert.That(selection.HasSelection, Is.False);
-            Assert.That(selection.Hovered, Is.EqualTo(EntityId.None));
-            Assert.That(cleared, Is.EqualTo(EntityId.None));
+            Assert.That(selection.Hovered, Is.EqualTo(GameEntityId.None));
+            Assert.That(cleared, Is.EqualTo(GameEntityId.None));
         }
 
         [Test]

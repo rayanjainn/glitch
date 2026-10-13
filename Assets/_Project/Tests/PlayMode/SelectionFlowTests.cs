@@ -44,7 +44,7 @@ namespace BugReport.Tests.PlayMode
         private void Hover()
         {
             scanner.Scan();
-            services.Selection.SetHovered(scanner.CurrentTarget != null ? scanner.CurrentTarget.Id : EntityId.None);
+            services.Selection.SetHovered(scanner.CurrentTarget != null ? scanner.CurrentTarget.Id : GameEntityId.None);
         }
 
         [Test]

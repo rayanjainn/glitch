@@ -79,7 +79,7 @@ This deviates from the GDD's suggested tree in one way: tests live under `Assets
 
 `GameEntity` (MonoBehaviour) implements `IEntityDescriptor`, which exposes Id, DisplayName, Category, Capabilities, and IsAlive.
 
-- **EntityId** is a runtime int assigned by the registry. It is monotonically increasing and **never reused** within a registry lifetime, so a stale id can never resolve to a different object. It is not used for saves. Saves will use authored stable ids *(planned, M8)*.
+- **GameEntityId** is a runtime int assigned by the registry. It is monotonically increasing and **never reused** within a registry lifetime, so a stale id can never resolve to a different object. It is not used for saves. Saves will use authored stable ids *(planned, M8)*.
 - **EntityCategory** values are Prop, Structure, Decoration, Hero, Enemy, Objective, SystemDevice, and Anomaly. Requirements can exclude categories, and the anomaly is always excluded.
 - **EntityCapabilities** is a `[Flags]` enum: Inspectable, CollisionTransferable, Duplicable, Freezable, PropertyMutable, AIControllable, and ObjectiveRelevant.
   - In M1 the flags are **declarative data** used for selection validation and debug display.
@@ -91,7 +91,7 @@ This deviates from the GDD's suggested tree in one way: tests live under `Assets
 ## 4. Targeting and selection (implemented)
 
 ```
-Camera ─▶ TargetScanner ──(GameEntity)──▶ SelectionController ──(EntityId)──▶ SelectionModel (Core)
+Camera ─▶ TargetScanner ──(GameEntity)──▶ SelectionController ──(GameEntityId)──▶ SelectionModel (Core)
          sphere cast, nearest hit,            feedback events                  hover/selected ids,
          ignores anomaly hierarchy            (UI/audio)                       validation, auto-clear
 ```
@@ -164,7 +164,7 @@ Consequences:
 
 - Only entities with `DuplicationCapability`, which references **its own prefab asset**. Duplicates are always instantiated **from the prefab, never from the scene instance**. `Instantiate(sceneObject)` would clone live modifier state (for example kinematic-while-frozen with no operation owning it), outlines, and cached references.
 - Approved state (pose, linear and angular velocity, selected data through `IDuplicationStateProvider`) is copied explicitly. External references are **not** copied. A duplicate rebinds through the registry or the level, or starts unbound.
-- Each duplicate gets a new EntityId plus a `Lineage` record (OriginId, generation). The objective policy comes from the definition: NotObjective (default), Inherit, or Ambiguous (the "confused objective" gag, M5+).
+- Each duplicate gets a new GameEntityId plus a `Lineage` record (OriginId, generation). The objective policy comes from the definition: NotObjective (default), Inherit, or Ambiguous (the "confused objective" gag, M5+).
 - Limits: global cap and per-source cap. The spawn point must pass an overlap check, otherwise the operation is rejected. Duplicate creation is itself a `GlitchOperation`: reverting it despawns the copy and cascades `Invalidated` to operations targeting the copy.
 - The anomaly and anything without the capability can never be duplicated.
 
