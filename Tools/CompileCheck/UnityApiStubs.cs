@@ -166,6 +166,7 @@ namespace UnityEngine
         public static void Log(object m) { } public static void Log(object m, Object c) { }
         public static void LogWarning(object m) { } public static void LogWarning(object m, Object c) { }
         public static void LogError(object m) { } public static void LogError(object m, Object c) { }
+        public static void LogException(Exception e) { }
     }
     public class Collider : Component { public bool enabled { get => throw null; set { } } public Bounds bounds => throw null; }
     public class BoxCollider : Collider { }
@@ -345,7 +346,7 @@ namespace UnityEditor
         public string stringValue { get => throw null; set { } } public float floatValue { get => throw null; set { } }
         public int intValue { get => throw null; set { } } public int arraySize { get => throw null; set { } }
         public bool isArray => throw null; public string name => throw null; public string propertyPath => throw null;
-        public SerializedPropertyType propertyType => throw null;
+        public SerializedPropertyType propertyType => throw null; public string type => throw null;
         public SerializedProperty GetArrayElementAtIndex(int i) => throw null;
         public bool NextVisible(bool enterChildren) => throw null;
     }
@@ -354,7 +355,7 @@ namespace UnityEditor
         public SerializedObject(Object o) { }
         public SerializedProperty FindProperty(string p) => throw null;
         public SerializedProperty GetIterator() => throw null;
-        public bool ApplyModifiedPropertiesWithoutUndo() => throw null;
+        public bool ApplyModifiedPropertiesWithoutUndo() => throw null; public void Update() { }
     }
     public static class AssetDatabase
     {
@@ -364,12 +365,14 @@ namespace UnityEditor
         public static bool IsValidFolder(string p) => throw null;
         public static string CreateFolder(string parent, string name) => throw null;
         public static void CreateAsset(Object o, string p) { }
+        public static string GetAssetPath(Object o) => throw null;
     }
     public static class EditorUtility
     {
         public static bool DisplayDialog(string t, string m, string ok) => throw null;
         public static bool DisplayDialog(string t, string m, string ok, string cancel) => throw null;
         public static void SetDirty(Object o) { }
+        public static bool IsPersistent(Object o) => throw null;
     }
     public class EditorBuildSettingsScene { public EditorBuildSettingsScene(string p, bool e) { } public string path => throw null; public bool enabled => throw null; }
     public static class EditorBuildSettings { public static EditorBuildSettingsScene[] scenes { get => throw null; set { } } }

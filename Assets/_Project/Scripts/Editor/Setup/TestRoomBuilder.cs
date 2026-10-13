@@ -57,20 +57,36 @@ namespace BugReport.EditorTools.Setup
 
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-            if (Build(out var error)) Debug.Log("[BUG REPORT] Built " + ScenePath + ". Press Play.");
-            else Debug.LogError("[BUG REPORT] Test room build failed: " + error);
+            string error;
+            bool built;
+            try
+            {
+                built = Build(out error);
+            }
+            catch (System.Exception e)
+            {
+                built = false;
+                error = e.Message;
+                Debug.LogException(e);
+            }
+
+            if (built) Debug.Log("[BUG REPORT] Built " + ScenePath + ". Press Play.");
+            else Debug.LogError("[BUG REPORT] Test room build failed (scene not saved): " + error);
         }
 
         /// <summary>Builds and saves the scene. Returns false with a reason instead of leaving a half-built scene saved.</summary>
         public static bool Build(out string error)
         {
             error = null;
+            EnsureFolder("Assets/_Project/Scenes");
 
-            // Create every asset/folder BEFORE loading assets we reference: CreateAsset, CreateFolder and
-            // SaveAssets can trigger re-imports, which invalidate previously loaded asset objects.
+            // Open the new scene FIRST. NewScene(Single) unloads assets nothing references yet, which
+            // destroys asset objects loaded before it (the input actions came through as null). So every
+            // asset this scene references is created or loaded after this line.
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
             var mats = new MaterialSet();
             if (!mats.Create(out error)) return false;
-            EnsureFolder("Assets/_Project/Scenes");
 
             var actions = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
             if (actions == null)
@@ -78,8 +94,6 @@ namespace BugReport.EditorTools.Setup
                 error = "Input actions not found at " + InputActionsPath + ". Select it in the Project window and check the Console for import errors.";
                 return false;
             }
-
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             BuildLighting();
             var environment = new GameObject("--- ENVIRONMENT ---").transform;
@@ -385,6 +399,13 @@ namespace BugReport.EditorTools.Setup
                             problems.Add(behaviour.GetType().Name + " on '" + behaviour.name + "': " + prop.propertyPath);
                     }
                 }
+
+                foreach (var renderer in root.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (renderer is LineRenderer) continue; // outline lines get their material at runtime
+                    if (renderer.sharedMaterial == null)
+                        problems.Add(renderer.GetType().Name + " on '" + renderer.name + "': material");
+                }
             }
             return problems;
         }
@@ -442,6 +463,20 @@ namespace BugReport.EditorTools.Setup
             var so = Serialized(target, property, out var prop);
             prop.objectReferenceValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
+
+            // SerializedProperty silently ignores assignments it rejects (destroyed object, wrong type).
+            // Read back so a failure is reported here, with the reason, instead of as a null at Play time.
+            so.Update();
+            if (so.FindProperty(property).objectReferenceValue != value)
+            {
+                bool destroyed = value == null && !ReferenceEquals(value, null);
+                throw new System.InvalidOperationException(
+                    "[BUG REPORT] Could not assign " + target.GetType().Name + "." + property +
+                    " = " + (ReferenceEquals(value, null) ? "null" : value.GetType().Name) +
+                    (destroyed ? " (the object was already destroyed/unloaded)" : string.Empty) +
+                    "; field type '" + prop.type + "', asset path '" + (destroyed ? "-" : AssetDatabase.GetAssetPath(value)) +
+                    "', persistent=" + (!destroyed && !ReferenceEquals(value, null) && EditorUtility.IsPersistent(value)) + ".");
+            }
         }
 
         private static void WireArray(Object target, string property, Object[] values)

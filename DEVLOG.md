@@ -62,3 +62,12 @@
 - **Likely cause (unconfirmed):** scripts recompiled while Play mode was running (Unity's default "Recompile And Continue Playing"). That nulls non-serialized fields and does not re-run Awake. The other possibility is an earlier exception in Awake.
 - **Fix:** `ProgressMonitor` is now created lazily, with its parameters clamped, instead of only in Awake.
 - **Project policy:** in-play-mode recompilation is not supported, since static services can't survive it. Owners should set Preferences ▸ General ▸ Script Changes While Playing = *Recompile After Finished Playing*.
+
+## 2026-10-13 — Fifth Unity run: wiring validation fired
+
+- The builder correctly refused to save: `InputReader on 'ANOMALY': actions` was unassigned, even though the asset loaded fine. That **disproves** the re-import theory from the previous entry.
+- **New likely cause:** `EditorSceneManager.NewScene(..., Single)` unloads unused assets, destroying the input-actions object that was loaded before it.
+- **Fix:** open the scene first, then create and load every asset it references.
+- `Wire()` now reads each assignment back and throws with diagnostics (destroyed?, field type, asset path, persistence) if Unity silently rejected it.
+- Validation now also rejects renderers without a material.
+- The build menu catches exceptions, so a failed build is reported as "scene not saved" instead of an unhandled exception.
