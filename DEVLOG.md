@@ -234,3 +234,17 @@
   - The anomaly sits just under the reticle and covers part of the view.
   - The hero's "..." icon is small.
   - Whether the puzzles were understandable without the guide.
+
+## 2026-10-14 — Milestone 6 pass 2 merged; Milestone 7 (onboarding) started
+
+- PR #7 merged after the owner's Unity run (all tests passing) and a full playthrough in a macOS build.
+- **Playtest finding:** the owner could only finish with the written guide, so the next milestone is teaching (owner's choice), before new levels or art.
+- **Owner's direction:** full game (20+ levels), CC0 asset packs, all four level styles, plus an unspecified "something else".
+- **Correction:** I had proposed sci-fi asset kits. Re-reading the GDD (Part 2.1: PROJECT HERO is a colourful fantasy adventure), the "normal layer" must be fantasy-adventure; sci-fi kits only suit the lab, industrial and security chapters. DESIGN_ROADMAP.md uses the GDD's direction.
+- **Network:** this cloud environment blocks kenney.nl, quaternius.com, polyhaven.com and opengameart.org; assets must be downloaded by the owner or those domains allowed.
+- **Implemented on `feature/onboarding-tutorial`:**
+  - guide system (Core tracker + runtime director + HUD card + world marker + chime);
+  - glitch locking; TRAINING LAB rewritten as a 14-step guided tutorial;
+  - camera shoulder offset; bigger hero icon.
+- **Design choice:** the tutorial is TRAINING LAB itself, not a new level in front of it. A separate tutorial would teach the same three puzzles twice.
+- **Verified here:** Core 144/144; per-assembly compile 0/0; filename check OK. **Not verified:** whether the guide actually teaches, which needs a fresh player.

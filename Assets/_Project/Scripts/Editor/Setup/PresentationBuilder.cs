@@ -83,6 +83,7 @@ namespace BugReport.EditorTools.Setup
             Wire(inspection, "viewCamera", cam);
             Wire(inspection, "heroAnimator", heroAnimator);
             Wire(inspection, "settings", assets.Settings);
+            if (systems.Guide != null) Wire(inspection, "guide", systems.Guide);
 
             var hud = go.AddComponent<GameHud>();
             Wire(hud, "styleSheet", assets.Style);
@@ -91,6 +92,7 @@ namespace BugReport.EditorTools.Setup
             Wire(hud, "containment", systems.Containment);
             if (systems.Objectives != null) Wire(hud, "objectives", systems.Objectives);
             Wire(hud, "settings", assets.Settings);
+            if (systems.Guide != null) Wire(hud, "guide", systems.Guide);
 
             var menus = go.AddComponent<GameMenus>();
             Wire(menus, "styleSheet", assets.Style);

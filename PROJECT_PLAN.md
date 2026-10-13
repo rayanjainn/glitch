@@ -40,8 +40,7 @@ Each milestone ends playable, tested, and documented, and is merged to `main` on
 | 4 | Hero behaviour + Containment | FSM hero (navigation decision), deterministic containment stages + patch action | Hero reliable with no interference; containment escalates and decays per thresholds |
 | 5 | Vertical-slice level | One polished room, 3 connected objectives, restart, pause menu, minimal HUD, audio/VFX feedback | Completable from fresh launch; restart leaves no stale modifications |
 | 6 | Art & polish | Materials, lighting, anomaly model, outline/glitch shaders, audio, camera polish, profiling | 60 FPS @1080p on the reference PC (measured) |
-| 7 | Content expansion | Further glitches/levels, only after the slice proves fun | — |
-| 8 | Release prep | Settings + save persistence, rebinding UI, error handling, reproducible build | Clean build from a script; external playtest checklist |
+| 7+ | See **DESIGN_ROADMAP.md §6** | Onboarding (7), art pipeline (8), front end (9), chapters 1–3 demo (10), later chapters, release prep (15) | Per roadmap |
 
 Detailed, checkable tasks are in TASKS.md. How to test a branch before merging: TESTING.md.
 

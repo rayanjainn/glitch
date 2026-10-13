@@ -7,6 +7,7 @@ using BugReport.EditorTools.Setup;
 using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.Level;
+using BugReport.Tutorial;
 using BugReport.UI;
 using NUnit.Framework;
 using UnityEditor;
@@ -55,6 +56,15 @@ namespace BugReport.Tests.EditMode
                 (All<InspectionOverlay>().Count, "InspectionOverlay"), (All<UnityEngine.UIElements.UIDocument>().Count, "UIDocument"),
             })
                 Assert.That(count.Item1, Is.EqualTo(1), count.Item2);
+        }
+
+        [Test]
+        public void HasAValidGuide_WiredIntoTheHud()
+        {
+            var guide = All<GuideDirector>().Single();
+            Assert.That(guide.Validate(), Is.Null);
+            var hudGuide = new SerializedObject(All<GameHud>().Single()).FindProperty("guide").objectReferenceValue;
+            Assert.That(hudGuide, Is.EqualTo(guide));
         }
 
         [Test]

@@ -48,6 +48,7 @@ namespace BugReport.Glitches
         [SerializeField] private SelectionController selection;
 
         private readonly List<Loaded> loaded = new List<Loaded>();
+        private readonly HashSet<GlitchDefinition> lockedDefinitions = new HashSet<GlitchDefinition>();
         private readonly GameEntityId[] oneTarget = new GameEntityId[1];
         private readonly GameEntityId[] twoTargets = new GameEntityId[2];
         private GameServices services;
@@ -57,9 +58,47 @@ namespace BugReport.Glitches
         public event Action<GlitchFeedback> Feedback;
 
         public int LoadedCount => loaded.Count;
-        public GlitchDefinition CurrentDefinition => loaded.Count > 0 ? loaded[current].Definition : null;
+        /// <summary>The equipped glitch, or null when none is loaded and unlocked.</summary>
+        public GlitchDefinition CurrentDefinition => HasCurrent ? loaded[current].Definition : null;
         public int CurrentIndex => current;
         public GlitchDefinition DefinitionAt(int index) => loaded[index].Definition;
+        public bool IsUnlocked(int index) => !lockedDefinitions.Contains(loaded[index].Definition);
+
+        public int UnlockedCount
+        {
+            get
+            {
+                int n = 0;
+                for (int i = 0; i < loaded.Count; i++) if (IsUnlocked(i)) n++;
+                return n;
+            }
+        }
+
+        private bool HasCurrent => loaded.Count > 0 && IsUnlocked(current);
+
+        /// <summary>
+        /// Locks or unlocks a glitch (tutorials introduce them one at a time). Locked glitches are
+        /// skipped when cycling and hidden in the HUD. Unlocking announces the new glitch.
+        /// </summary>
+        public void SetLocked(GlitchDefinition definition, bool isLocked)
+        {
+            if (definition == null) return;
+            bool changed = isLocked ? lockedDefinitions.Add(definition) : lockedDefinitions.Remove(definition);
+            if (!changed) return;
+            if (!isLocked) Emit(GlitchFeedbackKind.Info, "NEW GLITCH: " + definition.DisplayName, definition.Color);
+            EnsureCurrentUnlocked();
+        }
+
+        private void EnsureCurrentUnlocked()
+        {
+            if (loaded.Count == 0 || IsUnlocked(current)) return;
+            for (int i = 0; i < loaded.Count; i++)
+            {
+                if (!IsUnlocked(i)) continue;
+                current = i;
+                return;
+            }
+        }
         public GlitchFeedback LastFeedback { get; private set; }
         public float LastFeedbackTime { get; private set; } = float.NegativeInfinity;
 
@@ -120,6 +159,7 @@ namespace BugReport.Glitches
                 }
                 loaded.Add(new Loaded(definition, definition.ToSpec(), definition.CreateEffect(s)));
             }
+            EnsureCurrentUnlocked();
             if (loaded.Count == 0) Debug.LogWarning("[BUG REPORT] GlitchController has no usable glitches.", this);
 
             s.Glitches.OperationEnded += OnOperationEnded;
@@ -135,7 +175,7 @@ namespace BugReport.Glitches
             // Scaled time: pausing (timeScale 0) also pauses glitch durations.
             services.Glitches.Tick(Time.time);
 
-            if (loaded.Count == 0) return;
+            if (!HasCurrent) return;
             var g = loaded[current];
             if (!TryBuildTargets(g, out var targets, out var prompt))
             {
@@ -149,7 +189,7 @@ namespace BugReport.Glitches
         public void ApplyCurrent()
         {
             if (!CanAct()) return;
-            if (loaded.Count == 0)
+            if (!HasCurrent)
             {
                 Emit(GlitchFeedbackKind.Rejected, "NO GLITCHES AVAILABLE", RejectColor);
                 return;
@@ -185,8 +225,12 @@ namespace BugReport.Glitches
 
         public void CycleGlitch()
         {
-            if (!CanAct() || loaded.Count == 0) return;
-            current = (current + 1) % loaded.Count;
+            if (!CanAct() || !HasCurrent) return;
+            for (int step = 0; step < loaded.Count; step++)
+            {
+                current = (current + 1) % loaded.Count;
+                if (IsUnlocked(current)) break;
+            }
             Emit(GlitchFeedbackKind.Info, "GLITCH: " + loaded[current].Spec.DisplayName, loaded[current].Definition.Color);
         }
 
