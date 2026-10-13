@@ -143,3 +143,10 @@
   - **Containment:** settings asset, director (cooldown scaling, oldest-first patches that skip vetoed reverts), HUD presenter, patch flash outlines.
 - **Behaviour choice found while writing tests:** when blocked mid-route with no closer reachable node, the hero waits at the obstacle instead of walking back to its last node.
 - **Not verified:** Unity compile, 14 new PlayMode tests and the updated EditMode tests, the routes in the real room, and the containment HUD/feel. Thresholds will likely need tuning by playtest.
+
+## 2026-10-13 — Milestone 4 first Unity run: 2 test bugs
+
+- **Failures:** `ContainmentDirectorTests.PatchDeployment_…` and `BlockedPatch_…` failed with "COOLDOWN 0.5s". The tests applied two transfers at the same `Time.time`, and the cooldown correctly rejected the second. That's a test bug, not a game bug.
+- **Fix:** the test helper uses an explicit clock advancing 1 s per apply.
+- **Audit:** the same pattern made M3's `FreezeTests.Unfreeze_RestoresTheKinematicFlagItFound` pass vacuously (its second freeze was silently rejected). It now asserts both freezes succeed.
+- **Rule:** tests that apply several glitches must pass explicit, increasing `now` values and assert each apply succeeded.

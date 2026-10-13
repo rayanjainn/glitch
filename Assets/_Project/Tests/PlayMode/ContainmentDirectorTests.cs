@@ -17,6 +17,8 @@ namespace BugReport.Tests.PlayMode
         private ContainmentSettingsAsset settings;
         private GlitchSpec spec;
         private IGlitchEffect effect;
+        // Explicit clock: each transfer happens 1 s after the previous one, past the 0.5 s cooldown.
+        private float clock;
 
         [SetUp]
         public void SetUp()
@@ -53,7 +55,8 @@ namespace BugReport.Tests.PlayMode
 
         private GlitchOperation Transfer(CollisionCapability a, CollisionCapability b)
         {
-            var r = services.Glitches.TryApply(spec, effect, new[] { a.GetComponent<GameEntity>().Id, b.GetComponent<GameEntity>().Id }, Time.time);
+            clock += 1f;
+            var r = services.Glitches.TryApply(spec, effect, new[] { a.GetComponent<GameEntity>().Id, b.GetComponent<GameEntity>().Id }, clock);
             Assert.That(r.Succeeded, Is.True, r.Describe());
             return r.Operation;
         }
