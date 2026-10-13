@@ -374,6 +374,10 @@ namespace UnityEngine
 
 namespace UnityEngine.Rendering
 {
+    // Real SRP Core types whose names a project class could collide with (CS0104 in files that import UnityEngine.Rendering).
+    public class DebugOverlay { }
+    public class DebugManager { }
+    public class DebugUI { }
     public class VolumeComponent : ScriptableObject { public bool active { get => throw null; set { } } }
     public class VolumeParameter<T> { public T value { get => throw null; set { } } public bool overrideState { get => throw null; set { } } public void Override(T v) { } }
     public class FloatParameter : VolumeParameter<float> { }

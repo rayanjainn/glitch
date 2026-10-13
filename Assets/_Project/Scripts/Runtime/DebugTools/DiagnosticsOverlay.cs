@@ -17,7 +17,7 @@ namespace BugReport.DebugTools
     /// Debug keys read the keyboard directly on purpose: they are not gameplay
     /// actions, must not be remappable, and are stripped with this component.
     /// </summary>
-    public sealed class DebugOverlay : MonoBehaviour
+    public sealed class DiagnosticsOverlay : MonoBehaviour
     {
         [SerializeField] private AnomalyMotor anomaly;
         [SerializeField] private SelectionController selection;

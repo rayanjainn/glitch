@@ -481,7 +481,7 @@ namespace BugReport.EditorTools.Setup
 
             systems.AddComponent<WorldBoundsGuard>();
 
-            var overlay = systems.AddComponent<DebugOverlay>();
+            var overlay = systems.AddComponent<DiagnosticsOverlay>();
             Wire(overlay, "anomaly", motor);
             Wire(overlay, "selection", selection);
             Wire(overlay, "hero", hero);
