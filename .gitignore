@@ -44,3 +44,4 @@ Thumbs.db
 
 # Unity command-line test output
 /TestResults/
+Tools/CompileCheck/gen/

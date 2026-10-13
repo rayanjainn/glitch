@@ -21,7 +21,7 @@ namespace BugReport.EditorTools.Setup
     /// game UI (HUD, menus, inspection). Every feature can be switched off in the VisualSettings
     /// asset without rebuilding.
     /// </summary>
-    internal static class PresentationBuilder
+    public static class PresentationBuilder
     {
         public const string VisualSettingsPath = "Assets/_Project/ScriptableObjects/Presentation/VS_Default.asset";
         public const string VolumeProfilePath = "Assets/_Project/Art/Rendering/VP_BugReport.asset";
@@ -42,7 +42,7 @@ namespace BugReport.EditorTools.Setup
         }
 
         /// <summary>Create/load presentation assets. Call after NewScene (see TestRoomBuilder.Build).</summary>
-        public static Assets LoadOrCreateAssets(MaterialSet mats)
+        internal static Assets LoadOrCreateAssets(MaterialSet mats)
         {
             var assets = new Assets
             {
@@ -61,7 +61,7 @@ namespace BugReport.EditorTools.Setup
         }
 
         /// <summary>Adds everything presentational to a level whose gameplay objects already exist.</summary>
-        public static void Apply(Assets assets, MaterialSet mats, Systems systems, GameObject anomaly, HeroController hero, Camera cam)
+        internal static void Apply(Assets assets, MaterialSet mats, Systems systems, GameObject anomaly, HeroController hero, Camera cam)
         {
             ConfigureCamera(cam);
             BuildPostFx(assets, systems, cam);

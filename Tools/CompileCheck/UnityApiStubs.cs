@@ -552,6 +552,15 @@ namespace UnityEditor
     public class Editor : ScriptableObject { }
     public class EditorWindow : ScriptableObject { }
     public class MonoScript : Object { public System.Type GetClass() => throw null; }
+    public static class TypeCache
+    {
+        public struct TypeCollection : IEnumerable<Type>
+        {
+            public IEnumerator<Type> GetEnumerator() => throw null;
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => throw null;
+        }
+        public static TypeCollection GetTypesDerivedFrom<T>() => throw null;
+    }
     public static class GameObjectUtility { public static int GetMonoBehavioursWithMissingScriptCount(GameObject g) => throw null; }
 }
 

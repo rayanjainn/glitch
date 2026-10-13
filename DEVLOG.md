@@ -212,3 +212,13 @@
 - **Decision I'm reversing:** ARCHITECTURE said the designed UI would wait until the layout had been playtested. I did it first because the information layout is the same as before (plus the dock and messages), and future layout changes are now USS edits instead of IMGUI rect maths. If the playtest changes what the HUD should show, that is a code change either way.
 - **Verified here:** Core tests 135/135; stub compile 0 errors / 0 warnings, now including UI Toolkit stubs; filename check OK. The stub compile caught a wrong enum name and a definite-assignment error before Unity did.
 - **Not verified:** anything visual; USS parsing (Unity reports bad properties as import warnings); UI Toolkit's Input System backend for mouse and gamepad menu navigation (Unity 6 documents it as default when no EventSystem exists).
+
+## 2026-10-13 — Milestone 6 pass 2, first Unity compile: cross-assembly access
+
+- **Error:** `CS0122 'PresentationBuilder' is inaccessible` in the new EditMode UI asset tests. The builder was `internal` to `BugReport.Editor`; the tests are a separate assembly.
+- **Why the offline check missed it:** `Tools/CompileCheck` compiled every file into **one** assembly, so `internal` was visible everywhere.
+- **Fixes:**
+  - `PresentationBuilder` is now public, with its helpers that take internal types kept internal (same pattern as `TestRoomBuilder`).
+  - `compile-check.py` replaces the single project. It generates one project per `.asmdef` with the same references; `noEngineReferences` assemblies get no Unity stubs. Verified: with the old `internal` it reproduces the same 5 errors; with the fix it reports 0.
+  - It also catches a missing `.asmdef` reference between our own assemblies. It cannot catch a missing Unity package reference, because the stubs are one assembly.
+- **Warning UAC0005** (Unity analyzer) in `ScriptFileNameTests`: `AppDomain.GetAssemblies()` replaced with `TypeCache.GetTypesDerivedFrom<T>()`.
