@@ -1,0 +1,33 @@
+* text=auto
+
+# Code and Unity YAML: always LF so diffs stay clean across Windows/macOS/Linux.
+*.cs            text eol=lf diff=csharp
+*.asmdef        text eol=lf
+*.inputactions  text eol=lf
+*.json          text eol=lf
+*.md            text eol=lf
+*.sh            text eol=lf
+*.unity         text eol=lf
+*.prefab        text eol=lf
+*.asset         text eol=lf
+*.mat           text eol=lf
+*.meta          text eol=lf
+*.controller    text eol=lf
+*.anim          text eol=lf
+*.physicMaterial text eol=lf
+
+# Binary assets (consider Git LFS before large art/audio lands; see PROJECT_PLAN.md)
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.tga   binary
+*.psd   binary
+*.exr   binary
+*.hdr   binary
+*.fbx   binary
+*.blend binary
+*.wav   binary
+*.ogg   binary
+*.mp3   binary
+*.ttf   binary
+*.otf   binary

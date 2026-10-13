@@ -1,0 +1,43 @@
+# ---- Unity generated ----
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/Assets/Plugins/Editor/JetBrains*
+
+# IDE / solution files Unity regenerates at the project root
+/*.csproj
+/*.sln
+/*.slnx
+/*.suo
+/*.user
+/*.userprefs
+/*.pidb
+/*.booproj
+/*.unityproj
+.vs/
+.vscode/
+.idea/
+*.DotSettings.user
+
+# Crash reports / build artifacts
+sysinfo.txt
+crashlytics-buildid.txt
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# ---- .NET tooling outside Unity (Tools/) ----
+Tools/**/bin/
+Tools/**/obj/
+Tools/**/TestResults/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
