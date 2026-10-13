@@ -437,6 +437,8 @@ namespace UnityEditor
         public static bool IsValidFolder(string p) => throw null;
         public static string CreateFolder(string parent, string name) => throw null;
         public static void CreateAsset(Object o, string p) { }
+        public static string[] FindAssets(string filter) => throw null;
+        public static string GUIDToAssetPath(string guid) => throw null;
         public static string GetAssetPath(Object o) => throw null;
     }
     public static class EditorUtility
@@ -457,6 +459,9 @@ namespace UnityEditor
         public static void RecordPrefabInstancePropertyModifications(Object targetObject) { }
         public static bool IsPartOfPrefabInstance(Object componentOrGameObject) => throw null;
     }
+    public class Editor : ScriptableObject { }
+    public class EditorWindow : ScriptableObject { }
+    public class MonoScript : Object { public System.Type GetClass() => throw null; }
     public static class GameObjectUtility { public static int GetMonoBehavioursWithMissingScriptCount(GameObject g) => throw null; }
 }
 

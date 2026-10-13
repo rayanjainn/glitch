@@ -169,3 +169,15 @@
   - The gate latches open.
 - **Avoided:** `FindObjectsByType(FindObjectsSortMode)` in tests. Its sort mode is being phased out in newer Unity 6 versions [Likely]; the entity registry is used instead.
 - **Not verified:** Unity compile, all new Unity tests (especially the playthrough timing), look, sound, and feel.
+
+## 2026-10-13 — Milestone 5 first Unity run: objective conditions lost
+
+- **Symptoms:**
+  - `SliceLevelSceneTests`: objectives 2 and 3 had null conditions.
+  - The playthrough timed out at objective 2.
+  - Console: "GameObject 'Zone_Exit' references runtime script in scene file. Fixing!"
+- **Cause:** `HeroReachedZone` (a MonoBehaviour) was declared in `ObjectiveCondition.cs`. Unity maps components to scripts by file name, so it dropped the component when saving the scene. Compiles fine; fails silently.
+- **Fix:** moved it to `HeroReachedZone.cs`.
+- **Guard rails:**
+  - EditMode `ScriptFileNameTests` checks every MonoBehaviour/ScriptableObject resolves to its own MonoScript.
+  - `Tools/CompileCheck/check-unity-filenames.py` runs the same check without Unity (run before every push).
