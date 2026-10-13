@@ -61,7 +61,16 @@ namespace BugReport.Glitches
             return true;
         }
 
-        public string CanEnd(GlitchOperation operation, GlitchEndReason reason) => null;
+        public string CanEnd(GlitchOperation operation, GlitchEndReason reason)
+        {
+            // A frozen machine must not start moving again while someone stands in its path.
+            if (!TryResolve(operation.Target(0), out var capability, out var name)) return null;
+            var hazard = capability.GetComponent<Level.HeroHazard>();
+            if (hazard != null && hazard.Volume != null &&
+                PhysicsOccupancy.IsOccupied(hazard.VolumeColliders, GameLayers.OccupantMask, out _))
+                return "CANNOT UNFREEZE " + name + ": SOMEONE IS IN ITS PATH";
+            return null;
+        }
 
         public void OnEnded(GlitchOperation operation, GlitchEndReason reason)
         {

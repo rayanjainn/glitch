@@ -9,6 +9,8 @@ using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.InputHandling;
 using BugReport.Interaction;
+using BugReport.Audio;
+using BugReport.Level;
 using BugReport.Presentation;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -126,14 +128,9 @@ namespace BugReport.EditorTools.Setup
             var hero = BuildHero(mats);
             var anomaly = BuildAnomaly(mats, actions, out var motor);
             var cameraRig = BuildCamera(anomaly.transform, out var scanner);
-            BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze }, containmentSettings, out var selection, out var glitchController);
-
-            var controller = anomaly.AddComponent<AnomalyPlayerController>();
-            Wire(controller, "input", anomaly.GetComponent<InputReader>());
-            Wire(controller, "motor", motor);
-            Wire(controller, "cameraRig", cameraRig);
-            Wire(controller, "selection", selection);
-            Wire(controller, "glitches", glitchController);
+            var systems = BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze },
+                containmentSettings, objectives: null, debugOverlayVisible: true, levelTitle: "TEST ROOM");
+            WirePlayer(anomaly, motor, cameraRig, systems);
 
             var missing = FindUnassignedReferences(scene);
             if (missing.Count > 0)
@@ -153,7 +150,7 @@ namespace BugReport.EditorTools.Setup
 
         // ---------------------------------------------------------------- lighting
 
-        private static void BuildLighting()
+        internal static void BuildLighting()
         {
             var sun = new GameObject("Sun", typeof(Light));
             var light = sun.GetComponent<Light>();
@@ -173,7 +170,7 @@ namespace BugReport.EditorTools.Setup
             CreatePointLight("Light_Warm", new Vector3(-6f, 3.2f, -3f), new Color(1f, 0.7f, 0.45f), 2.5f, 9f);
         }
 
-        private static void CreatePointLight(string name, Vector3 position, Color color, float intensity, float range)
+        internal static void CreatePointLight(string name, Vector3 position, Color color, float intensity, float range)
         {
             var go = new GameObject(name, typeof(Light));
             go.transform.position = position;
@@ -187,7 +184,7 @@ namespace BugReport.EditorTools.Setup
 
         // ---------------------------------------------------------------- room
 
-        private static void BuildRoom(Transform parent, MaterialSet mats)
+        internal static void BuildRoom(Transform parent, MaterialSet mats)
         {
             int world = GameLayers.Index(GameLayers.World);
 
@@ -240,7 +237,7 @@ namespace BugReport.EditorTools.Setup
                 "Level objective. The hero wants to be here.");
         }
 
-        private static void BuildProps(Transform parent, MaterialSet mats, GameObject cratePrefab)
+        internal static void BuildProps(Transform parent, MaterialSet mats, GameObject cratePrefab)
         {
             int props = GameLayers.Index(GameLayers.Props);
             int world = GameLayers.Index(GameLayers.World);
@@ -289,28 +286,9 @@ namespace BugReport.EditorTools.Setup
 
         // ---------------------------------------------------------------- actors
 
-        private static HeroController BuildHero(MaterialSet mats)
+        internal static HeroController BuildHero(MaterialSet mats)
         {
-            int heroLayer = GameLayers.Index(GameLayers.Hero);
-            var hero = new GameObject("HERO");
-            hero.transform.position = new Vector3(-9f, 1.05f, 0f);
-            hero.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
-            hero.layer = heroLayer;
-
-            var body = Primitive(PrimitiveType.Capsule, "Body", hero.transform, Vector3.zero, Vector3.one, mats.Hero, heroLayer, keepCollider: false);
-            body.transform.localPosition = Vector3.zero;
-            var visor = Primitive(PrimitiveType.Cube, "Visor", hero.transform, Vector3.zero, new Vector3(0.55f, 0.15f, 0.2f), mats.HeroVisor, heroLayer, keepCollider: false);
-            visor.transform.localPosition = new Vector3(0f, 0.5f, 0.38f);
-
-            var cc = hero.AddComponent<CharacterController>();
-            cc.height = 2f;
-            cc.radius = 0.4f;
-            cc.center = Vector3.zero;
-            cc.stepOffset = 0.3f;
-            cc.skinWidth = 0.04f;
-
-            AddEntity(hero, "HERO", EntityCategory.Hero, EntityCapabilities.Inspectable | EntityCapabilities.AIControllable,
-                "PROJECT HERO protagonist. Follows the script. Trusts the level geometry.");
+            var hero = CreateHeroBody(mats, new Vector3(-9f, 1.05f, 0f), 90f, out var cc);
 
             // Route graph. The firewall is the only way east; the holo panel can be walked around (north/south),
             // so making it solid re-routes the hero instead of blocking it.
@@ -337,7 +315,33 @@ namespace BugReport.EditorTools.Setup
             return controller;
         }
 
-        private static HeroNavNode NavNode(Transform parent, string name, Vector3 position)
+        /// <summary>The hero's body: capsule + visor, CharacterController, GameEntity. Behaviour is added by the caller.</summary>
+        internal static GameObject CreateHeroBody(MaterialSet mats, Vector3 position, float yaw, out CharacterController cc)
+        {
+            int heroLayer = GameLayers.Index(GameLayers.Hero);
+            var hero = new GameObject("HERO");
+            hero.transform.position = position;
+            hero.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            hero.layer = heroLayer;
+
+            var body = Primitive(PrimitiveType.Capsule, "Body", hero.transform, Vector3.zero, Vector3.one, mats.Hero, heroLayer, keepCollider: false);
+            body.transform.localPosition = Vector3.zero;
+            var visor = Primitive(PrimitiveType.Cube, "Visor", hero.transform, Vector3.zero, new Vector3(0.55f, 0.15f, 0.2f), mats.HeroVisor, heroLayer, keepCollider: false);
+            visor.transform.localPosition = new Vector3(0f, 0.5f, 0.38f);
+
+            cc = hero.AddComponent<CharacterController>();
+            cc.height = 2f;
+            cc.radius = 0.4f;
+            cc.center = Vector3.zero;
+            cc.stepOffset = 0.3f;
+            cc.skinWidth = 0.04f;
+
+            AddEntity(hero, "HERO", EntityCategory.Hero, EntityCapabilities.Inspectable | EntityCapabilities.AIControllable,
+                "PROJECT HERO protagonist. Follows the script. Trusts the level geometry.");
+            return hero;
+        }
+
+        internal static HeroNavNode NavNode(Transform parent, string name, Vector3 position)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -345,7 +349,7 @@ namespace BugReport.EditorTools.Setup
             return go.AddComponent<HeroNavNode>();
         }
 
-        private static GameObject BuildAnomaly(MaterialSet mats, InputActionAsset actions, out AnomalyMotor motor)
+        internal static GameObject BuildAnomaly(MaterialSet mats, InputActionAsset actions, out AnomalyMotor motor)
         {
             int layer = GameLayers.Index(GameLayers.Anomaly);
             var anomaly = new GameObject("ANOMALY");
@@ -393,7 +397,7 @@ namespace BugReport.EditorTools.Setup
             return anomaly;
         }
 
-        private static AnomalyCameraRig BuildCamera(Transform anomaly, out TargetScanner scanner)
+        internal static AnomalyCameraRig BuildCamera(Transform anomaly, out TargetScanner scanner)
         {
             var go = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener));
             go.tag = "MainCamera";
@@ -414,19 +418,29 @@ namespace BugReport.EditorTools.Setup
             return rig;
         }
 
-        private static void BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, HeroController hero,
-            GlitchDefinition[] glitchDefinitions, ContainmentSettingsAsset containmentSettings,
-            out SelectionController selection, out GlitchController glitchController)
+        /// <summary>References the level builders need after the shared systems exist.</summary>
+        internal struct Systems
+        {
+            public GameObject Root;
+            public SelectionController Selection;
+            public GlitchController Glitches;
+            public ContainmentDirector Containment;
+        }
+
+        /// <summary>Bootstrap, state, selection, glitches, containment, presenters, HUD, menus, audio, kill plane.</summary>
+        internal static Systems BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, HeroController hero,
+            GlitchDefinition[] glitchDefinitions, ContainmentSettingsAsset containmentSettings, ObjectiveDirector objectives,
+            bool debugOverlayVisible, string levelTitle)
         {
             var systems = new GameObject("--- SYSTEMS ---");
             var bootstrap = systems.AddComponent<GameBootstrap>();
             WireEnum(bootstrap, "initialState", (int)GameState.Playing);
             systems.AddComponent<GameStatePresenter>();
 
-            selection = systems.AddComponent<SelectionController>();
+            var selection = systems.AddComponent<SelectionController>();
             Wire(selection, "scanner", scanner);
 
-            glitchController = systems.AddComponent<GlitchController>();
+            var glitchController = systems.AddComponent<GlitchController>();
             WireArray(glitchController, "glitches", glitchDefinitions);
             Wire(glitchController, "selection", selection);
 
@@ -447,14 +461,48 @@ namespace BugReport.EditorTools.Setup
             var reticle = systems.AddComponent<ReticlePresenter>();
             Wire(reticle, "glitches", glitchController);
 
+            var hud = systems.AddComponent<LevelHud>();
+            if (objectives != null) Wire(hud, "objectives", objectives);
+            Wire(hud, "glitches", glitchController);
+
+            var menus = systems.AddComponent<LevelMenus>();
+            if (objectives != null) Wire(menus, "objectives", objectives);
+            var menuSo = new SerializedObject(menus);
+            menuSo.FindProperty("levelTitle").stringValue = levelTitle;
+            menuSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var audio = systems.AddComponent<AudioFeedback>();
+            Wire(audio, "selection", selection);
+            Wire(audio, "glitches", glitchController);
+            Wire(audio, "containment", containment);
+            if (objectives != null) Wire(audio, "objectives", objectives);
+
+            systems.AddComponent<WorldBoundsGuard>();
+
             var overlay = systems.AddComponent<DebugOverlay>();
             Wire(overlay, "anomaly", motor);
             Wire(overlay, "selection", selection);
             Wire(overlay, "hero", hero);
             Wire(overlay, "glitches", glitchController);
+            var overlaySo = new SerializedObject(overlay);
+            overlaySo.FindProperty("visible").boolValue = debugOverlayVisible;
+            overlaySo.ApplyModifiedPropertiesWithoutUndo();
+
+            return new Systems { Root = systems, Selection = selection, Glitches = glitchController, Containment = containment };
         }
 
-        private static void AddCollision(GameObject go, CollisionMode authoredMode, MaterialSet mats)
+        /// <summary>Adds the player controller to the anomaly and connects it.</summary>
+        internal static void WirePlayer(GameObject anomaly, AnomalyMotor motor, AnomalyCameraRig cameraRig, Systems systems)
+        {
+            var controller = anomaly.AddComponent<AnomalyPlayerController>();
+            Wire(controller, "input", anomaly.GetComponent<InputReader>());
+            Wire(controller, "motor", motor);
+            Wire(controller, "cameraRig", cameraRig);
+            Wire(controller, "selection", systems.Selection);
+            Wire(controller, "glitches", systems.Glitches);
+        }
+
+        internal static void AddCollision(GameObject go, CollisionMode authoredMode, MaterialSet mats)
         {
             var capability = go.AddComponent<CollisionCapability>();
             capability.Configure(go.GetComponents<Collider>(), authoredMode, GameLayers.World);
@@ -462,7 +510,7 @@ namespace BugReport.EditorTools.Setup
             go.AddComponent<CollisionModeVisual>().Configure(mats.Ghost, mats.Solidified);
         }
 
-        private static void AddFreeze(GameObject go, MaterialSet mats)
+        internal static void AddFreeze(GameObject go, MaterialSet mats)
         {
             go.AddComponent<FreezeCapability>();
             if (go.GetComponent<RendererOverrides>() == null) go.AddComponent<RendererOverrides>();
@@ -470,7 +518,7 @@ namespace BugReport.EditorTools.Setup
         }
 
         /// <summary>(Re)generates the crate prefab. The profile asset must already exist so the prefab can reference it.</summary>
-        private static GameObject CreateCratePrefab(MaterialSet mats, DuplicationProfile profile)
+        internal static GameObject CreateCratePrefab(MaterialSet mats, DuplicationProfile profile)
         {
             EnsureFolder(PrefabFolder);
             var temp = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -497,7 +545,7 @@ namespace BugReport.EditorTools.Setup
             return prefab;
         }
 
-        private static void CrateInstance(GameObject prefab, Transform parent, string objectName, string displayName, string description, Vector3 position, Quaternion rotation)
+        internal static void CrateInstance(GameObject prefab, Transform parent, string objectName, string displayName, string description, Vector3 position, Quaternion rotation)
         {
             var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
             go.name = objectName;
@@ -509,7 +557,7 @@ namespace BugReport.EditorTools.Setup
         }
 
         /// <summary>Loads a designer asset if it exists (never overwrites tuning), otherwise creates it with defaults.</summary>
-        private static T LoadOrCreate<T>(string path, System.Action<T> applyDefaults) where T : ScriptableObject
+        internal static T LoadOrCreate<T>(string path, System.Action<T> applyDefaults) where T : ScriptableObject
         {
             var existing = AssetDatabase.LoadAssetAtPath<T>(path);
             if (existing != null) return existing;
@@ -541,7 +589,7 @@ namespace BugReport.EditorTools.Setup
                     while (prop.NextVisible(true))
                     {
                         if (prop.propertyType != SerializedPropertyType.ObjectReference || prop.name == "m_Script") continue;
-                        if (prop.objectReferenceValue == null)
+                        if (prop.objectReferenceValue == null && !IsOptional(behaviour.GetType(), prop.propertyPath))
                             problems.Add(behaviour.GetType().Name + " on '" + behaviour.name + "': " + prop.propertyPath);
                     }
                 }
@@ -556,7 +604,19 @@ namespace BugReport.EditorTools.Setup
             return problems;
         }
 
-        private static void InvisibleBox(string name, Transform parent, Vector3 position, Vector3 size, int layer)
+        /// <summary>True for a top-level field marked [OptionalReference].</summary>
+        internal static bool IsOptional(System.Type type, string propertyPath)
+        {
+            if (propertyPath.Contains(".")) return false;
+            for (var t = type; t != null; t = t.BaseType)
+            {
+                var field = t.GetField(propertyPath, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                if (field != null) return System.Attribute.IsDefined(field, typeof(OptionalReferenceAttribute));
+            }
+            return false;
+        }
+
+        internal static void InvisibleBox(string name, Transform parent, Vector3 position, Vector3 size, int layer)
         {
             var go = new GameObject(name, typeof(BoxCollider));
             go.transform.SetParent(parent, false);
@@ -565,10 +625,10 @@ namespace BugReport.EditorTools.Setup
             go.layer = layer;
         }
 
-        private static GameObject Block(string name, Transform parent, Vector3 position, Vector3 size, Material material, int layer)
+        internal static GameObject Block(string name, Transform parent, Vector3 position, Vector3 size, Material material, int layer)
             => Primitive(PrimitiveType.Cube, name, parent, position, size, material, layer);
 
-        private static GameObject Primitive(PrimitiveType type, string name, Transform parent, Vector3 position, Vector3 scale, Material material, int layer, bool keepCollider = true)
+        internal static GameObject Primitive(PrimitiveType type, string name, Transform parent, Vector3 position, Vector3 scale, Material material, int layer, bool keepCollider = true)
         {
             var go = GameObject.CreatePrimitive(type);
             go.name = name;
@@ -581,7 +641,7 @@ namespace BugReport.EditorTools.Setup
             return go;
         }
 
-        private static void AddBody(GameObject go, float mass)
+        internal static void AddBody(GameObject go, float mass)
         {
             var body = go.AddComponent<Rigidbody>();
             body.mass = mass;
@@ -589,13 +649,13 @@ namespace BugReport.EditorTools.Setup
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
 
-        private static void AddEntity(GameObject go, string displayName, EntityCategory category, EntityCapabilities caps, string description)
+        internal static void AddEntity(GameObject go, string displayName, EntityCategory category, EntityCapabilities caps, string description)
         {
             var entity = go.AddComponent<GameEntity>();
             entity.Configure(displayName, category, caps, description);
         }
 
-        private static SerializedObject Serialized(Object target, string property, out SerializedProperty prop)
+        internal static SerializedObject Serialized(Object target, string property, out SerializedProperty prop)
         {
             var so = new SerializedObject(target);
             prop = so.FindProperty(property);
@@ -604,7 +664,7 @@ namespace BugReport.EditorTools.Setup
             return so;
         }
 
-        private static void Wire(Object target, string property, Object value)
+        internal static void Wire(Object target, string property, Object value)
         {
             var so = Serialized(target, property, out var prop);
             prop.objectReferenceValue = value;
@@ -625,7 +685,7 @@ namespace BugReport.EditorTools.Setup
             }
         }
 
-        private static void WireArray(Object target, string property, Object[] values)
+        internal static void WireArray(Object target, string property, Object[] values)
         {
             var so = Serialized(target, property, out var prop);
             prop.arraySize = values.Length;
@@ -633,28 +693,33 @@ namespace BugReport.EditorTools.Setup
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void WireFloat(Object target, string property, float value)
+        internal static void WireFloat(Object target, string property, float value)
         {
             var so = Serialized(target, property, out var prop);
             prop.floatValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void WireEnum(Object target, string property, int value)
+        internal static void WireEnum(Object target, string property, int value)
         {
             var so = Serialized(target, property, out var prop);
             prop.intValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void AddToBuildSettings(string path)
+        /// <summary>Adds the scene to Build Settings (optionally as the first scene, i.e. what a build launches).</summary>
+        internal static void AddToBuildSettings(string path, bool first = false)
         {
             var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-            foreach (var s in scenes)
+            int existing = scenes.FindIndex(x => x.path == path);
+            if (existing >= 0)
             {
-                if (s.path == path) return;
+                if (!first || existing == 0) return;
+                scenes.RemoveAt(existing);
             }
-            scenes.Add(new EditorBuildSettingsScene(path, true));
+            var entry = new EditorBuildSettingsScene(path, true);
+            if (first) scenes.Insert(0, entry);
+            else scenes.Add(entry);
             EditorBuildSettings.scenes = scenes.ToArray();
         }
 
@@ -667,9 +732,10 @@ namespace BugReport.EditorTools.Setup
         }
 
         /// <summary>Generated placeholder materials. Updated in place if they already exist.</summary>
-        private sealed class MaterialSet
+        internal sealed class MaterialSet
         {
-            public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified, Frozen, Lift;
+            public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified, Frozen, Lift,
+                PlateIdle, PlatePressed, Gate, Piston;
 
             public bool Create(out string error)
             {
@@ -707,6 +773,10 @@ namespace BugReport.EditorTools.Setup
                 Solidified = Lit(lit, "M_CollisionSolidified", new Color(0.15f, 0.4f, 0.95f), 0.8f, new Color(0.15f, 0.5f, 1f) * 1.6f);
                 Frozen = Lit(lit, "M_Frozen", new Color(0.75f, 0.95f, 1f), 0.95f, new Color(0.45f, 0.85f, 1f) * 0.9f);
                 Lift = Lit(lit, "M_Lift", new Color(0.45f, 0.5f, 0.58f), 0.5f);
+                PlateIdle = Lit(lit, "M_PlateIdle", new Color(0.55f, 0.2f, 0.2f), 0.4f, new Color(0.6f, 0.1f, 0.1f) * 0.5f);
+                PlatePressed = Lit(lit, "M_PlatePressed", new Color(0.2f, 0.6f, 0.3f), 0.4f, new Color(0.1f, 0.9f, 0.3f) * 0.9f);
+                Gate = Lit(lit, "M_Gate", new Color(0.7f, 0.55f, 0.2f), 0.6f, new Color(0.9f, 0.5f, 0.1f) * 0.25f);
+                Piston = Lit(lit, "M_Piston", new Color(0.35f, 0.37f, 0.42f), 0.7f, new Color(1f, 0.3f, 0.1f) * 0.3f);
                 AssetDatabase.SaveAssets();
                 return true;
             }

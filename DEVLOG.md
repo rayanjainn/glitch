@@ -150,3 +150,22 @@
 - **Fix:** the test helper uses an explicit clock advancing 1 s per apply.
 - **Audit:** the same pattern made M3's `FreezeTests.Unfreeze_RestoresTheKinematicFlagItFound` pass vacuously (its second freeze was silently rejected). It now asserts both freezes succeed.
 - **Rule:** tests that apply several glitches must pass explicit, increasing `now` values and assert each apply succeeded.
+
+## 2026-10-13 — Milestone 4 merged; Milestone 5 implemented (Editor verification pending)
+
+- PR #4 merged (automated tests passing in Unity). The owner deferred manual playtests and asked for a plain-language guide: **PLAYTEST.md**.
+- **Milestone 5** on `feature/vertical-slice-level`. The level "TRAINING LAB" has 3 connected objectives:
+  1. firewall (Collision Transfer);
+  2. gate needing two weighted plates with one crate (Duplication; alternative: transfer the gate);
+  3. a piston corridor the hero refuses to enter while it moves (Freeze; alternative: make it intangible).
+- **New code:**
+  - **Core:** `ObjectiveTracker` (121/121 tests).
+  - **Runtime:** plates, gate, hazard, kill plane, objective director/condition, HUD, menus, procedural audio, `GameServices.WorldChanged`, `[OptionalReference]`.
+  - **Editor:** builder refactor + `SliceLevelBuilder`.
+  - **Tests:** mechanics, scene validation, and a full playthrough test (3× speed, real player workflow, unloads the level afterwards).
+- **Safety additions found while designing:**
+  - The hero checks moving hazards every frame, not every 0.4 s.
+  - Unfreezing or restoring a hazard is vetoed while anyone is in its path.
+  - The gate latches open.
+- **Avoided:** `FindObjectsByType(FindObjectsSortMode)` in tests. Its sort mode is being phased out in newer Unity 6 versions [Likely]; the entity registry is used instead.
+- **Not verified:** Unity compile, all new Unity tests (especially the playthrough timing), look, sound, and feel.

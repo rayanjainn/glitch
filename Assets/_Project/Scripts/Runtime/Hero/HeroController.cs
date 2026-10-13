@@ -112,6 +112,7 @@ namespace BugReport.Hero
             {
                 services.Glitches.OperationStarted -= OnWorldChanged;
                 services.Glitches.OperationEnded -= OnWorldChangedEnded;
+                services.WorldChanged -= NotifyWorldChanged;
             }
             services = null;
         }
@@ -121,6 +122,7 @@ namespace BugReport.Hero
             services = s;
             s.Glitches.OperationStarted += OnWorldChanged;
             s.Glitches.OperationEnded += OnWorldChangedEnded;
+            s.WorldChanged += NotifyWorldChanged;
         }
 
         private void OnWorldChanged(GlitchOperation _) => NotifyWorldChanged();
@@ -236,6 +238,14 @@ namespace BugReport.Hero
                 return Vector3.zero;
             }
 
+            // Moving machinery is re-checked every frame (cheap): a freeze can end at any moment,
+            // and the hero must stop before stepping into the machine's path, not 0.4 s later.
+            if (EntersUnsafeHazard(target))
+            {
+                EnterConfused();
+                return Vector3.zero;
+            }
+
             revalidateTimer -= deltaTime;
             if (revalidateTimer <= 0f)
             {
@@ -256,6 +266,23 @@ namespace BugReport.Hero
             var direction = toTarget / distance;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction, Vector3.up), turnSpeed * deltaTime);
             return direction * walkSpeed;
+        }
+
+        private bool EntersUnsafeHazard(Vector3 target)
+        {
+            var hazards = Level.HeroHazard.Active;
+            if (hazards.Count == 0) return false;
+            float radius = controller != null ? controller.radius : 0.4f;
+            var feet = Feet;
+            for (int i = 0; i < hazards.Count; i++)
+            {
+                var h = hazards[i];
+                if (h.IsSafe || h.Volume == null) continue;
+                // Already inside (cannot happen while unfreezing is vetoed): keep walking out rather than freezing in place.
+                if (h.Volume.bounds.Contains(feet + Vector3.up * 0.5f)) continue;
+                if (h.Intersects(feet, target, radius)) return true;
+            }
+            return false;
         }
 
         private bool ResolveGoal()

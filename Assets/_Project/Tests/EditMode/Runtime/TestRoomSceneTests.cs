@@ -75,23 +75,8 @@ namespace BugReport.Tests.EditMode
         [Test]
         public void ProjectComponentsHaveNoNullOrBrokenReferences()
         {
-            var problems = new List<string>();
-            foreach (var behaviour in All<MonoBehaviour>())
-            {
-                if (behaviour == null) continue;
-                var ns = behaviour.GetType().Namespace ?? string.Empty;
-                if (!ns.StartsWith("BugReport")) continue;
-
-                var so = new SerializedObject(behaviour);
-                var prop = so.GetIterator();
-                while (prop.NextVisible(true))
-                {
-                    if (prop.propertyType != SerializedPropertyType.ObjectReference) continue;
-                    if (prop.name == "m_Script") continue;
-                    if (prop.objectReferenceValue == null)
-                        problems.Add(behaviour.GetType().Name + " on '" + behaviour.name + "': " + prop.propertyPath);
-                }
-            }
+            // Same rule the builder enforces; fields marked [OptionalReference] may be empty.
+            var problems = TestRoomBuilder.FindUnassignedReferences(scene);
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 

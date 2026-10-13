@@ -1,6 +1,6 @@
 # BUG//REPORT — Technical Architecture
 
-Status: **Milestones 1–3 verified in Unity 6000.6.0f1. Milestone 4 (hero behaviour + containment) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
+Status: **Milestones 1–4: automated tests verified in Unity 6000.6.0f1 (manual playtests deferred). Milestone 5 (vertical-slice level) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
 
 Engine: Unity 6.6 (6000.6.x) · C# 9 (Unity's language level) · URP · Input System.
 
@@ -268,11 +268,22 @@ Consequences:
 
 **Deferred:** drones and sensors (anomaly sighting), stage-4 route shutdowns, audio alerts. They need the vertical-slice level and audio set (M5).
 
-## 8. Objectives, save, settings *(planned)*
+## 8. Level, objectives, UI, audio *(implemented M5)*; save and settings *(planned, M8)*
 
-- `ObjectiveManager` uses explicit conditions (entity reached trigger, entity count in zone, …) and never checks scene names. Duplicates follow the objective policy in 5.5.
-- Save data is versioned, serializable POCOs with authored stable ids. No Unity object references are persisted.
-- Settings are a separate file. Input rebinding uses `SaveBindingOverridesAsJson` on the runtime action copy. `InputReader` already instantiates a copy of the asset, so overrides never dirty the project asset.
+- **Objectives:** `ObjectiveDirector` holds authored entries (id, title, hint, `ObjectiveCondition`) and drives the core `ObjectiveTracker`.
+  - Conditions are explicit components (`HeroReachedZone`); scene names are never checked.
+  - Objectives describe **what** to achieve, not how, so alternative solutions count without extra work.
+  - When all are complete the state goes to `Ending` and the level-complete screen shows.
+- **Level machinery:**
+  - `PressurePlate` polls an overlap volume. Any rigidbody ≥ min mass counts: frozen bodies and duplicates too, but not characters.
+  - `GateController` opens when all plates are pressed and **latches**, so it can never close on the hero. It calls `GameServices.RaiseWorldChanged()` so a waiting hero re-plans.
+  - `HeroHazard` marks dangerous machinery with a **static** danger volume:
+    - Route segments crossing it are impassable unless the machine is frozen or intangible. This is checked in planning and every frame while walking.
+    - Unfreezing or restoring the machine is **vetoed** while anyone is in the volume, so the hero can never be crushed.
+- **Fall recovery:** `WorldBoundsGuard` puts originals back at their spawn pose and removes copies that fall below the kill plane, so puzzles can't be softlocked by lost items.
+- **UI:** IMGUI placeholders until the UI pass. `LevelHud` shows the objective and hint plus the glitch and prompt. `LevelMenus` is the pause / level-complete screen. Restart reloads the scene, which recreates all services.
+- **Audio:** `ProceduralSfx` synthesizes original placeholder sounds at runtime, so there is nothing to license. `AudioFeedback` maps game events to sounds: select, invalid, per-glitch tone, undo, patch, stage alerts, objective chimes.
+- **Not yet:** save data uses versioned POCOs with authored stable ids, and no Unity references are persisted. Settings live in a separate file. Input rebinding uses `SaveBindingOverridesAsJson` on the runtime action copy. **(M8)**
 
 ## 9. Physics layers
 
