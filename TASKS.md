@@ -15,10 +15,11 @@ Status: `[x]` done and verified · `[~]` implemented, verification pending · `[
 
 ### Project setup
 - [x] `.gitignore`, `.gitattributes` for Unity [auto]
-- [ ] Create a Unity 6.6 URP template project and copy `Packages/`, `ProjectSettings/`, `Assets/Settings/` (PROJECT_PLAN §2) [editor]
-- [ ] Remove template packages we don't use (e.g. Visual Scripting, Multiplayer Center) if present [editor]
-- [~] `BUG REPORT ▸ Setup ▸ 1. Configure Project`: layers, Intangible collision matrix, Input System/URP/colour-space checks [editor]
-- [ ] Commit generated `.meta` files, ProjectSettings, Packages [editor]
+- [x] Create a Unity 6.6 URP template project and copy `Packages/`, `ProjectSettings/`, `Assets/Settings/` (6000.6.0f1) [editor]
+- [ ] Remove template packages we don't use: `com.unity.visualscripting`, `com.unity.collab-proxy` (Plastic SCM; we use git). Keep `ai.navigation` (M4 decision) and `timeline` (cinematics later) [editor]
+- [x] `BUG REPORT ▸ Setup ▸ 1. Configure Project`: layers, Intangible collision matrix, Input System/URP/colour-space checks [editor]
+- [x] Commit generated `.meta` files, ProjectSettings, Packages (audited: no missing/orphan metas, all scene GUIDs resolve) [editor]
+- [x] Build settings: removed the template's missing SampleScene and the dangling project-wide input actions reference [auto]
 
 ### Core (engine-free)
 - [x] `GameEntityId`, `EntityCategory`, `EntityCapabilities`, `IEntityDescriptor` [auto]
@@ -54,8 +55,8 @@ Status: `[x]` done and verified · `[~]` implemented, verification pending · `[
 - [x] All project C# type-checks against Unity API stubs (`Tools/CompileCheck`, 0 errors). Weaker than a Unity compile [auto]
 
 ### Verification (exit gate)
-- [ ] Unity compile: 0 errors, 0 `BugReport.*` warnings [editor]
-- [ ] Test Runner: EditMode + PlayMode all green [editor]
+- [x] Unity compile: 0 errors (owner, 6000.6.0f1). Warning count not reported [editor]
+- [x] Test Runner: EditMode + PlayMode all green (owner-reported) [editor]
 - [ ] Manual checklist in PROJECT_PLAN §5 [editor][visual]
 - [ ] Gamepad pass [hw]
 - [ ] Merge to `main`

@@ -71,3 +71,16 @@
 - `Wire()` now reads each assignment back and throws with diagnostics (destroyed?, field type, asset path, persistence) if Unity silently rejected it.
 - Validation now also rejects renderers without a material.
 - The build menu catches exceptions, so a failed build is reported as "scene not saved" instead of an unhandled exception.
+
+## 2026-10-13 — Milestone 1 verified in Unity (owner)
+
+- The owner reports all EditMode and PlayMode tests passing in Unity 6000.6.0f1 and pushed the generated project (151 files).
+- **Audit of that commit:**
+  - Every asset has a `.meta`, there are no orphan metas, and no GUIDs are duplicated.
+  - Every GUID TestRoom references resolves: scripts, materials, input actions.
+  - Both quality levels point at committed URP assets. Input System only, Linear colour space.
+  - No Library/Temp/UserSettings committed.
+- **Fixed in EditorBuildSettings:**
+  - Removed the template's `SampleScene` entry (file not in repo). TestRoom is now build index 0.
+  - Removed the dangling project-wide input actions reference to the template's uncommitted `InputSystem_Actions` asset.
+- **Open:** remove the unused template packages (Visual Scripting, Collab Proxy); manual playtest checklist and gamepad pass not yet reported.
