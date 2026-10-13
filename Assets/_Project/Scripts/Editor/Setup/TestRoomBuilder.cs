@@ -31,6 +31,12 @@ namespace BugReport.EditorTools.Setup
         public const string MaterialFolder = "Assets/_Project/Art/Materials/Generated";
         public const string GlitchFolder = "Assets/_Project/ScriptableObjects/Glitches";
         public const string CollisionTransferPath = GlitchFolder + "/GL_CollisionTransfer.asset";
+        public const string DuplicationPath = GlitchFolder + "/GL_Duplication.asset";
+        public const string FreezePath = GlitchFolder + "/GL_Freeze.asset";
+        public const string ProfileFolder = "Assets/_Project/ScriptableObjects/Duplication";
+        public const string CrateProfilePath = ProfileFolder + "/DP_Crate.asset";
+        public const string PrefabFolder = "Assets/_Project/Prefabs/Generated";
+        public const string CratePrefabPath = PrefabFolder + "/PF_Crate.prefab";
 
         private const float RoomHalfX = 12f;
         private const float RoomHalfZ = 8f;
@@ -98,17 +104,26 @@ namespace BugReport.EditorTools.Setup
                 return false;
             }
 
-            var collisionTransfer = LoadOrCreateCollisionTransfer();
+            var collisionTransfer = LoadOrCreate<CollisionTransferDefinition>(CollisionTransferPath, d => d.ApplyDefaults());
+            var duplication = LoadOrCreate<DuplicationDefinition>(DuplicationPath, d => d.ApplyDefaults());
+            var freeze = LoadOrCreate<FreezeDefinition>(FreezePath, d => d.ApplyDefaults());
+            var crateProfile = LoadOrCreate<DuplicationProfile>(CrateProfilePath, p => p.Configure(null, 2));
+            var cratePrefab = CreateCratePrefab(mats, crateProfile);
+            if (cratePrefab == null)
+            {
+                error = "Could not save " + CratePrefabPath;
+                return false;
+            }
 
             BuildLighting();
             var environment = new GameObject("--- ENVIRONMENT ---").transform;
             BuildRoom(environment, mats);
-            BuildProps(environment, mats);
+            BuildProps(environment, mats, cratePrefab);
 
             var hero = BuildHero(mats);
             var anomaly = BuildAnomaly(mats, actions, out var motor);
             var cameraRig = BuildCamera(anomaly.transform, out var scanner);
-            BuildSystems(mats, scanner, motor, hero, collisionTransfer, out var selection, out var glitchController);
+            BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze }, out var selection, out var glitchController);
 
             var controller = anomaly.AddComponent<AnomalyPlayerController>();
             Wire(controller, "input", anomaly.GetComponent<InputReader>());
@@ -222,27 +237,35 @@ namespace BugReport.EditorTools.Setup
                 "Level objective. The hero wants to be here.");
         }
 
-        private static void BuildProps(Transform parent, MaterialSet mats)
+        private static void BuildProps(Transform parent, MaterialSet mats, GameObject cratePrefab)
         {
             int props = GameLayers.Index(GameLayers.Props);
             int world = GameLayers.Index(GameLayers.World);
             int intangible = GameLayers.Index(GameLayers.Intangible);
 
-            var propCaps = EntityCapabilities.Inspectable | EntityCapabilities.Duplicable | EntityCapabilities.Freezable | EntityCapabilities.PropertyMutable;
-            var crateA = Block("Crate_A", parent, new Vector3(-6f, 0.5f, 4f), Vector3.one, mats.Crate, props);
-            AddBody(crateA, 10f);
-            AddEntity(crateA, "CRATE_A", EntityCategory.Prop, propCaps, "Standard-issue crate.");
+            // Crates are prefab instances: Duplication copies them from the prefab, never from the scene object.
+            CrateInstance(cratePrefab, parent, "Crate_A", "CRATE_A", "Standard-issue crate.", new Vector3(-6f, 0.5f, 4f), Quaternion.identity);
+            CrateInstance(cratePrefab, parent, "Crate_B", "CRATE_B", "Standard-issue crate. Suspiciously identical to CRATE_A.",
+                new Vector3(-4.6f, 0.5f, 4.4f), Quaternion.Euler(0f, 20f, 0f));
 
-            var crateB = Block("Crate_B", parent, new Vector3(-4.6f, 0.5f, 4.4f), Vector3.one, mats.Crate, props);
-            crateB.transform.rotation = Quaternion.Euler(0f, 20f, 0f);
-            AddBody(crateB, 10f);
-            AddEntity(crateB, "CRATE_B", EntityCategory.Prop, propCaps, "Standard-issue crate. Suspiciously identical to CRATE_A.");
-
-            var ball = Primitive(PrimitiveType.Sphere, "Ball", parent, new Vector3(-5f, 0.35f, -4f), Vector3.one * 0.7f, mats.Ball, props);
+            // Starts in the air so it can be frozen mid-fall right after Play.
+            var ball = Primitive(PrimitiveType.Sphere, "Ball", parent, new Vector3(-5f, 3f, -4f), Vector3.one * 0.7f, mats.Ball, props);
             AddBody(ball, 2f);
             AddEntity(ball, "TEST_BALL", EntityCategory.Prop,
                 EntityCapabilities.Inspectable | EntityCapabilities.Freezable | EntityCapabilities.PropertyMutable,
                 "Physics test object.");
+            AddFreeze(ball, mats);
+
+            // Scripted mover: freezing it stops it mid-travel; it resumes from the same phase.
+            var lift = Block("Lift", parent, new Vector3(-2.5f, 0.15f, -5.5f), new Vector3(2f, 0.3f, 2f), mats.Lift, world);
+            var liftBody = lift.AddComponent<Rigidbody>();
+            liftBody.isKinematic = true;
+            liftBody.interpolation = RigidbodyInterpolation.Interpolate;
+            AddEntity(lift, "LIFT_PLATFORM", EntityCategory.SystemDevice,
+                EntityCapabilities.Inspectable | EntityCapabilities.Freezable,
+                "Moves up and down on a fixed schedule. Very punctual.");
+            lift.AddComponent<PingPongMover>().Configure(new Vector3(0f, 2.5f, 0f), 5f);
+            AddFreeze(lift, mats);
 
             // Not inspectable on purpose: demonstrates invalid-target feedback.
             var pillar = Primitive(PrimitiveType.Cylinder, "Pillar", parent, new Vector3(5f, 1.5f, -5f), new Vector3(0.8f, 1.5f, 0.8f), mats.Wall, world);
@@ -376,7 +399,7 @@ namespace BugReport.EditorTools.Setup
         }
 
         private static void BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, PlaceholderHero hero,
-            GlitchDefinition collisionTransfer, out SelectionController selection, out GlitchController glitchController)
+            GlitchDefinition[] glitchDefinitions, out SelectionController selection, out GlitchController glitchController)
         {
             var systems = new GameObject("--- SYSTEMS ---");
             var bootstrap = systems.AddComponent<GameBootstrap>();
@@ -387,11 +410,12 @@ namespace BugReport.EditorTools.Setup
             Wire(selection, "scanner", scanner);
 
             glitchController = systems.AddComponent<GlitchController>();
-            WireArray(glitchController, "glitches", new Object[] { collisionTransfer });
+            WireArray(glitchController, "glitches", glitchDefinitions);
             Wire(glitchController, "selection", selection);
 
             var highlight = systems.AddComponent<EntityHighlightPresenter>();
             Wire(highlight, "lineMaterial", mats.Line);
+            Wire(highlight, "glitches", glitchController);
 
             var pulses = systems.AddComponent<GlitchPulsePresenter>();
             Wire(pulses, "lineMaterial", mats.Line);
@@ -411,22 +435,68 @@ namespace BugReport.EditorTools.Setup
         {
             var capability = go.AddComponent<CollisionCapability>();
             capability.Configure(go.GetComponents<Collider>(), authoredMode, GameLayers.World);
-            var visual = go.AddComponent<CollisionModeVisual>();
-            visual.Configure(go.GetComponentsInChildren<Renderer>(), mats.Ghost, mats.Solidified);
+            if (go.GetComponent<RendererOverrides>() == null) go.AddComponent<RendererOverrides>();
+            go.AddComponent<CollisionModeVisual>().Configure(mats.Ghost, mats.Solidified);
         }
 
-        /// <summary>Loads the designer asset if it exists (never overwrites tuning), otherwise creates it with defaults.</summary>
-        private static GlitchDefinition LoadOrCreateCollisionTransfer()
+        private static void AddFreeze(GameObject go, MaterialSet mats)
         {
-            var existing = AssetDatabase.LoadAssetAtPath<CollisionTransferDefinition>(CollisionTransferPath);
+            go.AddComponent<FreezeCapability>();
+            if (go.GetComponent<RendererOverrides>() == null) go.AddComponent<RendererOverrides>();
+            go.AddComponent<FreezeVisual>().Configure(mats.Frozen);
+        }
+
+        /// <summary>(Re)generates the crate prefab. The profile asset must already exist so the prefab can reference it.</summary>
+        private static GameObject CreateCratePrefab(MaterialSet mats, DuplicationProfile profile)
+        {
+            EnsureFolder(PrefabFolder);
+            var temp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            temp.name = "PF_Crate";
+            temp.layer = GameLayers.Index(GameLayers.Props);
+            temp.GetComponent<MeshRenderer>().sharedMaterial = mats.Crate;
+            AddBody(temp, 10f);
+            AddEntity(temp, "CRATE", EntityCategory.Prop,
+                EntityCapabilities.Inspectable | EntityCapabilities.Duplicable | EntityCapabilities.Freezable | EntityCapabilities.PropertyMutable,
+                "Standard-issue crate.");
+            temp.AddComponent<DuplicationCapability>().Configure(profile);
+            AddFreeze(temp, mats);
+
+            var prefab = PrefabUtility.SaveAsPrefabAsset(temp, CratePrefabPath);
+            Object.DestroyImmediate(temp);
+            if (prefab == null) return null;
+
+            if (profile.Prefab != prefab)
+            {
+                profile.SetPrefab(prefab);
+                EditorUtility.SetDirty(profile);
+                AssetDatabase.SaveAssets();
+            }
+            return prefab;
+        }
+
+        private static void CrateInstance(GameObject prefab, Transform parent, string objectName, string displayName, string description, Vector3 position, Quaternion rotation)
+        {
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+            go.name = objectName;
+            go.transform.SetPositionAndRotation(position, rotation);
+            var entity = go.GetComponent<GameEntity>();
+            entity.Configure(displayName, entity.Category, entity.Capabilities, description);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(entity);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(go.transform);
+        }
+
+        /// <summary>Loads a designer asset if it exists (never overwrites tuning), otherwise creates it with defaults.</summary>
+        private static T LoadOrCreate<T>(string path, System.Action<T> applyDefaults) where T : ScriptableObject
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<T>(path);
             if (existing != null) return existing;
 
-            EnsureFolder(GlitchFolder);
-            var definition = ScriptableObject.CreateInstance<CollisionTransferDefinition>();
-            definition.ApplyDefaults();
-            AssetDatabase.CreateAsset(definition, CollisionTransferPath);
+            EnsureFolder(Path.GetDirectoryName(path).Replace('\\', '/'));
+            var asset = ScriptableObject.CreateInstance<T>();
+            applyDefaults(asset);
+            AssetDatabase.CreateAsset(asset, path);
             AssetDatabase.SaveAssets();
-            return AssetDatabase.LoadAssetAtPath<CollisionTransferDefinition>(CollisionTransferPath);
+            return AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
         // ---------------------------------------------------------------- helpers
@@ -576,7 +646,7 @@ namespace BugReport.EditorTools.Setup
         /// <summary>Generated placeholder materials. Updated in place if they already exist.</summary>
         private sealed class MaterialSet
         {
-            public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified;
+            public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified, Frozen, Lift;
 
             public bool Create(out string error)
             {
@@ -612,6 +682,8 @@ namespace BugReport.EditorTools.Setup
                 // Collision Transfer placeholder looks (electric blue): see-through ghost, glowing solid.
                 Ghost = Transparent(lit, "M_CollisionGhost", new Color(0.2f, 0.55f, 1f, 0.28f), new Color(0.1f, 0.35f, 1f) * 0.4f);
                 Solidified = Lit(lit, "M_CollisionSolidified", new Color(0.15f, 0.4f, 0.95f), 0.8f, new Color(0.15f, 0.5f, 1f) * 1.6f);
+                Frozen = Lit(lit, "M_Frozen", new Color(0.75f, 0.95f, 1f), 0.95f, new Color(0.45f, 0.85f, 1f) * 0.9f);
+                Lift = Lit(lit, "M_Lift", new Color(0.45f, 0.5f, 0.58f), 0.5f);
                 AssetDatabase.SaveAssets();
                 return true;
             }

@@ -137,6 +137,31 @@ namespace BugReport.Tests.EditMode
         }
 
         [Test]
+        public void EveryDeclaredCapability_IsImplemented()
+        {
+            foreach (var e in All<GameEntity>())
+            {
+                if (e.Capabilities.HasAll(EntityCapabilities.Freezable))
+                    Assert.That(e.GetComponent<FreezeCapability>(), Is.Not.Null, e.DisplayName + " declares Freezable without FreezeCapability");
+                if (e.Capabilities.HasAll(EntityCapabilities.Duplicable))
+                {
+                    var dup = e.GetComponent<DuplicationCapability>();
+                    Assert.That(dup, Is.Not.Null, e.DisplayName + " declares Duplicable without DuplicationCapability");
+                    Assert.That(dup.Profile, Is.Not.Null, e.DisplayName + ": no profile");
+                    Assert.That(dup.Profile.Prefab, Is.Not.Null, e.DisplayName + ": profile has no prefab");
+                    Assert.That(EditorUtility.IsPersistent(dup.Profile.Prefab), Is.True, e.DisplayName + ": profile prefab must be an asset, never a scene object");
+                }
+            }
+        }
+
+        [Test]
+        public void DuplicableCrates_ArePrefabInstances()
+        {
+            foreach (var e in All<GameEntity>().Where(x => x.Capabilities.HasAll(EntityCapabilities.Duplicable)))
+                Assert.That(PrefabUtility.IsPartOfPrefabInstance(e.gameObject), Is.True, e.DisplayName);
+        }
+
+        [Test]
         public void SceneIsInBuildSettings()
         {
             Assert.That(EditorBuildSettings.scenes.Any(s => s.path == TestRoomBuilder.ScenePath && s.enabled), Is.True);

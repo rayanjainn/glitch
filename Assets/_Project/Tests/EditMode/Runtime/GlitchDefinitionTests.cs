@@ -46,11 +46,37 @@ namespace BugReport.Tests.EditMode
         }
 
         [Test]
+        public void DuplicationAndFreezeDefaults_AreValid()
+        {
+            var dup = ScriptableObject.CreateInstance<DuplicationDefinition>();
+            var freeze = ScriptableObject.CreateInstance<FreezeDefinition>();
+            try
+            {
+                dup.ApplyDefaults();
+                freeze.ApplyDefaults();
+                Assert.That(dup.ValidateDefinition(), Is.Null);
+                Assert.That(freeze.ValidateDefinition(), Is.Null);
+                Assert.That(dup.ToSpec().Slot(0).RequiredCapabilities.HasAll(EntityCapabilities.Duplicable), Is.True);
+                Assert.That(freeze.ToSpec().Slot(0).Excludes(EntityCategory.Hero), Is.True);
+                Assert.That(freeze.ToSpec().Duration, Is.GreaterThan(0f), "freeze must have a duration limit");
+                Assert.That(dup.ToSpec().MaxActive, Is.GreaterThan(0), "duplication needs a global cap");
+            }
+            finally
+            {
+                Object.DestroyImmediate(dup);
+                Object.DestroyImmediate(freeze);
+            }
+        }
+
+        [Test]
         public void ProjectAsset_IfPresent_IsValid()
         {
-            var asset = AssetDatabase.LoadAssetAtPath<CollisionTransferDefinition>(TestRoomBuilder.CollisionTransferPath);
-            if (asset == null) Assert.Ignore("Not created yet: run 'Build Test Room Scene'.");
-            Assert.That(asset.ValidateDefinition(), Is.Null);
+            foreach (var path in new[] { TestRoomBuilder.CollisionTransferPath, TestRoomBuilder.DuplicationPath, TestRoomBuilder.FreezePath })
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<GlitchDefinition>(path);
+                if (asset == null) Assert.Ignore("Not created yet: run 'Build Test Room Scene'.");
+                Assert.That(asset.ValidateDefinition(), Is.Null, path);
+            }
         }
     }
 }

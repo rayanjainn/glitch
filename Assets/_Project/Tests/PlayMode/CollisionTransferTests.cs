@@ -320,7 +320,8 @@ namespace BugReport.Tests.PlayMode
             var ghost = Track(new Material(Shader.Find("Sprites/Default")));
             var solid = Track(new Material(Shader.Find("Sprites/Default")));
             wall.gameObject.SetActive(false);
-            wall.gameObject.AddComponent<CollisionModeVisual>().Configure(new[] { renderer }, ghost, solid);
+            wall.gameObject.AddComponent<Presentation.RendererOverrides>();
+            wall.gameObject.AddComponent<CollisionModeVisual>().Configure(ghost, solid);
             wall.gameObject.SetActive(true);
 
             Transfer(wall, pad);

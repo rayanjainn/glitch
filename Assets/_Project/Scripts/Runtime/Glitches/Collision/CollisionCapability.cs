@@ -33,6 +33,7 @@ namespace BugReport.Glitches
         [SerializeField] private string solidLayerName = GameLayers.World;
 
         private int[] solidLayers;
+        private bool[] authoredDynamic;
         private ModifierStack<CollisionMode> channel;
         private bool initialized;
         private bool loggedMissingLayer;
@@ -53,15 +54,19 @@ namespace BugReport.Glitches
             }
         }
 
-        /// <summary>True if any collider belongs to a non-kinematic rigidbody (it would fall through the world if intangible).</summary>
+        /// <summary>
+        /// True if any collider belongs to a rigidbody that was dynamic when authored. Uses the
+        /// authored state, not the current one: a frozen (temporarily kinematic) crate is still
+        /// dynamic and would fall through the floor once unfrozen while intangible.
+        /// </summary>
         public bool HasDynamicBody
         {
             get
             {
-                for (int i = 0; i < colliders.Length; i++)
+                EnsureInitialized();
+                for (int i = 0; i < authoredDynamic.Length; i++)
                 {
-                    var body = colliders[i] != null ? colliders[i].attachedRigidbody : null;
-                    if (body != null && !body.isKinematic) return true;
+                    if (authoredDynamic[i]) return true;
                 }
                 return false;
             }
@@ -92,10 +97,13 @@ namespace BugReport.Glitches
             int fallbackSolid = GameLayers.Index(solidLayerName);
             if (fallbackSolid < 0) fallbackSolid = 0;
             solidLayers = new int[colliders.Length];
+            authoredDynamic = new bool[colliders.Length];
             for (int i = 0; i < colliders.Length; i++)
             {
                 var c = colliders[i];
                 solidLayers[i] = authoredMode == CollisionMode.Solid && c != null ? c.gameObject.layer : fallbackSolid;
+                var body = c != null ? c.attachedRigidbody : null;
+                authoredDynamic[i] = body != null && !body.isKinematic;
             }
 
             channel = new ModifierStack<CollisionMode>(authoredMode, ConflictPolicy.Exclusive, ApplyMode);

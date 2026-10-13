@@ -1,6 +1,6 @@
 # BUG//REPORT — Technical Architecture
 
-Status: **Milestone 1 verified in Unity 6000.6.0f1. Milestone 2 (glitch framework + Collision Transfer) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
+Status: **Milestones 1–2 verified in Unity 6000.6.0f1. Milestone 3 (Duplication + Freeze) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
 
 Engine: Unity 6.6 (6000.6.x) · C# 9 (Unity's language level) · URP · Input System.
 
@@ -102,7 +102,7 @@ Camera ─▶ TargetScanner ──(GameEntity)──▶ SelectionController ─�
 
 ---
 
-## 5. Glitch system *(framework + Collision Transfer implemented in M2; Duplication/Freeze planned for M3)*
+## 5. Glitch system *(framework + Collision Transfer: M2; Duplication + Freeze: M3)*
 
 ### 5.1 Data and runtime objects
 
@@ -173,21 +173,36 @@ Consequences:
   - `GlitchPulsePresenter` fires a 0.6 s beam from source to target.
   - The reticle turns red or cyan from the live apply preview.
 
-### 5.5 Duplication *(M3)*
+### 5.5 Duplication *(implemented, M3)*
 
-- Only entities with `DuplicationCapability`, which references **its own prefab asset**. Duplicates are always instantiated **from the prefab, never from the scene instance**. `Instantiate(sceneObject)` would clone live modifier state (for example kinematic-while-frozen with no operation owning it), outlines, and cached references.
-- Approved state (pose, linear and angular velocity, selected data through `IDuplicationStateProvider`) is copied explicitly. External references are **not** copied. A duplicate rebinds through the registry or the level, or starts unbound.
-- Each duplicate gets a new GameEntityId plus a `Lineage` record (OriginId, generation). The objective policy comes from the definition: NotObjective (default), Inherit, or Ambiguous (the "confused objective" gag, M5+).
-- Limits: global cap and per-source cap. The spawn point must pass an overlap check, otherwise the operation is rejected. Duplicate creation is itself a `GlitchOperation`: reverting it despawns the copy and cascades `Invalidated` to operations targeting the copy.
-- The anomaly and anything without the capability can never be duplicated.
+- **Who can be copied:** only entities with the `Duplicable` flag **and** a `DuplicationCapability` → `DuplicationProfile` (ScriptableObject) → **prefab asset**.
+  - The profile exists because a prefab cannot reference itself: Unity remaps self-references to the new instance on Instantiate, which would silently clone the live scene object.
+  - An EditMode test fails the scene if a profile points at a non-asset.
+- **Spawning:**
+  - The copy is instantiated from the prefab under an **inactive holder**, so nothing on it runs until identity (name, capabilities) and lineage (`DuplicateMarker`: origin, generation, operation) are set.
+  - Then it is activated and registers with a new `GameEntityId`.
+  - Approved state copied: pose, scale, and optionally velocity (profile). Glitch state is **never** cloned (a copy of a frozen crate is not frozen) and external references are not copied.
+- **Placement:** the first free spot beside the source (right, left, front, back, top; `Physics.CheckBox` ignoring Intangible). Otherwise rejected: "NO SPACE".
+- **Limits:** `DuplicationDefinition.MaxActive` is the global cap; `DuplicationProfile.MaxCopiesPerSource` is the per-source cap.
+- **Lifetime:** the copy is the operation's **product** (`GlitchOperation.AddProduct`).
+  - Reverting despawns it, through a lease.
+  - Losing the copy for any reason ends the operation (TargetLost), which frees the copy budget.
+  - Anything glitching the copy ends with it. Copies of copies collapse in a chain.
+- **Objectives:** `NotObjective` (default) strips `ObjectiveRelevant` from copies; `Inherit` keeps it (the "confused objective" gag, M5).
+- **Not yet:** a kill plane for copies that fall out of the world (M5).
 
-### 5.6 Freeze *(M3)*
+### 5.6 Freeze *(implemented, M3)*
 
-- A local freeze, never a global pause. `FreezeCapability` contributes modifiers on:
-  - Rigidbody: an `IsKinematic` modifier. The linear and angular velocity at freeze time are stored **in the operation**, not the object.
-  - Scripted movers (platforms, machines, projectiles): `LocalTimeScale = 0`. All project movers must advance with `EntityClock.DeltaTime` instead of `Time.deltaTime`. This is a coding rule, enforced in review and by a test on each mover.
-  - Animator: a speed modifier. NavMeshAgent (if used): `isStopped`.
-- Release policy from the definition: `ReleaseAtRest` (default, safest) or `RestoreMomentum` (clamped). Order matters in Unity 6: set non-kinematic **before** writing `linearVelocity`, because writing velocity on a kinematic body is unsupported. Forces applied while kinematic are ignored, so nothing accumulates.
+- **Mechanism:** `FreezeCapability` holds an exclusive `ModifierStack<bool>` and is the only code allowed to change the entity's `Rigidbody.isKinematic` and Animator speeds while frozen.
+  - **Frozen:** the body turns kinematic, so forces and gravity are ignored and nothing accumulates. Animator speed goes to 0. Scripted movers (`ITimeScaled`, e.g. `PingPongMover`) read `TimeScale` = 0 and resume from the same phase.
+  - **Unfrozen:** the kinematic flag returns to the value it had before freezing. A dynamic body is released **at rest**. The flag is set before velocities are written, which Unity 6 requires.
+- **Momentum:** `FreezeDefinition.Release = RestoreMomentum` returns the velocity captured **in the operation** (clamped to `MaxReleaseSpeed`), and only for non-forced endings.
+- **Limits:** the definition gives Freeze a duration (8 s default) and max active (3). The hero is excluded until AI Override exists.
+- **Interplay:** `CollisionCapability.HasDynamicBody` uses the **authored** body state, so a frozen (temporarily kinematic) crate still can't become an intangible collision source.
+
+### Presentation arbitration
+
+`RendererOverrides` owns material overrides per entity with priorities (freeze 20 > collision 10). Without it, two visuals each restoring the materials they remembered would overwrite each other.
 
 ### 5.7 Multiple glitches interacting (rules)
 

@@ -48,6 +48,28 @@ namespace BugReport.Core.Glitches
             return operation != null;
         }
 
+        /// <summary>True if any active operation targets or created <paramref name="entity"/>.</summary>
+        public bool IsInvolved(GameEntityId entity)
+        {
+            for (int i = 0; i < active.Count; i++)
+            {
+                if (active[i].Operation.Involves(entity)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>Number of active operations of <paramref name="specId"/> whose slot-0 target is <paramref name="source"/>.</summary>
+        public int CountActiveOn(string specId, GameEntityId source)
+        {
+            int n = 0;
+            for (int i = 0; i < active.Count; i++)
+            {
+                var op = active[i].Operation;
+                if (op.Spec.Id == specId && op.TargetCount > 0 && op.Target(0) == source) n++;
+            }
+            return n;
+        }
+
         public bool IsTargeted(GameEntityId entity)
         {
             for (int i = 0; i < active.Count; i++)
@@ -133,13 +155,13 @@ namespace BugReport.Core.Glitches
             return End(active[active.Count - 1].Operation.Id, reason);
         }
 
-        /// <summary>Ends every operation that targets <paramref name="entity"/>. Returns how many ended.</summary>
+        /// <summary>Ends every operation that targets or created <paramref name="entity"/>. Returns how many ended.</summary>
         public int EndAllTargeting(GameEntityId entity, GlitchEndReason reason)
         {
             scratch.Clear();
             for (int i = 0; i < active.Count; i++)
             {
-                if (active[i].Operation.Targets(entity)) scratch.Add(active[i]);
+                if (active[i].Operation.Involves(entity)) scratch.Add(active[i]);
             }
             int ended = 0;
             // Snapshot: ending one operation may end others (cascades), so re-check by id.

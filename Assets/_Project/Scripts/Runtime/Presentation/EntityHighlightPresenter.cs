@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
+using BugReport.Glitches;
 using UnityEngine;
 
 namespace BugReport.Presentation
@@ -26,6 +27,8 @@ namespace BugReport.Presentation
         [SerializeField] private Color selectedColor = new Color(0.2f, 0.95f, 1f, 1f);
         [Tooltip("Outline for entities currently changed by a glitch (electric blue = collision).")]
         [SerializeField] private Color glitchedColor = new Color(0.15f, 0.5f, 1f, 0.9f);
+        [Tooltip("Supplies each glitch's colour for the outlines of what it changed or created.")]
+        [SerializeField] private GlitchController glitches;
 
         private readonly List<BoundsOutline> pool = new List<BoundsOutline>();
         private readonly List<IEntityDescriptor> buffer = new List<IEntityDescriptor>();
@@ -67,7 +70,7 @@ namespace BugReport.Presentation
                 {
                     var entity = buffer[i] as GameEntity;
                     if (entity == null || entity.Id == hovered || entity.Id == selected) continue;
-                    if (services.Glitches.IsTargeted(entity.Id)) continue;
+                    if (services.Glitches.IsInvolved(entity.Id)) continue;
                     if (entity.Category == EntityCategory.Anomaly) continue;
                     if (!entity.Capabilities.HasAll(EntityCapabilities.Inspectable)) continue;
                     Draw(entity, inspectColor);
@@ -76,16 +79,18 @@ namespace BugReport.Presentation
             }
 
             // Every entity currently changed by a glitch stays outlined, so the player can see what they altered.
-            var glitches = services.Glitches;
-            for (int i = 0; i < glitches.ActiveCount; i++)
+            var manager = services.Glitches;
+            for (int i = 0; i < manager.ActiveCount; i++)
             {
-                var op = glitches.GetActive(i);
-                for (int t = 0; t < op.TargetCount; t++)
+                var op = manager.GetActive(i);
+                var color = glitches != null ? glitches.ColorFor(op) : glitchedColor;
+                color.a = glitchedColor.a;
+                for (int t = 0; t < op.TargetCount + op.ProductCount; t++)
                 {
-                    var id = op.Target(t);
+                    var id = t < op.TargetCount ? op.Target(t) : op.Product(t - op.TargetCount);
                     if (id == hovered || id == selected) continue;
                     if (services.Registry.TryGet(id, out var target) && target is GameEntity glitchedEntity)
-                        Draw(glitchedEntity, glitchedColor);
+                        Draw(glitchedEntity, color);
                 }
             }
 

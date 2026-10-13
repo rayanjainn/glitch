@@ -40,6 +40,7 @@ namespace BugReport.Core.Glitches
     {
         private readonly GameEntityId[] targets;
         private readonly List<IModifierLease> leases = new List<IModifierLease>();
+        private readonly List<GameEntityId> products = new List<GameEntityId>();
 
         internal GlitchOperation(OperationId id, GlitchSpec spec, GameEntityId[] targets, float startTime)
         {
@@ -61,6 +62,8 @@ namespace BugReport.Core.Glitches
         public bool IsActive => State == OperationState.Active;
         public int TargetCount => targets.Length;
         public int LeaseCount => leases.Count;
+        /// <summary>Entities this operation created (e.g. duplicates). Losing one ends the operation.</summary>
+        public int ProductCount => products.Count;
 
         /// <summary>Effect-specific data (e.g. which side of a transfer is which). Optional.</summary>
         public object EffectState { get; set; }
@@ -74,6 +77,21 @@ namespace BugReport.Core.Glitches
                 if (targets[i] == id) return true;
             }
             return false;
+        }
+
+        public GameEntityId Product(int index) => products[index];
+
+        public bool HasProduct(GameEntityId id) => products.Contains(id);
+
+        /// <summary>True if <paramref name="id"/> is a target or a product of this operation.</summary>
+        public bool Involves(GameEntityId id) => Targets(id) || HasProduct(id);
+
+        /// <summary>Records an entity created by this operation. Its unregistration ends the operation (TargetLost).</summary>
+        public void AddProduct(GameEntityId id)
+        {
+            if (!id.IsValid) throw new ArgumentException("Product id must be valid.", nameof(id));
+            if (!IsActive) throw new InvalidOperationException(Id + " has already ended.");
+            if (!products.Contains(id)) products.Add(id);
         }
 
         public float Remaining(float now) => float.IsPositiveInfinity(EndTime) ? float.PositiveInfinity : Math.Max(0f, EndTime - now);
