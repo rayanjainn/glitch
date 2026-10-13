@@ -24,6 +24,8 @@ namespace BugReport.Presentation
         [SerializeField] private Color hoverValidColor = new Color(1f, 1f, 1f, 0.95f);
         [SerializeField] private Color hoverInvalidColor = new Color(1f, 0.25f, 0.3f, 0.95f);
         [SerializeField] private Color selectedColor = new Color(0.2f, 0.95f, 1f, 1f);
+        [Tooltip("Outline for entities currently changed by a glitch (electric blue = collision).")]
+        [SerializeField] private Color glitchedColor = new Color(0.15f, 0.5f, 1f, 0.9f);
 
         private readonly List<BoundsOutline> pool = new List<BoundsOutline>();
         private readonly List<IEntityDescriptor> buffer = new List<IEntityDescriptor>();
@@ -65,11 +67,26 @@ namespace BugReport.Presentation
                 {
                     var entity = buffer[i] as GameEntity;
                     if (entity == null || entity.Id == hovered || entity.Id == selected) continue;
+                    if (services.Glitches.IsTargeted(entity.Id)) continue;
                     if (entity.Category == EntityCategory.Anomaly) continue;
                     if (!entity.Capabilities.HasAll(EntityCapabilities.Inspectable)) continue;
                     Draw(entity, inspectColor);
                 }
                 buffer.Clear();
+            }
+
+            // Every entity currently changed by a glitch stays outlined, so the player can see what they altered.
+            var glitches = services.Glitches;
+            for (int i = 0; i < glitches.ActiveCount; i++)
+            {
+                var op = glitches.GetActive(i);
+                for (int t = 0; t < op.TargetCount; t++)
+                {
+                    var id = op.Target(t);
+                    if (id == hovered || id == selected) continue;
+                    if (services.Registry.TryGet(id, out var target) && target is GameEntity glitchedEntity)
+                        Draw(glitchedEntity, glitchedColor);
+                }
             }
 
             bool gameplay = state == GameState.Playing || state == GameState.Inspection;

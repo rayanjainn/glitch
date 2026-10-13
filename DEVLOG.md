@@ -84,3 +84,23 @@
   - Removed the template's `SampleScene` entry (file not in repo). TestRoom is now build index 0.
   - Removed the dangling project-wide input actions reference to the template's uncommitted `InputSystem_Actions` asset.
 - **Open:** remove the unused template packages (Visual Scripting, Collab Proxy); manual playtest checklist and gamepad pass not yet reported.
+
+## 2026-10-13 — Milestone 1 merged; Milestone 2 implemented (Editor verification pending)
+
+- PR #1 merged into `main` by the owner. Milestone 2 is on `feature/glitch-framework-collision-transfer`.
+- **Core:** `ModifierStack<T>`, `OperationId`, `GlitchSpec`, `GlitchOperation`, `GlitchManager`, `IGlitchEffect`, `GlitchResult`. **87/87 core tests pass here** (38 new).
+- **Runtime:**
+  - `CollisionCapability`, `PhysicsOccupancy`, `GlitchDefinition` + `CollisionTransferDefinition`, `CollisionTransferEffect`, `GlitchController`, `CollisionModeVisual`, `GlitchPulsePresenter`.
+  - Glitch outlines, reticle preview, debug overlay glitch panel.
+  - `GameServices.Glitches`, disposed before the registry so objects are restored while still registered.
+- **Builder:** firewall/shadow/holo panel collision setup, glitch definition asset (load-or-create, never overwritten), ghost and solidified materials.
+- **Decisions:**
+  - Dynamic sources are rejected.
+  - Reverts and expiry wait while the source is occupied; forced endings don't.
+  - Two-target glitches use the selection as SOURCE and the hovered entity as TARGET.
+  - Q cycles glitches until the wheel UI lands in M5.
+- **Verified here:**
+  - Core tests: 87/87.
+  - `Tools/CompileCheck`: 0 errors. The stubs gained only real Unity APIs: Sprite, CreateAssetMenu, OverlapBoxNonAlloc, BlendMode, RenderQueue, LogAssert, …
+  - The committed collision matrix has Intangible colliding with nothing.
+- **Not verified:** Unity compile, the 21 new PlayMode and 4 new EditMode tests, the transparent ghost material's look (URP properties set by script), and the playtest checklist.

@@ -63,17 +63,36 @@ Status: `[x]` done and verified · `[~]` implemented, verification pending · `[
 
 ---
 
-## Milestone 2 — Glitch framework + Collision Transfer (next)
-- [ ] Core `ModifierStack<T>` with owner handles, priority, conflict policy (Exclusive/Stack) + tests [auto]
-- [ ] Core `GlitchOperation`, `OperationState`, end reasons; `GlitchManager` (apply, revert, LIFO revert, by-target, EndAll, invalidation cascade, expiry with injected clock) + tests [auto]
-- [ ] `GlitchDefinition` ScriptableObject → `TargetRequirement`, arity, duration, colour, cost/cooldown, containment weight [auto/editor]
-- [ ] `IGlitchEffect` strategy interface; `GlitchController` player workflow (select glitch → collect targets → apply; R revert; RMB cancel) [auto/editor]
-- [ ] `CollisionCapability`: explicit collider list, PhysicsLayer channel, latent colliders [editor]
-- [ ] Collision Transfer effect: occupancy check ("OCCUPIED"), dynamic-body policy decided + documented [editor]
-- [ ] Capability-component validation (flag without component → clear failure) [auto]
-- [ ] Feedback: source/target wireframe, transfer pulse (placeholder VFX), invalid-target message [editor][visual]
-- [ ] PlayMode tests: apply, revert, expire, target destroyed mid-operation, double-apply conflict, scene unload cleanup, unrelated objects unaffected [editor]
-- [ ] Test room: firewall → shadow solution works; hero walks through and arrives [editor][visual]
+## Milestone 2 — Glitch framework + Collision Transfer (current)
+- [x] Core `ModifierStack<T>`: owner leases, priority, conflict policy (Exclusive/Stack), base changes survive revert. 10 tests [auto]
+- [x] Core `GlitchSpec`, `GlitchOperation`, `GlitchManager`: apply/validate, cooldown, max active, expiry (injected clock), revert, LIFO revert, EndAll, target-lost cascade, effect veto (`CanEnd`), exception isolation. 28 tests [auto]
+- [~] `GlitchDefinition` ScriptableObject (slots, duration, cooldown, max active, colour, containment weight) + `CollisionTransferDefinition` [editor]
+- [~] `IGlitchEffect` strategy; `GlitchController` workflow (E select source, aim target, LMB apply, R revert, Q cycle) [editor]
+- [~] `CollisionCapability`: explicit colliders, exclusive mode channel, layer switching [editor]
+- [~] Collision Transfer effect: occupancy rejection, blocked revert while occupied, dynamic sources rejected (policy decided) [editor]
+- [~] Capability validation: flag without component → clear failure + EditMode scene test [editor]
+- [~] Feedback: ghost/solidified materials, glitched outlines, transfer beam, reticle preview, overlay glitch panel [editor][visual]
+- [~] PlayMode tests: CollisionTransferTests (15), GlitchControllerTests (6); EditMode GlitchDefinitionTests (3) + scene tests [editor]
+- [~] Test room: FIREWALL_01 (solid), SHADOW_DECAL and HOLO_PANEL (intangible). Firewall → shadow lets the hero through; firewall → holo panel blocks it again [editor][visual]
+- [ ] Remove unused template packages (Visual Scripting, Collab Proxy) [editor]
+
+### Manual playtest checklist (Milestone 2)
+After **BUG REPORT ▸ Setup ▸ 2. Build Test Room Scene → Rebuild**, press Play:
+1. The overlay shows `GLITCH COLLISION TRANSFER` and `SELECT A SOURCE [E]`.
+2. Aim at **FIREWALL_01** → E (selected). Aim at **SHADOW_DECAL** → the reticle is cyan and the overlay says READY. Press LMB:
+   - a blue beam runs firewall → shadow;
+   - the firewall turns see-through blue and the shadow glows;
+   - both stay outlined blue.
+3. The hero (BLOCKED) retries within about 2 s, walks through the firewall, and reaches the exit (**ARRIVED**).
+4. Fly the anomaly through the ghost firewall: no collision.
+5. R → both restored. Do it while flying *inside* the ghost firewall: you get "CANNOT RESTORE … INSIDE" and nothing changes. Fly out, press R again: restored.
+6. Restart (F5). Transfer firewall → **HOLO_PANEL**: the hero passes the firewall but is BLOCKED at the solid panel.
+7. Invalid cases each show a red reticle and a reason:
+   - crate as source (missing capability);
+   - shadow as source (already intangible);
+   - firewall onto the firewall (must differ);
+   - LMB with nothing selected (prompt).
+8. Esc pause → LMB/R do nothing. Resume works.
 
 ## Milestone 3 — Duplication + Freeze
 - [ ] `DuplicationCapability` (prefab reference), prefab-only instantiation, approved state transfer, lineage, caps, spawn overlap check [editor]
