@@ -1,6 +1,7 @@
 using System;
 using BugReport.Core.GameFlow;
 using BugReport.Glitches;
+using BugReport.Presentation;
 using UnityEngine;
 
 namespace BugReport.Level
@@ -15,6 +16,7 @@ namespace BugReport.Level
         [SerializeField, OptionalReference] private ObjectiveDirector objectives;
         [SerializeField] private GlitchController glitches;
         [SerializeField, Min(0.5f)] private float completeFlashSeconds = 2.5f;
+        [SerializeField, OptionalReference] private VisualSettings settings;
 
         private GameServices services;
         private Action<GameServices> bindCallback;
@@ -54,6 +56,8 @@ namespace BugReport.Level
             {
                 int i = objectives.Tracker.CurrentIndex;
                 var entry = objectives.Get(i);
+                if (VisualSettings.On(settings, x => x.hudPanels))
+                    WorldLabel.Panel(new Rect(8, Screen.height - 146, 640, 106), new Color(0.02f, 0.05f, 0.08f, 0.6f));
                 GUI.Label(new Rect(16, Screen.height - 140, 520, 24), "OBJECTIVE " + (i + 1) + "/" + objectives.Count, small);
                 GUI.Label(new Rect(16, Screen.height - 118, 620, 28), entry.title, big);
                 GUI.Label(new Rect(16, Screen.height - 88, 620, 40), entry.hint, small);
@@ -65,6 +69,8 @@ namespace BugReport.Level
             if (glitches != null && glitches.CurrentDefinition != null)
             {
                 var def = glitches.CurrentDefinition;
+                if (VisualSettings.On(settings, x => x.hudPanels))
+                    WorldLabel.Panel(new Rect(Screen.width * 0.5f - 230f, Screen.height - 70, 460f, 62f), new Color(0.02f, 0.05f, 0.08f, 0.6f));
                 float cooldown = services.Glitches.CooldownRemaining(def.Id, Time.time);
                 var previous = GUI.color;
                 GUI.color = def.Color;

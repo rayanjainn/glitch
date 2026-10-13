@@ -144,7 +144,7 @@ After **Build Test Room Scene → Rebuild**, press Play:
 7. Stand inside the ghost firewall when a patch is due: it patches something else instead, never the wall around you.
 8. F5 restart: containment back to stage 0.
 
-## Milestone 5 — Vertical-slice level (current)
+## Milestone 5 — Vertical-slice level ✅ (tests incl. full playthrough verified in Unity, merged; manual playtest deferred)
 - [x] Core `ObjectiveTracker`: sequential, latching, cascades when alternatives satisfy later goals. 8 tests (121 total) [auto]
 - [~] Level mechanics: `PressurePlate` (weight incl. frozen bodies and copies), `GateController` (latched, announces world change), `HeroHazard` (hero refuses dangerous machinery; unfreeze/restore vetoed while someone is in its path), `WorldBoundsGuard` kill plane [editor]
 - [~] `ObjectiveDirector` + `HeroReachedZone` (objectives describe goals, not solutions → alternatives count) [editor]
@@ -155,7 +155,20 @@ After **Build Test Room Scene → Rebuild**, press Play:
 - [ ] Manual playtest with PLAYTEST.md (deferred by owner; covers M1–M5 in plain language) [visual]
 - [ ] Remove unused template packages (Visual Scripting, Collab Proxy) [editor]
 
-## Milestones 6–8
+## Milestone 6 — Art & polish (current, pass 1)
+- [x] Core `BurstEnvelope` / `BurstMixer` for short effect bursts. 5 tests (126 total) [auto]
+- [~] `VisualSettings` asset: every presentation feature can be switched off without code; `ComfortSettings` (colour-split toggle in the pause menu) [editor]
+- [~] Post-processing: global URP volume (ACES tone mapping, bloom, vignette, colour adjustments); `GlitchCameraFx` chromatic/lens bursts on glitches and a red vignette pulse on patches [editor][visual]
+- [~] Inspection labels (GDD 9.3) + selected-object property panel [visual]
+- [~] Hero body language (`HeroAnimator`: bob, lean, wobble, hop, state icons) on a visual pivot only [visual]
+- [~] Anomaly: tetrahedron shards, eye that follows the aimed target (`AnomalyEye`), trail [visual]
+- [~] Collapsing-outline flashes on copies and frozen objects; HUD panels; grid floor texture (generated PNG via LFS); SMAA [visual]
+- [~] Tests: PresentationTests (7 PlayMode), PresentationAssetTests (2 EditMode) [editor]
+- [ ] **Needs the owner's eyes:** PLAYTEST.md Part 5. Tuning values live in VP_BugReport and VS_Default.
+- [ ] Profiling on the reference PC (Unity Profiler; 60 FPS @1080p target) [editor][hw]
+- [ ] Later polish passes: designed UI (replace IMGUI), real models and animation, designed audio, lighting bake
+
+## Milestones 7–8
 See PROJECT_PLAN §3. Not broken down yet, deliberately, to avoid planning against unknowns.
 
 ---

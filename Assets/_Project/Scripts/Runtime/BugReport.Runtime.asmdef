@@ -3,7 +3,9 @@
     "rootNamespace": "BugReport",
     "references": [
         "BugReport.Core",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

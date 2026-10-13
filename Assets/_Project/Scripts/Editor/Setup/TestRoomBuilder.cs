@@ -119,6 +119,7 @@ namespace BugReport.EditorTools.Setup
                 error = "Could not save " + CratePrefabPath;
                 return false;
             }
+            var presentation = PresentationBuilder.LoadOrCreateAssets(mats);
 
             BuildLighting();
             var environment = new GameObject("--- ENVIRONMENT ---").transform;
@@ -131,6 +132,7 @@ namespace BugReport.EditorTools.Setup
             var systems = BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze },
                 containmentSettings, objectives: null, debugOverlayVisible: true, levelTitle: "TEST ROOM");
             WirePlayer(anomaly, motor, cameraRig, systems);
+            PresentationBuilder.Apply(presentation, mats, systems, anomaly, hero, cameraRig.GetComponent<Camera>());
 
             var missing = FindUnassignedReferences(scene);
             if (missing.Count > 0)
@@ -479,7 +481,7 @@ namespace BugReport.EditorTools.Setup
 
             systems.AddComponent<WorldBoundsGuard>();
 
-            var overlay = systems.AddComponent<DebugOverlay>();
+            var overlay = systems.AddComponent<DiagnosticsOverlay>();
             Wire(overlay, "anomaly", motor);
             Wire(overlay, "selection", selection);
             Wire(overlay, "hero", hero);
@@ -615,6 +617,8 @@ namespace BugReport.EditorTools.Setup
             }
             return false;
         }
+
+        internal static void EnsureFolderFor(string assetPath) => EnsureFolder(Path.GetDirectoryName(assetPath).Replace('\\', '/'));
 
         internal static void InvisibleBox(string name, Transform parent, Vector3 position, Vector3 size, int layer)
         {
@@ -816,7 +820,7 @@ namespace BugReport.EditorTools.Setup
                 return Save(m, name);
             }
 
-            private static Material Save(Material material, string name)
+            internal static Material Save(Material material, string name)
             {
                 string path = MaterialFolder + "/" + name + ".mat";
                 var existing = AssetDatabase.LoadAssetAtPath<Material>(path);

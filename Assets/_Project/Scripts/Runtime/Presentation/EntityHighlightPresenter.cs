@@ -34,19 +34,39 @@ namespace BugReport.Presentation
         [SerializeField] private ContainmentDirector containment;
         [SerializeField] private Color patchedColor = new Color(1f, 0.2f, 0.25f, 1f);
         [SerializeField, Min(0.1f)] private float patchFlashSeconds = 1.2f;
+        [SerializeField, OptionalReference] private VisualSettings settings;
+        [Tooltip("Seconds a collapsing outline takes to settle onto a glitched object.")]
+        [SerializeField, Min(0.05f)] private float spawnFlashSeconds = 0.35f;
 
         private readonly List<BoundsOutline> pool = new List<BoundsOutline>();
         private readonly List<IEntityDescriptor> buffer = new List<IEntityDescriptor>();
         private readonly List<(GameEntityId id, float until)> patchFlashes = new List<(GameEntityId, float)>();
+        private readonly List<(GameEntityId id, float start, Color color)> spawnFlashes = new List<(GameEntityId, float, Color)>();
         private GameServices services;
         private Action<GameServices> bindCallback;
         private int used;
 
         private void OnEnable()
         {
-            bindCallback = s => services = s;
+            bindCallback = Bind;
             GameServices.WhenReady(bindCallback);
             if (containment != null) containment.Patched += OnPatched;
+        }
+
+        private void Bind(GameServices s)
+        {
+            services = s;
+            s.Glitches.OperationStarted += OnOperationStarted;
+        }
+
+        /// <summary>A collapsing outline settles onto what the glitch changed or created.</summary>
+        private void OnOperationStarted(Core.Glitches.GlitchOperation operation)
+        {
+            if (!VisualSettings.On(settings, x => x.spawnFlashes)) return;
+            var color = glitches != null ? glitches.ColorFor(operation) : glitchedColor;
+            float now = Time.unscaledTime;
+            for (int i = 0; i < operation.ProductCount; i++) spawnFlashes.Add((operation.Product(i), now, color));
+            if (operation.ProductCount == 0 && operation.TargetCount == 1) spawnFlashes.Add((operation.Target(0), now, color));
         }
 
         private void OnPatched(Core.Glitches.GlitchOperation operation)
@@ -58,7 +78,9 @@ namespace BugReport.Presentation
         private void OnDisable()
         {
             if (containment != null) containment.Patched -= OnPatched;
+            if (services != null && !services.IsDisposed) services.Glitches.OperationStarted -= OnOperationStarted;
             patchFlashes.Clear();
+            spawnFlashes.Clear();
             GameServices.CancelWhenReady(bindCallback);
             services = null;
             for (int i = 0; i < pool.Count; i++) pool[i].Hide();
@@ -121,6 +143,25 @@ namespace BugReport.Presentation
                 }
                 if (services.Registry.TryGet(flash.id, out var patchedTarget) && patchedTarget is GameEntity patchedEntity)
                     Draw(patchedEntity, Mathf.Repeat(now * 8f, 1f) < 0.5f ? patchedColor : Color.white);
+            }
+
+            for (int i = spawnFlashes.Count - 1; i >= 0; i--)
+            {
+                var flash = spawnFlashes[i];
+                float t = (now - flash.start) / spawnFlashSeconds;
+                if (t >= 1f)
+                {
+                    spawnFlashes.RemoveAt(i);
+                    continue;
+                }
+                if (services.Registry.TryGet(flash.id, out var flashTarget) && flashTarget is GameEntity flashEntity)
+                {
+                    var bounds = flashEntity.GetWorldBounds();
+                    bounds.Expand(bounds.size.magnitude * 0.9f * (1f - t));
+                    var c = flash.color;
+                    c.a = 1f - t * 0.5f;
+                    NextOutline().Show(bounds, c);
+                }
             }
 
             bool gameplay = state == GameState.Playing || state == GameState.Inspection;
