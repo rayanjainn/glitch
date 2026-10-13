@@ -176,6 +176,32 @@ namespace BugReport.Core.Tests
         }
 
         [Test]
+        public void CooldownScale_LengthensNewCooldowns_AndNeverShortens()
+        {
+            var spec = Spec(cooldown: 2f);
+            manager.CooldownScale = 1.5f;
+            ApplyAB(spec, now: 0f);
+            Assert.That(manager.CooldownRemaining("collision", 0f), Is.EqualTo(3f).Within(1e-4f));
+
+            manager.CooldownScale = 0.1f;
+            Assert.That(manager.CooldownScale, Is.EqualTo(1f), "containment never makes glitches cheaper");
+        }
+
+        [Test]
+        public void ContainmentInputs_SumActiveWeightsAndProducts()
+        {
+            var c = new FakeEntity("C").RegisterIn(registry);
+            var heavy = new GlitchSpec("heavy", "HEAVY", new[] { Transferable }, containmentWeight: 2f);
+            effect.OnApplyHook = op => op.AddProduct(c.Id);
+            manager.TryApply(heavy, effect, new[] { a.Id }, 0f);
+            effect.OnApplyHook = null;
+            manager.TryApply(Spec(arity: 1), effect, new[] { b.Id }, 0f); // default weight 1
+
+            Assert.That(manager.ActiveContainmentWeight, Is.EqualTo(3f).Within(1e-4f));
+            Assert.That(manager.ActiveProductCount, Is.EqualTo(1));
+        }
+
+        [Test]
         public void FailedApply_DoesNotStartCooldown()
         {
             var spec = Spec(cooldown: 5f);

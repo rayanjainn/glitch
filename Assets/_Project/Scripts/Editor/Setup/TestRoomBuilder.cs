@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using BugReport.Anomaly;
+using BugReport.Containment;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
 using BugReport.DebugTools;
@@ -37,6 +38,7 @@ namespace BugReport.EditorTools.Setup
         public const string CrateProfilePath = ProfileFolder + "/DP_Crate.asset";
         public const string PrefabFolder = "Assets/_Project/Prefabs/Generated";
         public const string CratePrefabPath = PrefabFolder + "/PF_Crate.prefab";
+        public const string ContainmentSettingsPath = "Assets/_Project/ScriptableObjects/Containment/CS_Default.asset";
 
         private const float RoomHalfX = 12f;
         private const float RoomHalfZ = 8f;
@@ -108,6 +110,7 @@ namespace BugReport.EditorTools.Setup
             var duplication = LoadOrCreate<DuplicationDefinition>(DuplicationPath, d => d.ApplyDefaults());
             var freeze = LoadOrCreate<FreezeDefinition>(FreezePath, d => d.ApplyDefaults());
             var crateProfile = LoadOrCreate<DuplicationProfile>(CrateProfilePath, p => p.Configure(null, 2));
+            var containmentSettings = LoadOrCreate<ContainmentSettingsAsset>(ContainmentSettingsPath, _ => { });
             var cratePrefab = CreateCratePrefab(mats, crateProfile);
             if (cratePrefab == null)
             {
@@ -123,7 +126,7 @@ namespace BugReport.EditorTools.Setup
             var hero = BuildHero(mats);
             var anomaly = BuildAnomaly(mats, actions, out var motor);
             var cameraRig = BuildCamera(anomaly.transform, out var scanner);
-            BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze }, out var selection, out var glitchController);
+            BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze }, containmentSettings, out var selection, out var glitchController);
 
             var controller = anomaly.AddComponent<AnomalyPlayerController>();
             Wire(controller, "input", anomaly.GetComponent<InputReader>());
@@ -286,7 +289,7 @@ namespace BugReport.EditorTools.Setup
 
         // ---------------------------------------------------------------- actors
 
-        private static PlaceholderHero BuildHero(MaterialSet mats)
+        private static HeroController BuildHero(MaterialSet mats)
         {
             int heroLayer = GameLayers.Index(GameLayers.Hero);
             var hero = new GameObject("HERO");
@@ -309,24 +312,37 @@ namespace BugReport.EditorTools.Setup
             AddEntity(hero, "HERO", EntityCategory.Hero, EntityCapabilities.Inspectable | EntityCapabilities.AIControllable,
                 "PROJECT HERO protagonist. Follows the script. Trusts the level geometry.");
 
-            var routeRoot = new GameObject("HeroRoute").transform;
-            var route = new[]
-            {
-                Waypoint(routeRoot, "WP_0", new Vector3(-5f, 0f, 0f)),
-                Waypoint(routeRoot, "WP_1_Exit", new Vector3(10.5f, 0f, 0f)),
-            };
+            // Route graph. The firewall is the only way east; the holo panel can be walked around (north/south),
+            // so making it solid re-routes the hero instead of blocking it.
+            var graphRoot = new GameObject("HeroNavGraph");
+            var start = NavNode(graphRoot.transform, "N_Start", new Vector3(-9f, 0f, 0f));
+            var west = NavNode(graphRoot.transform, "N_FirewallWest", new Vector3(-1.2f, 0f, 0f));
+            var east = NavNode(graphRoot.transform, "N_FirewallEast", new Vector3(3f, 0f, 0f));
+            var south = NavNode(graphRoot.transform, "N_HoloSouth", new Vector3(6f, 0f, -3.2f));
+            var north = NavNode(graphRoot.transform, "N_HoloNorth", new Vector3(6f, 0f, 3.2f));
+            var beforeExit = NavNode(graphRoot.transform, "N_BeforeExit", new Vector3(9f, 0f, 0f));
+            var exit = NavNode(graphRoot.transform, "N_Exit", new Vector3(10.5f, 0f, 0f));
+            start.Configure(west);
+            west.Configure(east);
+            east.Configure(beforeExit, south, north);
+            south.Configure(beforeExit);
+            north.Configure(beforeExit);
+            beforeExit.Configure(exit);
 
-            var placeholder = hero.AddComponent<PlaceholderHero>();
-            placeholder.Configure(route, newStartDelay: 1.5f);
-            return placeholder;
+            var navGraph = graphRoot.AddComponent<HeroNavGraph>();
+            navGraph.Configure(new[] { start, west, east, south, north, beforeExit, exit }, cc.radius, cc.height);
+
+            var controller = hero.AddComponent<HeroController>();
+            controller.Configure(navGraph, exit, newStartDelay: 1.5f);
+            return controller;
         }
 
-        private static Transform Waypoint(Transform parent, string name, Vector3 position)
+        private static HeroNavNode NavNode(Transform parent, string name, Vector3 position)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
             go.transform.position = position;
-            return go.transform;
+            return go.AddComponent<HeroNavNode>();
         }
 
         private static GameObject BuildAnomaly(MaterialSet mats, InputActionAsset actions, out AnomalyMotor motor)
@@ -398,8 +414,9 @@ namespace BugReport.EditorTools.Setup
             return rig;
         }
 
-        private static void BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, PlaceholderHero hero,
-            GlitchDefinition[] glitchDefinitions, out SelectionController selection, out GlitchController glitchController)
+        private static void BuildSystems(MaterialSet mats, TargetScanner scanner, AnomalyMotor motor, HeroController hero,
+            GlitchDefinition[] glitchDefinitions, ContainmentSettingsAsset containmentSettings,
+            out SelectionController selection, out GlitchController glitchController)
         {
             var systems = new GameObject("--- SYSTEMS ---");
             var bootstrap = systems.AddComponent<GameBootstrap>();
@@ -413,9 +430,15 @@ namespace BugReport.EditorTools.Setup
             WireArray(glitchController, "glitches", glitchDefinitions);
             Wire(glitchController, "selection", selection);
 
+            var containment = systems.AddComponent<ContainmentDirector>();
+            Wire(containment, "settings", containmentSettings);
+            var containmentHud = systems.AddComponent<ContainmentPresenter>();
+            Wire(containmentHud, "director", containment);
+
             var highlight = systems.AddComponent<EntityHighlightPresenter>();
             Wire(highlight, "lineMaterial", mats.Line);
             Wire(highlight, "glitches", glitchController);
+            Wire(highlight, "containment", containment);
 
             var pulses = systems.AddComponent<GlitchPulsePresenter>();
             Wire(pulses, "lineMaterial", mats.Line);

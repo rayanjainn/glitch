@@ -62,34 +62,27 @@ namespace BugReport.Tests.PlayMode
         private GlitchResult Transfer(CollisionCapability source, CollisionCapability target, float now = 0f)
             => services.Glitches.TryApply(spec, effect, new[] { Id(source), Id(target) }, now);
 
-        private PlaceholderHero Hero(Vector3 position, params Vector3[] route)
+        private GameObject T(GameObject go) => Track(go);
+
+        /// <summary>Hero walking a straight graph from <paramref name="position"/> to <paramref name="goalPosition"/>.</summary>
+        private HeroController Hero(Vector3 position, Vector3 goalPosition)
         {
-            var go = Track(new GameObject("Hero"));
+            var feet = new Vector3(position.x, 0f, position.z);
+            var graph = HeroTestKit.Chain(T, out var nodes, feet, goalPosition);
+            return HeroTestKit.Hero(T, position, graph, nodes[1]);
+        }
+
+        /// <summary>A CharacterController on the Hero layer that just stands there (an occupant).</summary>
+        private GameObject Occupant(Vector3 position)
+        {
+            var go = Track(new GameObject("Occupant"));
             go.layer = heroLayer;
             go.transform.position = position;
             var cc = go.AddComponent<CharacterController>();
             cc.height = 2f;
             cc.radius = 0.4f;
-            var hero = go.AddComponent<PlaceholderHero>();
-            hero.AutoTick = false;
-            var points = new Transform[route.Length];
-            for (int i = 0; i < route.Length; i++)
-            {
-                points[i] = Track(new GameObject("WP" + i)).transform;
-                points[i].position = route[i];
-            }
-            hero.Configure(points, newStartDelay: 0f);
             Physics.SyncTransforms();
-            return hero;
-        }
-
-        private static void Simulate(PlaceholderHero hero, float seconds)
-        {
-            for (int i = 0; i < Mathf.CeilToInt(seconds * 60f); i++)
-            {
-                hero.Tick(1f / 60f);
-                Physics.SyncTransforms();
-            }
+            return go;
         }
 
         // ---------------------------------------------------------------- tests
@@ -147,13 +140,12 @@ namespace BugReport.Tests.PlayMode
             var wall = Transferrable("Wall", new Vector3(0, 1.5f, 3), new Vector3(20, 3, 0.5f), CollisionMode.Solid);
             var pad = Transferrable("Pad", new Vector3(8, 0.05f, -6), new Vector3(2, 0.1f, 2), CollisionMode.Intangible);
             var hero = Hero(new Vector3(0, 1.05f, 0), new Vector3(0, 0, 8));
-            Simulate(hero, 4f);
+            HeroTestKit.Simulate(hero, 4f);
             Assume.That(hero.State, Is.EqualTo(HeroState.Blocked));
 
             Assert.That(Transfer(wall, pad).Succeeded, Is.True);
-            Simulate(hero, 8f);
 
-            Assert.That(hero.State, Is.EqualTo(HeroState.Arrived));
+            Assert.That(HeroTestKit.SimulateUntil(hero, HeroState.Arrived, 10f), Is.True, "state " + hero.State);
         }
 
         [Test]
@@ -165,9 +157,9 @@ namespace BugReport.Tests.PlayMode
             var hero = Hero(new Vector3(0, 1.05f, 0), new Vector3(0, 0, 8));
 
             Assert.That(Transfer(source, holo).Succeeded, Is.True);
-            Simulate(hero, 4f);
+            HeroTestKit.Simulate(hero, 4f);
 
-            Assert.That(hero.State, Is.EqualTo(HeroState.Blocked));
+            Assert.That(hero.State, Is.EqualTo(HeroState.Blocked), "no way around in this graph");
             Assert.That(hero.transform.position.z, Is.LessThan(3f));
         }
 
@@ -190,7 +182,7 @@ namespace BugReport.Tests.PlayMode
         {
             var wall = Transferrable("Wall", new Vector3(0, 1, 3), new Vector3(4, 2, 0.5f), CollisionMode.Solid);
             var zone = Transferrable("Zone", new Vector3(8, 1, 0), new Vector3(3, 2, 3), CollisionMode.Intangible);
-            Hero(new Vector3(8, 1.05f, 0));
+            Occupant(new Vector3(8, 1.05f, 0));
 
             var result = Transfer(wall, zone);
 
@@ -205,7 +197,7 @@ namespace BugReport.Tests.PlayMode
             var wall = Transferrable("Wall", new Vector3(0, 1, 3), new Vector3(4, 2, 2f), CollisionMode.Solid);
             var pad = Transferrable("Pad", new Vector3(8, 0.05f, 0), new Vector3(2, 0.1f, 2), CollisionMode.Intangible);
             var op = Transfer(wall, pad).Operation;
-            var hero = Hero(new Vector3(0, 1.05f, 3)); // standing inside the now-intangible wall
+            var hero = Occupant(new Vector3(0, 1.05f, 3)); // standing inside the now-intangible wall
 
             var blocked = services.Glitches.Revert(op.Id);
             Assert.That(blocked.Failure, Is.EqualTo(GlitchFailure.EndBlocked));

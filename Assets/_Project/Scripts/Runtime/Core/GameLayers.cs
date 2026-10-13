@@ -65,6 +65,23 @@ namespace BugReport
             }
         }
 
+        /// <summary>
+        /// What blocks the hero's route planning: static world and props. Excludes the hero itself,
+        /// the anomaly (moves constantly; the hero just bumps into it) and Intangible objects.
+        /// </summary>
+        public static int HeroBlockingMask
+        {
+            get
+            {
+                int mask = 0;
+                int world = Index(World);
+                int props = Index(Props);
+                if (world >= 0) mask |= 1 << world;
+                if (props >= 0) mask |= 1 << props;
+                return mask != 0 ? mask : 1;
+            }
+        }
+
         /// <summary>Geometry the camera must not clip through. Falls back to Default if layers are missing.</summary>
         public static int CameraObstructionMask
         {

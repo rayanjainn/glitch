@@ -1,6 +1,6 @@
 # BUG//REPORT — Technical Architecture
 
-Status: **Milestones 1–2 verified in Unity 6000.6.0f1. Milestone 3 (Duplication + Freeze) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
+Status: **Milestones 1–3 verified in Unity 6000.6.0f1. Milestone 4 (hero behaviour + containment) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
 
 Engine: Unity 6.6 (6000.6.x) · C# 9 (Unity's language level) · URP · Input System.
 
@@ -214,19 +214,59 @@ Consequences:
 
 ---
 
-## 6. Hero *(M1 placeholder → M4)*
+## 6. Hero *(implemented, M4)*
 
-- In M1, `PlaceholderHero` walks a waypoint route with a CharacterController, so colliders physically block it. `ProgressMonitor` (Core) detects stalls → Blocked → retries every 2 s. The retry is what lets a later glitch unblock it. This is covered by a PlayMode test.
-- In M4 an FSM hero follows objective-driven goals. **Open risk:** NavMesh versus dynamic collision. A baked NavMesh ignores runtime collision changes. Candidate design: bake only the floor, make glitchable blockers `NavMeshObstacle(carve)` toggled by the collision capability, and handle new walkable surfaces (shadow → platform) with `NavMeshLink`s authored in advance or a local `NavMeshSurface` rebuild. This needs `com.unity.ai.navigation`, an official package, added only in M4. Alternative: a custom waypoint graph with runtime passability checks. Prototype both in M4 before committing.
+**Navigation decision.** I chose an authored waypoint graph with live physics passability over NavMesh. Recorded in M4.
 
-## 7. Containment *(planned, M4)*
+- A baked NavMesh ignores runtime collision changes. Collision Transfer, Freeze and Duplication change what is solid constantly, so NavMesh would need every glitchable object kept in sync through obstacle carving, plus runtime rebakes for surfaces that become walkable.
+- With the graph, `HeroNavGraph.IsPassable` is a capsule sweep against `World|Props` at query time. Intangible objects, the anomaly and the hero itself are excluded, and low steps (pads, decals) are ignored. A glitch changes routes instantly, with zero nav data to maintain.
+- The routing itself is the engine-free `NavGraph` (A*, deterministic tie-breaks). When the goal is unreachable it returns a **partial path** to the reachable node closest to the goal.
+- **Trade-off:** levels need authored nodes. That is acceptable for a handcrafted puzzle game where the hero "follows the script". Revisit if levels become open.
 
-A deterministic Core `ContainmentModel` fed by explicit events: GlitchApplied(weight), ActiveOperationSeconds, DuplicateCount, RestrictedTargetModified, AnomalySighted(by unit).
+**`HeroController` states (FSM):**
 
-- Per-source pressure with decay produces Stages 0–4, with thresholds **and hysteresis** so the stage doesn't flicker.
-- Normal play with no glitches decays to 0. This avoids a meter that rises regardless of player action.
-- Stage changes emit events. Responders (UI, audio, drones, `PatchAction`) subscribe. `PatchAction` asks `GlitchManager` to revert a chosen operation, which is what creates exploitable openings.
-- `Reset()` runs on level restart. Fully unit-testable with an injected clock.
+| State | Behaviour |
+|---|---|
+| Idle | waits out the start delay |
+| Walking | follows the route; re-checks the next edge every 0.4 s; stall detection via `ProgressMonitor` |
+| Blocked | no full route: walks as far as possible, then waits at the obstacle and re-plans every 2 s, or within 0.3 s of any glitch starting or ending |
+| Confused | the next edge became blocked, or it got physically stuck: pauses 1.2 s, then re-plans |
+| Arrived | at the goal |
+
+- It moves with a CharacterController, so it is physically blocked by what is solid.
+- It never walks backwards to a node when no progress is possible; it waits at the obstacle.
+- It is deterministic and uses no randomness.
+- Investigate, Chase and the rest of the AI Override states come with that glitch (deferred, GDD Part 11).
+
+## 7. Containment *(implemented, M4)*
+
+**`ContainmentModel` (core, deterministic, unit-tested).** Pressure (0–100) comes only from explicit sources:
+
+| Source | Effect |
+|---|---|
+| Glitch applied | impulse = spec `ContainmentWeight` × 10 |
+| Glitches active | + weight × 1/s |
+| Duplicates existing | + 0.5/s each |
+| Anomaly sighted *(input exists; no sensors yet)* | + 8/s |
+| Restricted target modified *(input exists)* | + 15 |
+| Decay | − 1.5/s, always |
+
+- Because decay always applies, normal play returns to stage 0.
+- Stages 1–4 have separate enter thresholds (20/45/70/90) and exit thresholds (12/35/60/80), so stages don't flicker.
+- All of these values are tunable in `ContainmentSettingsAsset` (ScriptableObject).
+
+**`ContainmentDirector` (runtime) responses:**
+- **Cooldowns:** multiplied by stage (×1.5 from stage 2, ×2 at stage 4), through `GlitchManager.CooldownScale`, which is clamped ≥ 1.
+- **Patches, from stage 3:** every 6 s (3 s at stage 4) the **oldest** revertible glitch is reverted with reason `Patched`, through the same `GlitchManager` API the player uses.
+  - The first patch waits one full interval after entering the stage (warning time).
+  - A patch the effect vetoes (someone inside a wall that would turn solid) moves on to the next glitch. Patches never trap anyone.
+  - Each patch relieves 15 pressure.
+- **This is how containment creates opportunities as well as threats:** a patch can re-solidify a wall, or undo a duplicate a sensor was fooled by.
+- The director never edits objects directly.
+
+**Presentation (placeholder):** `ContainmentPresenter` shows a pressure bar plus a stage banner (red/white) and a patch countdown. Patched objects flash red/white.
+
+**Deferred:** drones and sensors (anomaly sighting), stage-4 route shutdowns, audio alerts. They need the vertical-slice level and audio set (M5).
 
 ## 8. Objectives, save, settings *(planned)*
 

@@ -13,13 +13,14 @@ namespace BugReport.Core.Glitches
         private readonly TargetRequirement[] slots;
 
         public GlitchSpec(string id, string displayName, IReadOnlyList<TargetRequirement> slots,
-            float duration = 0f, float cooldown = 0f, int maxActive = 0)
+            float duration = 0f, float cooldown = 0f, int maxActive = 0, float containmentWeight = 1f)
         {
             if (string.IsNullOrEmpty(id)) throw new ArgumentException("Glitch id is required.", nameof(id));
             if (slots == null || slots.Count == 0) throw new ArgumentException("A glitch needs at least one target slot.", nameof(slots));
             if (duration < 0f) throw new ArgumentOutOfRangeException(nameof(duration));
             if (cooldown < 0f) throw new ArgumentOutOfRangeException(nameof(cooldown));
             if (maxActive < 0) throw new ArgumentOutOfRangeException(nameof(maxActive));
+            if (containmentWeight < 0f) throw new ArgumentOutOfRangeException(nameof(containmentWeight));
 
             Id = id;
             DisplayName = string.IsNullOrEmpty(displayName) ? id : displayName;
@@ -28,6 +29,7 @@ namespace BugReport.Core.Glitches
             Duration = duration;
             Cooldown = cooldown;
             MaxActive = maxActive;
+            ContainmentWeight = containmentWeight;
         }
 
         public string Id { get; }
@@ -39,6 +41,8 @@ namespace BugReport.Core.Glitches
         public float Cooldown { get; }
         /// <summary>Maximum simultaneously active operations of this glitch. 0 = unlimited.</summary>
         public int MaxActive { get; }
+        /// <summary>How suspicious containment finds this glitch (impulse on apply, pressure while active).</summary>
+        public float ContainmentWeight { get; }
 
         public TargetRequirement Slot(int index) => slots[index];
     }

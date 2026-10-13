@@ -57,7 +57,9 @@ namespace BugReport.Tests.EditMode
             Assert.That(All<TargetScanner>().Count, Is.EqualTo(1), "TargetScanner");
             Assert.That(All<SelectionController>().Count, Is.EqualTo(1), "SelectionController");
             Assert.That(All<InputReader>().Count, Is.EqualTo(1), "InputReader");
-            Assert.That(All<PlaceholderHero>().Count, Is.EqualTo(1), "PlaceholderHero");
+            Assert.That(All<HeroController>().Count, Is.EqualTo(1), "HeroController");
+            Assert.That(All<HeroNavGraph>().Count, Is.EqualTo(1), "HeroNavGraph");
+            Assert.That(All<BugReport.Containment.ContainmentDirector>().Count, Is.EqualTo(1), "ContainmentDirector");
             Assert.That(All<GlitchController>().Count, Is.EqualTo(1), "GlitchController");
         }
 
@@ -101,14 +103,15 @@ namespace BugReport.Tests.EditMode
         }
 
         [Test]
-        public void AnomalyIsUntargetableAndHeroHasRoute()
+        public void AnomalyIsUntargetableAndHeroHasGoal()
         {
             var anomaly = All<AnomalyPlayerController>().Single().GetComponent<GameEntity>();
             Assert.That(anomaly, Is.Not.Null);
             Assert.That(anomaly.Category, Is.EqualTo(EntityCategory.Anomaly));
 
-            var hero = All<PlaceholderHero>().Single();
-            Assert.That(hero.RouteLength, Is.GreaterThan(0));
+            var hero = All<HeroController>().Single();
+            Assert.That(hero.Goal, Is.Not.Null);
+            Assert.That(All<HeroNavGraph>().Single().TryGetId(hero.Goal, out _), Is.True, "goal must be a node of the graph");
             Assert.That(hero.GetComponent<GameEntity>().Category, Is.EqualTo(EntityCategory.Hero));
         }
 
@@ -159,6 +162,19 @@ namespace BugReport.Tests.EditMode
         {
             foreach (var e in All<GameEntity>().Where(x => x.Capabilities.HasAll(EntityCapabilities.Duplicable)))
                 Assert.That(PrefabUtility.IsPartOfPrefabInstance(e.gameObject), Is.True, e.DisplayName);
+        }
+
+        [Test]
+        public void HeroCanReachTheExit_OnceTheFirewallIsPassable()
+        {
+            // Static graph check: connected start → exit ignoring physics.
+            var graph = All<HeroNavGraph>().Single();
+            var hero = All<HeroController>().Single();
+            graph.Build();
+            graph.TryGetId(hero.Goal, out var goal);
+            int start = graph.Graph.Nearest(hero.transform.position.x, 0f, hero.transform.position.z);
+            var path = new List<int>();
+            Assert.That(graph.Graph.TryFindPath(start, goal, (a, b) => true, path), Is.True);
         }
 
         [Test]

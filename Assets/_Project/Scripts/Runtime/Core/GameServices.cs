@@ -1,4 +1,5 @@
 using System;
+using BugReport.Core.Containment;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
 using BugReport.Core.Glitches;
@@ -26,12 +27,15 @@ namespace BugReport
             Selection = new SelectionModel(Registry, TargetRequirement.Selection);
             State = new GameStateMachine(initialState);
             Glitches = new GlitchManager(Registry);
+            Containment = new ContainmentModel();
         }
 
         public EntityRegistry Registry { get; }
         public SelectionModel Selection { get; }
         public GameStateMachine State { get; }
         public GlitchManager Glitches { get; }
+        /// <summary>Level-scoped: a restart creates new services, so containment always starts calm.</summary>
+        public ContainmentModel Containment { get; }
         public bool IsDisposed { get; private set; }
 
         public static GameServices Current => current;

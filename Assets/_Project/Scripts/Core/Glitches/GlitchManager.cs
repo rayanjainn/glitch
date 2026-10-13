@@ -39,6 +39,40 @@ namespace BugReport.Core.Glitches
 
         public int ActiveCount => active.Count;
 
+        private float cooldownScale = 1f;
+
+        /// <summary>
+        /// Multiplies cooldowns started from now on (containment makes glitches "more expensive"
+        /// at higher stages). Clamped to at least 1: containment never makes glitches cheaper.
+        /// </summary>
+        public float CooldownScale
+        {
+            get => cooldownScale;
+            set => cooldownScale = Math.Max(1f, value);
+        }
+
+        /// <summary>Sum of <see cref="GlitchSpec.ContainmentWeight"/> over active operations.</summary>
+        public float ActiveContainmentWeight
+        {
+            get
+            {
+                float sum = 0f;
+                for (int i = 0; i < active.Count; i++) sum += active[i].Operation.Spec.ContainmentWeight;
+                return sum;
+            }
+        }
+
+        /// <summary>Total entities currently created by active operations (duplicates).</summary>
+        public int ActiveProductCount
+        {
+            get
+            {
+                int sum = 0;
+                for (int i = 0; i < active.Count; i++) sum += active[i].Operation.ProductCount;
+                return sum;
+            }
+        }
+
         public GlitchOperation GetActive(int index) => active[index].Operation;
 
         public bool TryGet(OperationId id, out GlitchOperation operation)
@@ -128,7 +162,7 @@ namespace BugReport.Core.Glitches
             }
 
             active.Add(new Active(operation, effect));
-            if (spec.Cooldown > 0f) cooldownEnds[spec.Id] = now + spec.Cooldown;
+            if (spec.Cooldown > 0f) cooldownEnds[spec.Id] = now + spec.Cooldown * cooldownScale;
             OperationStarted?.Invoke(operation);
             return GlitchResult.Success(operation);
         }

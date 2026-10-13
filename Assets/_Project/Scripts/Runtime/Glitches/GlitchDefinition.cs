@@ -67,7 +67,7 @@ namespace BugReport.Glitches
             {
                 requirements[i] = new TargetRequirement(slots[i].requiredCapabilities, slots[i].excludedCategories ?? new EntityCategory[0]);
             }
-            return new GlitchSpec(Id, DisplayName, requirements, duration, cooldown, maxActive);
+            return new GlitchSpec(Id, DisplayName, requirements, duration, cooldown, maxActive, containmentWeight);
         }
 
         public abstract IGlitchEffect CreateEffect(GameServices services);
