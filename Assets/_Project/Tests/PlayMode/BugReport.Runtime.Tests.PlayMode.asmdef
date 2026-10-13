@@ -1,0 +1,23 @@
+{
+    "name": "BugReport.Runtime.Tests.PlayMode",
+    "rootNamespace": "BugReport.Tests.PlayMode",
+    "references": [
+        "BugReport.Core",
+        "BugReport.Runtime",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
