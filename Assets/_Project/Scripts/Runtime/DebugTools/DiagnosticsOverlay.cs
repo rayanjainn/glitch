@@ -8,7 +8,6 @@ using BugReport.Hero;
 using BugReport.Interaction;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 namespace BugReport.DebugTools
 {
@@ -55,17 +54,12 @@ namespace BugReport.DebugTools
             if (keyboard.f5Key.wasPressedThisFrame) RestartLevel();
         }
 
-        public static void RestartLevel()
-        {
-            var scene = SceneManager.GetActiveScene();
-            if (scene.buildIndex >= 0) SceneManager.LoadScene(scene.buildIndex);
-            else Debug.LogWarning("[BUG REPORT] Cannot restart: active scene is not in Build Settings.");
-        }
+        public static void RestartLevel() => Level.LevelFlow.RestartLevel();
 
         private void OnGUI()
         {
             EnsureStyles();
-            // The pause screen itself is drawn by LevelMenus.
+            // The pause screen itself is drawn by GameMenus (UI Toolkit).
             if (!visible) return;
             BuildText();
             var content = new GUIContent(text.ToString());

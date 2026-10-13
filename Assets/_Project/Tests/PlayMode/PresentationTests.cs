@@ -108,7 +108,7 @@ namespace BugReport.Tests.PlayMode
             var pivot = Track(new GameObject("Visual")).transform;
             pivot.SetParent(hero.transform, false);
             var animator = hero.gameObject.AddComponent<HeroAnimator>();
-            animator.Configure(hero, pivot, null);
+            animator.Configure(hero, pivot);
             return (hero, animator, pivot);
         }
 

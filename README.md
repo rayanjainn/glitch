@@ -21,7 +21,8 @@ Full walkthrough: **[TESTING.md](TESTING.md)**.
 ## Tests without Unity
 ```bash
 Tools/CoreTests/run-core-tests.sh            # Core rules: compile at C# 9 / netstandard2.1 + NUnit
-dotnet build Tools/CompileCheck              # type-check all C# against Unity API stubs (weaker than a Unity compile)
+python3 Tools/CompileCheck/compile-check.py  # type-check each Unity assembly against API stubs (weaker than a Unity compile)
+python3 Tools/CompileCheck/check-unity-filenames.py  # MonoBehaviours/ScriptableObjects live in <ClassName>.cs
 ```
 Requires the .NET 8 SDK. Headless Unity test runs: `Tools/UnityTests/run-unity-tests.ps1` (Windows) or `.sh` (macOS/Linux).
 

@@ -201,3 +201,36 @@
 - I had flagged this exact risk in M1 and dismissed it because the assembly didn't reference SRP Core then.
 - **Fix:** renamed ours to `DiagnosticsOverlay`, moving the file and `.meta` together so scenes keep the reference. The compile-check stubs now include SRP's `DebugOverlay`/`DebugManager`/`DebugUI` so such clashes reproduce outside Unity.
 - **Rule:** when an assembly gains a new reference, re-check project type names against the newly imported namespaces.
+
+## 2026-10-13 — Milestone 6 pass 1 merged; pass 2: UI Toolkit game UI (Editor verification pending)
+
+- PR #6 merged after the owner's Unity run: all EditMode and PlayMode tests passing.
+- **Pass 2** on `feature/ui-toolkit-hud` replaces every gameplay IMGUI placeholder with UI Toolkit:
+  - `UiLayer` base + `GameHud`, `GameMenus`, `InspectionOverlay` on one `UIDocument`;
+  - the tree is built in C# (type-checked, testable by element name); all styling is in `BugReportUI.uss`;
+  - new for players: a glitch dock showing every glitch and its cooldown, short feedback messages (rejection reasons such as OCCUPIED were previously only in the debug overlay), and a controls list on the pause screen.
+- **Decision I'm reversing:** ARCHITECTURE said the designed UI would wait until the layout had been playtested. I did it first because the information layout is the same as before (plus the dock and messages), and future layout changes are now USS edits instead of IMGUI rect maths. If the playtest changes what the HUD should show, that is a code change either way.
+- **Verified here:** Core tests 135/135; stub compile 0 errors / 0 warnings, now including UI Toolkit stubs; filename check OK. The stub compile caught a wrong enum name and a definite-assignment error before Unity did.
+- **Not verified:** anything visual; USS parsing (Unity reports bad properties as import warnings); UI Toolkit's Input System backend for mouse and gamepad menu navigation (Unity 6 documents it as default when no EventSystem exists).
+
+## 2026-10-13 — Milestone 6 pass 2, first Unity compile: cross-assembly access
+
+- **Error:** `CS0122 'PresentationBuilder' is inaccessible` in the new EditMode UI asset tests. The builder was `internal` to `BugReport.Editor`; the tests are a separate assembly.
+- **Why the offline check missed it:** `Tools/CompileCheck` compiled every file into **one** assembly, so `internal` was visible everywhere.
+- **Fixes:**
+  - `PresentationBuilder` is now public, with its helpers that take internal types kept internal (same pattern as `TestRoomBuilder`).
+  - `compile-check.py` replaces the single project. It generates one project per `.asmdef` with the same references; `noEngineReferences` assemblies get no Unity stubs. Verified: with the old `internal` it reproduces the same 5 errors; with the fix it reports 0.
+  - It also catches a missing `.asmdef` reference between our own assemblies. It cannot catch a missing Unity package reference, because the stubs are one assembly.
+- **Warning UAC0005** (Unity analyzer) in `ScriptFileNameTests`: `AppDomain.GetAssemblies()` replaced with `TypeCache.GetTypesDerivedFrom<T>()`.
+
+## 2026-10-14 — First human playthrough (macOS build)
+
+- The owner built the game as a macOS app and finished TRAINING LAB: all three objectives, completion screen. This is the **first manual playthrough** of the slice. Before this, only the automated playthrough had finished it.
+- **Bug seen in the screenshots:** spacing missing on the pause and complete screens (title touching the first button, key labels touching their descriptions, summary touching the buttons).
+  - **Cause:** the USS reset `.br-root Label { margin: 0; padding: 0 }` has higher specificity (class + type) than single-class rules such as `.br-key` and `.br-title`, so it removed their spacing.
+  - **Fix:** the reset is now a single class (`.br-label`) declared first, so later rules override it.
+- **Readability:** the prompt under the glitch dock was hard to read over the light floor. It now sits on a dark pill.
+- **Still open (needs the owner's feedback, not more guessing):**
+  - The anomaly sits just under the reticle and covers part of the view.
+  - The hero's "..." icon is small.
+  - Whether the puzzles were understandable without the guide.

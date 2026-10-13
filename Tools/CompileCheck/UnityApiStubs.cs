@@ -148,6 +148,14 @@ namespace UnityEngine
         public static Color Lerp(Color a, Color b, float t) => throw null;
         public static void RGBToHSV(Color rgb, out float h, out float s, out float v) => throw null;
     }
+    public struct Color32
+    {
+        public byte r, g, b, a;
+        public Color32(byte r, byte g, byte b, byte a) { this.r = r; this.g = g; this.b = b; this.a = a; }
+        public static implicit operator Color32(Color c) => throw null;
+        public static implicit operator Color(Color32 c) => throw null;
+    }
+    public struct Vector2Int { public Vector2Int(int x, int y) { } public int x => throw null; public int y => throw null; }
     public struct Pose { public Vector3 position; public Quaternion rotation; public Pose(Vector3 p, Quaternion r) { position = p; rotation = r; } }
     public struct Rect { public Rect(float x, float y, float w, float h) { this.x = x; this.y = y; width = w; height = h; } public float x, y, width, height; }
     public static class PlayerPrefs { public static int GetInt(string k, int d) => throw null; public static void SetInt(string k, int v) { } public static void Save() { } }
@@ -451,6 +459,7 @@ namespace UnityEngine.SceneManagement
 namespace UnityEngine.TestTools
 {
     [AttributeUsage(AttributeTargets.Method)] public class UnityTearDownAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Method)] public class UnitySetUpAttribute : Attribute { }
     public static class LogAssert { public static void Expect(UnityEngine.LogType type, System.Text.RegularExpressions.Regex message) { } public static void Expect(UnityEngine.LogType type, string message) { } }
     [AttributeUsage(AttributeTargets.Method)] public class UnityTestAttribute : Attribute { }
 }
@@ -510,6 +519,7 @@ namespace UnityEditor
     public static class AssetDatabase
     {
         public static T LoadAssetAtPath<T>(string p) where T : Object => throw null;
+        public static void SaveAssetIfDirty(Object o) { }
         public static Object[] LoadAllAssetsAtPath(string p) => throw null;
         public static void SaveAssets() { }
         public static bool IsValidFolder(string p) => throw null;
@@ -542,6 +552,15 @@ namespace UnityEditor
     public class Editor : ScriptableObject { }
     public class EditorWindow : ScriptableObject { }
     public class MonoScript : Object { public System.Type GetClass() => throw null; }
+    public static class TypeCache
+    {
+        public struct TypeCollection : IEnumerable<Type>
+        {
+            public IEnumerator<Type> GetEnumerator() => throw null;
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => throw null;
+        }
+        public static TypeCollection GetTypesDerivedFrom<T>() => throw null;
+    }
     public static class GameObjectUtility { public static int GetMonoBehavioursWithMissingScriptCount(GameObject g) => throw null; }
 }
 
@@ -560,5 +579,104 @@ namespace UnityEditor.SceneManagement
         public static bool SaveScene(Scene s, string p) => throw null;
         public static bool SaveCurrentModifiedScenesIfUserWantsTo() => throw null;
         public static UnityEngine.AsyncOperation LoadSceneAsyncInPlayMode(string path, LoadSceneParameters parameters) => throw null;
+    }
+}
+
+namespace UnityEngine.UIElements
+{
+    public enum PickingMode { Position, Ignore }
+    public enum DisplayStyle { Flex, None }
+    public enum StyleKeyword { Undefined, Null, Auto, None, Initial }
+    public struct StyleEnum<T> where T : struct, IConvertible
+    {
+        public T value { get => throw null; set { } }
+        public static implicit operator StyleEnum<T>(T v) => throw null;
+        public static implicit operator StyleEnum<T>(StyleKeyword k) => throw null;
+        public static bool operator ==(StyleEnum<T> a, StyleEnum<T> b) => throw null;
+        public static bool operator !=(StyleEnum<T> a, StyleEnum<T> b) => throw null;
+        public override bool Equals(object o) => throw null; public override int GetHashCode() => throw null;
+    }
+    public struct Length { public Length(float v) { } public static Length Percent(float v) => throw null; }
+    public struct StyleLength
+    {
+        public static implicit operator StyleLength(float v) => throw null;
+        public static implicit operator StyleLength(Length v) => throw null;
+        public static implicit operator StyleLength(StyleKeyword k) => throw null;
+    }
+    public struct StyleFloat
+    {
+        public static implicit operator StyleFloat(float v) => throw null;
+        public static implicit operator StyleFloat(StyleKeyword k) => throw null;
+    }
+    public struct StyleColor
+    {
+        public static implicit operator StyleColor(Color v) => throw null;
+        public static implicit operator StyleColor(StyleKeyword k) => throw null;
+    }
+    public interface IStyle
+    {
+        StyleEnum<DisplayStyle> display { get; set; }
+        StyleLength width { get; set; } StyleLength height { get; set; }
+        StyleLength left { get; set; } StyleLength top { get; set; }
+        StyleFloat opacity { get; set; }
+        StyleColor color { get; set; } StyleColor backgroundColor { get; set; }
+        StyleColor borderBottomColor { get; set; } StyleColor borderLeftColor { get; set; }
+    }
+    public interface IPanel { }
+    public interface IVisualElementScheduledItem { }
+    public interface IVisualElementScheduler { IVisualElementScheduledItem Execute(System.Action timerUpdateEvent); }
+    public struct VisualElementStyleSheetSet
+    {
+        public void Add(StyleSheet s) { } public bool Contains(StyleSheet s) => throw null; public bool Remove(StyleSheet s) => throw null;
+    }
+    public abstract class CallbackEventHandler { }
+    public abstract class Focusable : CallbackEventHandler { public virtual void Focus() { } public void Blur() { } }
+    public class VisualElement : Focusable
+    {
+        public string name { get => throw null; set { } }
+        public PickingMode pickingMode { get => throw null; set { } }
+        public object userData { get => throw null; set { } }
+        public IStyle style => throw null;
+        public VisualElementStyleSheetSet styleSheets => throw null;
+        public IPanel panel => throw null;
+        public VisualElement parent => throw null;
+        public IVisualElementScheduler schedule => throw null;
+        public int childCount => throw null;
+        public VisualElement this[int index] => throw null;
+        public void Add(VisualElement child) { } public void Insert(int index, VisualElement child) { }
+        public void Clear() { } public void RemoveFromHierarchy() { }
+        public void AddToClassList(string c) { } public void RemoveFromClassList(string c) { }
+        public void EnableInClassList(string c, bool enable) { } public bool ClassListContains(string c) => throw null;
+    }
+    public class TextElement : VisualElement { public virtual string text { get => throw null; set { } } }
+    public class Label : TextElement { public Label() { } public Label(string text) { } }
+    public class Button : TextElement { public Button() { } public Button(System.Action clickEvent) { } public event System.Action clicked; }
+    public static class UQueryExtensions
+    {
+        public static T Q<T>(this VisualElement e, string name = null, params string[] classes) where T : VisualElement => throw null;
+        public static VisualElement Q(this VisualElement e, string name = null, params string[] classes) => throw null;
+    }
+    public class StyleSheet : ScriptableObject { }
+    public class ThemeStyleSheet : StyleSheet { }
+    public enum PanelScaleMode { ConstantPixelSize, ConstantPhysicalSize, ScaleWithScreenSize }
+    public enum PanelScreenMatchMode { MatchWidthOrHeight, ShrinkToFit, ExpandToFit }
+    public class PanelSettings : ScriptableObject
+    {
+        public ThemeStyleSheet themeStyleSheet { get => throw null; set { } }
+        public PanelScaleMode scaleMode { get => throw null; set { } }
+        public Vector2Int referenceResolution { get => throw null; set { } }
+        public PanelScreenMatchMode screenMatchMode { get => throw null; set { } }
+        public float match { get => throw null; set { } }
+        public float sortingOrder { get => throw null; set { } }
+    }
+    public sealed class UIDocument : MonoBehaviour
+    {
+        public PanelSettings panelSettings { get => throw null; set { } }
+        public VisualElement rootVisualElement => throw null;
+        public float sortingOrder { get => throw null; set { } }
+    }
+    public static class RuntimePanelUtils
+    {
+        public static Vector2 CameraTransformWorldToPanel(IPanel panel, Vector3 worldPosition, Camera camera) => throw null;
     }
 }

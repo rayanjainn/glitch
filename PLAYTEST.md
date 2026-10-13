@@ -29,13 +29,13 @@ You are the small glowing thing. The yellow capsule is "the hero". You can't con
 2. Look at the blue wall and press **E**. A cyan box appears around it.
 3. Look at the **dark patch on the floor** and click the **left mouse button**.
 
-**You should see:** a blue flash; the wall turns see-through; the hero starts walking again and goes through the wall.
+**You should see:** a blue flash; a short message in the middle of the screen; the wall turns see-through; the hero starts walking again and goes through the wall.
 
 **Tell me if:** nothing happens, the wall looks strange (for example pink or solid black), or the hero stays stuck.
 
 ## Part 2: The gate
 1. The hero now stops at an **orange gate**. Two red squares are on the floor nearby. One has a crate on it.
-2. Press **Q** until the bottom of the screen says **DUPLICATION**.
+2. Press **Q** until **DUPLICATION** is highlighted in the bar at the bottom of the screen.
 3. Look at the crate and click the **left mouse button**.
 
 **You should see:** a pink flash; a second crate appears on the empty red square; both squares turn green; the gate sinks into the floor; the hero walks on.
@@ -44,7 +44,7 @@ You are the small glowing thing. The yellow capsule is "the hero". You can't con
 
 ## Part 3: The piston
 1. The hero stops before a narrow corridor. A **metal block slams back and forth** across it.
-2. Press **Q** until the screen says **FREEZE**.
+2. Press **Q** until **FREEZE** is highlighted in the bar at the bottom of the screen.
 3. Wait until the block is **pulled back** (out of the corridor). Look at it and click the **left mouse button**.
 
 **You should see:** the block turns pale blue and stops; the hero walks through; a "COMPLETE" screen appears.
@@ -60,6 +60,9 @@ You are the small glowing thing. The yellow capsule is "the hero". You can't con
 Just look and tell me what you like or dislike. Nothing here can break the game.
 - **Tab:** small dark name tags appear over things you can affect, with coloured dots (blue = collision, pink = copy, light blue = freeze).
 - **E on something:** a panel at the top right describes it.
+- **Bottom bar:** every power you have, the current one highlighted, with a countdown while it recharges. Underneath, a hint for what to do next.
+- **Mistakes:** if a power can't be used (for example "OCCUPIED"), a short red message says why, in the middle of the screen.
+- **Esc:** the pause screen now has a list of all controls. You can use the mouse, or arrow keys + Enter.
 - **The hero:** bobs while walking, shows "..." when waiting, "?" when confused, "!" when it sets off, and hops at the exit.
 - **You (the glowing thing):** pointy shards spin around you, a dark "eye" looks at what you aim at, and you leave a short trail.
 - **Every power:** a quick colour-split flash. If you dislike it, press **Esc** and turn **COLOUR-SPLIT EFFECTS** off.

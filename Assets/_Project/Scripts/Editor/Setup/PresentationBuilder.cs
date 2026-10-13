@@ -4,10 +4,12 @@ using BugReport.Anomaly;
 using BugReport.Hero;
 using BugReport.Level;
 using BugReport.Presentation;
+using BugReport.UI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UIElements;
 using static BugReport.EditorTools.Setup.TestRoomBuilder;
 using Object = UnityEngine.Object;
 
@@ -15,15 +17,19 @@ namespace BugReport.EditorTools.Setup
 {
     /// <summary>
     /// Milestone 6 presentation layer, applied to any built level: post-processing volume, glitch
-    /// camera bursts, inspection labels, hero body language, anomaly eye/shards/trail, camera AA.
-    /// Every feature can be switched off in the VisualSettings asset without rebuilding.
+    /// camera bursts, hero body language, anomaly eye/shards/trail, camera AA, and the UI Toolkit
+    /// game UI (HUD, menus, inspection). Every feature can be switched off in the VisualSettings
+    /// asset without rebuilding.
     /// </summary>
-    internal static class PresentationBuilder
+    public static class PresentationBuilder
     {
         public const string VisualSettingsPath = "Assets/_Project/ScriptableObjects/Presentation/VS_Default.asset";
         public const string VolumeProfilePath = "Assets/_Project/Art/Rendering/VP_BugReport.asset";
         public const string TetraMeshPath = "Assets/_Project/Art/Meshes/Generated/ME_Tetra.asset";
         public const string GridTexturePath = "Assets/_Project/Art/Textures/Generated/T_Grid.png";
+        public const string PanelSettingsPath = "Assets/_Project/UI/PS_BugReport.asset";
+        public const string ThemePath = "Assets/_Project/UI/BugReportTheme.tss";
+        public const string StyleSheetPath = "Assets/_Project/UI/BugReportUI.uss";
 
         internal struct Assets
         {
@@ -31,10 +37,12 @@ namespace BugReport.EditorTools.Setup
             public VolumeProfile Profile;
             public Mesh Tetra;
             public Material Pupil;
+            public PanelSettings Panel;
+            public StyleSheet Style;
         }
 
         /// <summary>Create/load presentation assets. Call after NewScene (see TestRoomBuilder.Build).</summary>
-        public static Assets LoadOrCreateAssets(MaterialSet mats)
+        internal static Assets LoadOrCreateAssets(MaterialSet mats)
         {
             var assets = new Assets
             {
@@ -47,23 +55,72 @@ namespace BugReport.EditorTools.Setup
             pupil.SetColor("_BaseColor", new Color(0.02f, 0.02f, 0.04f));
             pupil.SetFloat("_Smoothness", 0.95f);
             assets.Pupil = MaterialSet.Save(pupil, "M_AnomalyPupil");
+            assets.Style = LoadRequired<StyleSheet>(StyleSheetPath);
+            assets.Panel = LoadOrCreatePanelSettings();
             return assets;
         }
 
         /// <summary>Adds everything presentational to a level whose gameplay objects already exist.</summary>
-        public static void Apply(Assets assets, MaterialSet mats, Systems systems, GameObject anomaly, HeroController hero, Camera cam)
+        internal static void Apply(Assets assets, MaterialSet mats, Systems systems, GameObject anomaly, HeroController hero, Camera cam)
         {
             ConfigureCamera(cam);
             BuildPostFx(assets, systems, cam);
             UpgradeAnomaly(assets, mats, anomaly, cam);
-            AttachHeroAnimator(assets, hero, cam);
-
-            var labels = systems.Root.AddComponent<InspectionLabelsPresenter>();
-            Wire(labels, "settings", assets.Settings);
-            Wire(labels, "viewCamera", cam);
-
+            var heroAnimator = AttachHeroAnimator(assets, hero);
             Wire(systems.Root.GetComponent<EntityHighlightPresenter>(), "settings", assets.Settings);
-            Wire(systems.Root.GetComponent<LevelHud>(), "settings", assets.Settings);
+            BuildUi(assets, systems, heroAnimator, cam);
+        }
+
+        /// <summary>One UIDocument; each UI layer adds its own subtree to it.</summary>
+        private static void BuildUi(Assets assets, Systems systems, HeroAnimator heroAnimator, Camera cam)
+        {
+            var go = new GameObject("UI");
+            var document = go.AddComponent<UIDocument>();
+            document.panelSettings = assets.Panel;
+
+            var inspection = go.AddComponent<InspectionOverlay>();
+            Wire(inspection, "styleSheet", assets.Style);
+            Wire(inspection, "viewCamera", cam);
+            Wire(inspection, "heroAnimator", heroAnimator);
+            Wire(inspection, "settings", assets.Settings);
+
+            var hud = go.AddComponent<GameHud>();
+            Wire(hud, "styleSheet", assets.Style);
+            Wire(hud, "glitches", systems.Glitches);
+            Wire(hud, "selection", systems.Selection);
+            Wire(hud, "containment", systems.Containment);
+            if (systems.Objectives != null) Wire(hud, "objectives", systems.Objectives);
+            Wire(hud, "settings", assets.Settings);
+
+            var menus = go.AddComponent<GameMenus>();
+            Wire(menus, "styleSheet", assets.Style);
+            if (systems.Objectives != null) Wire(menus, "objectives", systems.Objectives);
+            var so = new SerializedObject(menus);
+            so.FindProperty("levelTitle").stringValue = systems.LevelTitle;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static T LoadRequired<T>(string path) where T : Object
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (asset == null) throw new InvalidOperationException("Missing " + path + " (it is part of the repository; pull again or reimport).");
+            return asset;
+        }
+
+        /// <summary>1920x1080 reference, scales with screen size; theme = Unity default runtime theme.</summary>
+        private static PanelSettings LoadOrCreatePanelSettings()
+        {
+            var theme = LoadRequired<ThemeStyleSheet>(ThemePath);
+            var panel = LoadOrCreate<PanelSettings>(PanelSettingsPath, _ => { });
+            panel.themeStyleSheet = theme;
+            panel.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+            panel.referenceResolution = new Vector2Int(1920, 1080);
+            panel.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
+            panel.match = 0.5f;
+            panel.sortingOrder = 0;
+            EditorUtility.SetDirty(panel);
+            AssetDatabase.SaveAssetIfDirty(panel);
+            return panel;
         }
 
         private static void ConfigureCamera(Camera cam)
@@ -118,7 +175,7 @@ namespace BugReport.EditorTools.Setup
             trail.shadowCastingMode = ShadowCastingMode.Off;
         }
 
-        private static void AttachHeroAnimator(Assets assets, HeroController hero, Camera cam)
+        private static HeroAnimator AttachHeroAnimator(Assets assets, HeroController hero)
         {
             // Animate a pivot holding the visuals, never the CharacterController's transform.
             var pivot = new GameObject("Visual").transform;
@@ -129,8 +186,9 @@ namespace BugReport.EditorTools.Setup
                 if (part != null) part.SetParent(pivot, true);
             }
             var animator = hero.gameObject.AddComponent<HeroAnimator>();
-            animator.Configure(hero, pivot, cam);
+            animator.Configure(hero, pivot);
             Wire(animator, "settings", assets.Settings);
+            return animator;
         }
 
         /// <summary>Grid floor material for lab-style rooms; cells of <paramref name="cellsX"/>×<paramref name="cellsZ"/>.</summary>

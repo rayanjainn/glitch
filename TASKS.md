@@ -44,7 +44,7 @@ Status: `[x]` done and verified · `[~]` implemented, verification pending · `[
 - [~] `PlaceholderHero`: waypoint walk, blocked detection, retry [editor]
 - [~] `GameStatePresenter`: cursor lock + pause time scale, restored on destroy [editor]
 - [~] `EntityHighlightPresenter` + `BoundsOutline`: inspection/hover/selection wireframes [editor][visual]
-- [~] `ReticlePresenter`, `DebugOverlay` (F1 toggle, F5 restart) [editor][visual]
+- [~] Reticle (now in `GameHud`), `DiagnosticsOverlay` (F1 toggle, F5 restart) [editor][visual]
 - [~] `AnomalyVisual`: placeholder core + orbiting fragments [visual]
 
 ### Editor tooling
@@ -126,7 +126,7 @@ After **Build Test Room Scene → Rebuild**, press Play:
 - [x] Core `ContainmentModel` + `ContainmentSettings` (explicit sources, decay, hysteresis, patch relief, reset). 12 tests [auto]
 - [x] Core: `GlitchSpec.ContainmentWeight`, `GlitchManager.CooldownScale` / `ActiveContainmentWeight` / `ActiveProductCount`. 2 tests (113 total) [auto]
 - [~] `HeroNavNode`, `HeroNavGraph`, `HeroController` FSM (Idle/Walking/Blocked/Confused/Arrived); replaces `PlaceholderHero` [editor]
-- [~] `ContainmentSettingsAsset`, `ContainmentDirector` (cooldown scaling, patches oldest revertible glitch, skips vetoed), `ContainmentPresenter`, patched-object flash [editor][visual]
+- [~] `ContainmentSettingsAsset`, `ContainmentDirector` (cooldown scaling, patches oldest revertible glitch, skips vetoed), containment HUD (now in `GameHud`), patched-object flash [editor][visual]
 - [~] Test room: 7-node hero graph (firewall is the only way east; the holo panel can be bypassed north/south), containment settings asset [editor]
 - [~] Tests: HeroControllerTests (7), ContainmentDirectorTests (7), CollisionTransferTests migrated to the new hero, scene tests (graph connectivity, systems) [editor]
 - [ ] Remove unused template packages (Visual Scripting, Collab Proxy) [editor]
@@ -155,18 +155,34 @@ After **Build Test Room Scene → Rebuild**, press Play:
 - [ ] Manual playtest with PLAYTEST.md (deferred by owner; covers M1–M5 in plain language) [visual]
 - [ ] Remove unused template packages (Visual Scripting, Collab Proxy) [editor]
 
-## Milestone 6 — Art & polish (current, pass 1)
+## Milestone 6 — Art & polish (current)
+
+**Pass 1 (presentation): merged, Unity tests passing.**
 - [x] Core `BurstEnvelope` / `BurstMixer` for short effect bursts. 5 tests (126 total) [auto]
 - [~] `VisualSettings` asset: every presentation feature can be switched off without code; `ComfortSettings` (colour-split toggle in the pause menu) [editor]
 - [~] Post-processing: global URP volume (ACES tone mapping, bloom, vignette, colour adjustments); `GlitchCameraFx` chromatic/lens bursts on glitches and a red vignette pulse on patches [editor][visual]
-- [~] Inspection labels (GDD 9.3) + selected-object property panel [visual]
+- [x] Inspection labels (GDD 9.3) + selected-object property panel [visual] (moved to UI Toolkit in pass 2)
 - [~] Hero body language (`HeroAnimator`: bob, lean, wobble, hop, state icons) on a visual pivot only [visual]
 - [~] Anomaly: tetrahedron shards, eye that follows the aimed target (`AnomalyEye`), trail [visual]
 - [~] Collapsing-outline flashes on copies and frozen objects; HUD panels; grid floor texture (generated PNG via LFS); SMAA [visual]
 - [~] Tests: PresentationTests (7 PlayMode), PresentationAssetTests (2 EditMode) [editor]
 - [ ] **Needs the owner's eyes:** PLAYTEST.md Part 5. Tuning values live in VP_BugReport and VS_Default.
 - [ ] Profiling on the reference PC (Unity Profiler; 60 FPS @1080p target) [editor][hw]
-- [ ] Later polish passes: designed UI (replace IMGUI), real models and animation, designed audio, lighting bake
+
+**Pass 2 (UI Toolkit game UI): implemented on `feature/ui-toolkit-hud`, pending Editor verification.**
+- [x] Core `HudFormat` (wording, invariant-culture numbers) and `ToastQueue` (newest first, repeats collapse, fade). 9 tests (135 total) [auto]
+- [~] `UiLayer` base: one shared `UIDocument`, layers sorted by draw order, rebuild on document re-enable [editor]
+- [~] `GameHud`: containment bar + stage banner + patch countdown, reticle, feedback messages (rejections now visible to players, not only in the debug overlay), objective panel, glitch dock with per-glitch cooldowns, prompt [editor][visual]
+- [~] `GameMenus`: pause (resume, colour-split, controls reference, restart, quit), level complete; keyboard/gamepad focus [editor][visual]
+- [~] `InspectionOverlay`: world tags, hero state icon, selected-object panel [editor][visual]
+- [~] `BugReportUI.uss` (all layout/look), `BugReportTheme.tss`, `PS_BugReport` panel settings (built by the level builders) [editor]
+- [x] Removed IMGUI `LevelHud`, `LevelMenus`, `ContainmentPresenter`, `ReticlePresenter`, `InspectionLabelsPresenter`, `WorldLabel`, HeroAnimator's icon drawing [auto: stub compile]
+- [~] Tests: GameUiTests (11 PlayMode), PresentationAssetTests +2 EditMode, SliceLevelSceneTests updated [editor]
+- [ ] **Needs the owner's eyes:** PLAYTEST.md Part 5 (now includes the new UI)
+
+**Later passes:**
+- [ ] Profiling on the reference PC (see above)
+- [ ] Real models and animation, designed audio, lighting bake
 
 ## Milestones 7–8
 See PROJECT_PLAN §3. Not broken down yet, deliberately, to avoid planning against unknowns.

@@ -58,6 +58,8 @@ namespace BugReport.Glitches
 
         public int LoadedCount => loaded.Count;
         public GlitchDefinition CurrentDefinition => loaded.Count > 0 ? loaded[current].Definition : null;
+        public int CurrentIndex => current;
+        public GlitchDefinition DefinitionAt(int index) => loaded[index].Definition;
         public GlitchFeedback LastFeedback { get; private set; }
         public float LastFeedbackTime { get; private set; } = float.NegativeInfinity;
 
