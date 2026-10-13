@@ -18,10 +18,12 @@ namespace UnityEngine
         public static void Destroy(Object o) { }
         public static void DestroyImmediate(Object o) { }
         public static T Instantiate<T>(T original) where T : Object => throw null;
+        public static T FindAnyObjectByType<T>() where T : Object => throw null;
         public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent) where T : Object => throw null;
         public int GetInstanceID() => throw null;
     }
     public class YieldInstruction { }
+    public class AsyncOperation : YieldInstruction { public bool isDone => throw null; }
     public sealed class WaitForFixedUpdate : YieldInstruction { }
     public class ScriptableObject : Object { public static T CreateInstance<T>() where T : ScriptableObject => throw null; }
     public class Sprite : Object { }
@@ -137,13 +139,15 @@ namespace UnityEngine
         public static Color white => default; public static Color blue => default; public static Color magenta => default;
         public static Color operator *(Color c, float f) => throw null;
         public static Color Lerp(Color a, Color b, float t) => throw null;
+        public static void RGBToHSV(Color rgb, out float h, out float s, out float v) => throw null;
     }
+    public struct Pose { public Vector3 position; public Quaternion rotation; public Pose(Vector3 p, Quaternion r) { position = p; rotation = r; } }
     public struct Rect { public Rect(float x, float y, float w, float h) { } }
     public struct Bounds
     {
         public Bounds(Vector3 c, Vector3 s) { }
         public Vector3 center => throw null; public Vector3 size => throw null; public Vector3 extents => throw null; public Vector3 min => throw null; public Vector3 max => throw null;
-        public void Encapsulate(Bounds b) { } public void Expand(float a) { }
+        public void Encapsulate(Bounds b) { } public void Expand(float a) { } public bool Contains(Vector3 p) => throw null;
     }
     public struct Ray { }
     public struct RaycastHit { public float distance => throw null; public Transform transform => throw null; public Collider collider => throw null; public Vector3 point => throw null; }
@@ -174,10 +178,13 @@ namespace UnityEngine
         public static float Clamp(float v, float a, float b) => throw null;
         public static int Clamp(int v, int a, int b) => throw null;
         public static float Min(float a, float b) => throw null;
+        public static float Clamp01(float v) => throw null;
+        public static float Exp(float v) => throw null;
+        public static bool Approximately(float a, float b) => throw null;
         public static float Abs(float v) => throw null; public static float Sin(float v) => throw null; public static float Cos(float v) => throw null;
         public static float Repeat(float t, float l) => throw null; public static float MoveTowards(float a, float b, float d) => throw null;
         public static float Lerp(float a, float b, float t) => throw null;
-        public static int RoundToInt(float v) => throw null; public static int CeilToInt(float v) => throw null;
+        public static int RoundToInt(float v) => throw null; public static float Round(float v) => throw null; public static int CeilToInt(float v) => throw null;
     }
     public static class Time { public static float fixedDeltaTime => throw null; public static float deltaTime => throw null; public static float unscaledDeltaTime => throw null; public static float time => throw null; public static float unscaledTime => throw null; public static float timeScale { get => throw null; set { } } }
     public enum CursorLockMode { None, Locked, Confined }
@@ -244,6 +251,18 @@ namespace UnityEngine
     }
     public enum CameraClearFlags { Skybox = 1, SolidColor = 2, Depth = 3, Nothing = 4 }
     public class AudioListener : Behaviour { }
+    public sealed class AudioClip : Object
+    {
+        public static AudioClip Create(string name, int lengthSamples, int channels, int frequency, bool stream) => throw null;
+        public bool SetData(float[] data, int offsetSamples) => throw null;
+        public bool GetData(float[] data, int offsetSamples) => throw null;
+    }
+    public sealed class AudioSource : Behaviour
+    {
+        public bool playOnAwake { get => throw null; set { } }
+        public float spatialBlend { get => throw null; set { } }
+        public void PlayOneShot(AudioClip clip, float volumeScale) { }
+    }
     public enum LightType { Spot, Directional, Point }
     public enum LightShadows { None, Hard, Soft }
     public class Light : Behaviour
@@ -295,7 +314,7 @@ namespace UnityEngine
         public GUIStyleState normal => throw null;
         public float CalcHeight(GUIContent c, float w) => throw null;
     }
-    public class GUISkin : ScriptableObject { public GUIStyle box => throw null; public GUIStyle label => throw null; }
+    public class GUISkin : ScriptableObject { public GUIStyle box => throw null; public GUIStyle label => throw null; public GUIStyle button => throw null; }
     public class GUIContent { public GUIContent(string t) { } }
     public static class GUI
     {
@@ -303,6 +322,7 @@ namespace UnityEngine
         public static void DrawTexture(Rect r, Texture2D t) { }
         public static void Label(Rect r, string t, GUIStyle s) { }
         public static void Box(Rect r, GUIContent c, GUIStyle s) { }
+        public static bool Button(Rect r, string text, GUIStyle s) => throw null;
     }
     public enum RuntimeInitializeLoadType { AfterSceneLoad, BeforeSceneLoad, AfterAssembliesLoaded, BeforeSplashScreen, SubsystemRegistration }
     [AttributeUsage(AttributeTargets.Method)] public class RuntimeInitializeOnLoadMethodAttribute : Attribute { public RuntimeInitializeOnLoadMethodAttribute(RuntimeInitializeLoadType t) { } }
@@ -331,18 +351,28 @@ namespace UnityEngine.Rendering
 
 namespace UnityEngine.SceneManagement
 {
-    public struct Scene { public bool isLoaded => throw null; public bool IsValid() => throw null; public int buildIndex => throw null; public string path => throw null; public GameObject[] GetRootGameObjects() => throw null; }
+    public struct Scene { public string name => throw null; public bool isLoaded => throw null; public bool IsValid() => throw null; public int buildIndex => throw null; public string path => throw null; public GameObject[] GetRootGameObjects() => throw null; }
 
     public static class SceneManager
     {
         public static Scene GetActiveScene() => throw null;
         public static Scene GetSceneByPath(string p) => throw null;
         public static void LoadScene(int i) { }
+        public static Scene CreateScene(string name) => throw null;
+        public static bool SetActiveScene(Scene s) => throw null;
+        public static UnityEngine.AsyncOperation UnloadSceneAsync(Scene s) => throw null;
+    }
+    public enum LoadSceneMode { Single = 0, Additive = 1 }
+    public struct LoadSceneParameters { public LoadSceneParameters(LoadSceneMode mode) { } }
+    public class AsyncOperationStub { }
+    public static class SceneManagerUnused
+    {
     }
 }
 
 namespace UnityEngine.TestTools
 {
+    [AttributeUsage(AttributeTargets.Method)] public class UnityTearDownAttribute : Attribute { }
     public static class LogAssert { public static void Expect(UnityEngine.LogType type, System.Text.RegularExpressions.Regex message) { } public static void Expect(UnityEngine.LogType type, string message) { } }
     [AttributeUsage(AttributeTargets.Method)] public class UnityTestAttribute : Attribute { }
 }
@@ -385,7 +415,7 @@ namespace UnityEditor
     public class SerializedProperty
     {
         public Object objectReferenceValue { get => throw null; set { } }
-        public string stringValue { get => throw null; set { } } public float floatValue { get => throw null; set { } }
+        public string stringValue { get => throw null; set { } } public float floatValue { get => throw null; set { } } public bool boolValue { get => throw null; set { } }
         public int intValue { get => throw null; set { } } public int arraySize { get => throw null; set { } }
         public bool isArray => throw null; public string name => throw null; public string propertyPath => throw null;
         public SerializedPropertyType propertyType => throw null; public string type => throw null;
@@ -407,6 +437,8 @@ namespace UnityEditor
         public static bool IsValidFolder(string p) => throw null;
         public static string CreateFolder(string parent, string name) => throw null;
         public static void CreateAsset(Object o, string p) { }
+        public static string[] FindAssets(string filter) => throw null;
+        public static string GUIDToAssetPath(string guid) => throw null;
         public static string GetAssetPath(Object o) => throw null;
     }
     public static class EditorUtility
@@ -417,6 +449,7 @@ namespace UnityEditor
         public static bool IsPersistent(Object o) => throw null;
     }
     public class EditorBuildSettingsScene { public EditorBuildSettingsScene(string p, bool e) { } public string path => throw null; public bool enabled => throw null; }
+    public static class EditorApplication { public static bool isPlaying { get => throw null; set { } } }
     public static class EditorBuildSettings { public static EditorBuildSettingsScene[] scenes { get => throw null; set { } } }
     public static class PlayerSettings { public static ColorSpace colorSpace { get => throw null; set { } } }
     public static class PrefabUtility
@@ -426,6 +459,9 @@ namespace UnityEditor
         public static void RecordPrefabInstancePropertyModifications(Object targetObject) { }
         public static bool IsPartOfPrefabInstance(Object componentOrGameObject) => throw null;
     }
+    public class Editor : ScriptableObject { }
+    public class EditorWindow : ScriptableObject { }
+    public class MonoScript : Object { public System.Type GetClass() => throw null; }
     public static class GameObjectUtility { public static int GetMonoBehavioursWithMissingScriptCount(GameObject g) => throw null; }
 }
 
@@ -443,5 +479,6 @@ namespace UnityEditor.SceneManagement
         public static bool CloseScene(Scene s, bool remove) => throw null;
         public static bool SaveScene(Scene s, string p) => throw null;
         public static bool SaveCurrentModifiedScenesIfUserWantsTo() => throw null;
+        public static UnityEngine.AsyncOperation LoadSceneAsyncInPlayMode(string path, LoadSceneParameters parameters) => throw null;
     }
 }

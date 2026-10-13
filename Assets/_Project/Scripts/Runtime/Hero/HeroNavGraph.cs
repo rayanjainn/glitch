@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BugReport.Core.Navigation;
+using BugReport.Level;
 using UnityEngine;
 
 namespace BugReport.Hero
@@ -90,7 +91,15 @@ namespace BugReport.Hero
             float r = agentRadius * 0.95f;
             var bottom = fromFeet + Vector3.up * (stepClearance + r);
             var top = fromFeet + Vector3.up * Mathf.Max(stepClearance + r, agentHeight - r);
-            return !Physics.CapsuleCast(bottom, top, r, delta / distance, distance, Mask, QueryTriggerInteraction.Ignore);
+            if (Physics.CapsuleCast(bottom, top, r, delta / distance, distance, Mask, QueryTriggerInteraction.Ignore)) return false;
+
+            // Never route through machinery that is currently dangerous.
+            var hazards = HeroHazard.Active;
+            for (int i = 0; i < hazards.Count; i++)
+            {
+                if (!hazards[i].IsSafe && hazards[i].Intersects(fromFeet, toFeet, agentRadius)) return false;
+            }
+            return true;
         }
 
         /// <summary>Nearest node the hero can walk straight to from <paramref name="feet"/>; -1 if none.</summary>

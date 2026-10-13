@@ -75,6 +75,11 @@ namespace BugReport.Glitches
             if (!TryResolve(operation.Target(0), out var source, out var sourceName)) return null;
             if (PhysicsOccupancy.IsOccupied(source.Colliders, GameLayers.OccupantMask, out var occupant))
                 return "CANNOT RESTORE " + sourceName + ": " + Describe(occupant) + " IS INSIDE";
+            // A machine made harmless by intangibility must not become dangerous with someone in its path.
+            var hazard = source.GetComponent<Level.HeroHazard>();
+            if (hazard != null && hazard.Volume != null &&
+                PhysicsOccupancy.IsOccupied(hazard.VolumeColliders, GameLayers.OccupantMask, out var inPath))
+                return "CANNOT RESTORE " + sourceName + ": " + Describe(inPath) + " IS IN ITS PATH";
             return null;
         }
 

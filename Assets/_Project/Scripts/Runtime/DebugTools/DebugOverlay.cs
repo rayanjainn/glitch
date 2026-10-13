@@ -65,11 +65,7 @@ namespace BugReport.DebugTools
         private void OnGUI()
         {
             EnsureStyles();
-            if (services != null && !services.IsDisposed && services.State.Current == GameState.Paused)
-            {
-                GUI.Label(new Rect(0, Screen.height * 0.4f, Screen.width, 60), "PAUSED\n[Esc] resume   [F5] restart", bannerStyle);
-            }
-
+            // The pause screen itself is drawn by LevelMenus.
             if (!visible) return;
             BuildText();
             var content = new GUIContent(text.ToString());

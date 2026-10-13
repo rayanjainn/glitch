@@ -1,5 +1,7 @@
 # BUG//REPORT — Task Checklist
 
+> Manual playtesting is deferred by the owner. Use **PLAYTEST.md** (plain language) when ready. The per-milestone checklists below are the detailed engineering versions.
+
 Tags: **[auto]** done and verified in the dev container · **[editor]** needs the Unity Editor · **[visual]** needs a human to look/feel · **[hw]** needs hardware (gamepad, reference PC).
 
 Status: `[x]` done and verified · `[~]` implemented, verification pending · `[ ]` not started.
@@ -63,7 +65,7 @@ Status: `[x]` done and verified · `[~]` implemented, verification pending · `[
 
 ---
 
-## Milestone 2 — Glitch framework + Collision Transfer ✅ (verified in Unity, merged)
+## Milestone 2 — Glitch framework + Collision Transfer ✅ (tests verified in Unity, merged; manual playtest deferred)
 - [x] Core `ModifierStack<T>`: owner leases, priority, conflict policy (Exclusive/Stack), base changes survive revert. 10 tests [auto]
 - [x] Core `GlitchSpec`, `GlitchOperation`, `GlitchManager`: apply/validate, cooldown, max active, expiry (injected clock), revert, LIFO revert, EndAll, target-lost cascade, effect veto (`CanEnd`), exception isolation. 28 tests [auto]
 - [~] `GlitchDefinition` ScriptableObject (slots, duration, cooldown, max active, colour, containment weight) + `CollisionTransferDefinition` [editor]
@@ -94,7 +96,7 @@ After **BUG REPORT ▸ Setup ▸ 2. Build Test Room Scene → Rebuild**, press P
    - LMB with nothing selected (prompt).
 8. Esc pause → LMB/R do nothing. Resume works.
 
-## Milestone 3 — Duplication + Freeze ✅ (verified in Unity, merged)
+## Milestone 3 — Duplication + Freeze ✅ (tests verified in Unity, merged; manual playtest deferred)
 - [x] Core: operation products (`AddProduct`, `Involves`, `CountActiveOn`); losing a product ends the operation; copy-of-copy chains collapse. 4 new tests (91 total) [auto]
 - [~] `FreezeCapability` (exclusive frozen channel, kinematic + animator handling, release at rest), `ITimeScaled` + `PingPongMover`, `FreezeDefinition` (duration, release policy), `FreezeEffect` (velocity snapshot in the operation) [editor]
 - [~] `DuplicationProfile` (prefab, per-source cap, objective policy, inherit velocity), `DuplicationCapability`, `DuplicateMarker`, `DuplicationDefinition` (global cap), `DuplicationEffect` (prefab-only spawn under inactive holder, free-space placement, despawn lease) [editor]
@@ -118,7 +120,7 @@ After **Build Test Room Scene → Rebuild**, press Play:
 8. Invalid cases: duplicating the firewall, freezing the hero, freezing the pillar → red reticle and a reason.
 9. F5 restart: no copies remain, nothing stays frozen, ENTITIES count matches a fresh load.
 
-## Milestone 4 — Hero behaviour + Containment (current)
+## Milestone 4 — Hero behaviour + Containment ✅ (tests verified in Unity, merged; manual playtest deferred)
 - [x] Navigation decision: authored waypoint graph + live capsule-sweep passability (not NavMesh); see ARCHITECTURE §6 [auto]
 - [x] Core `NavGraph` (A*, partial paths, deterministic). 8 tests [auto]
 - [x] Core `ContainmentModel` + `ContainmentSettings` (explicit sources, decay, hysteresis, patch relief, reset). 12 tests [auto]
@@ -142,12 +144,16 @@ After **Build Test Room Scene → Rebuild**, press Play:
 7. Stand inside the ghost firewall when a patch is due: it patches something else instead, never the wall around you.
 8. F5 restart: containment back to stage 0.
 
-## Milestone 5 — Vertical-slice level
-- [ ] Objective system (explicit conditions) [auto/editor]
-- [ ] Training-lab room, three connected objectives with alternatives (PROJECT_PLAN §4) [editor][visual]
-- [ ] Pause menu, restart, minimal HUD (objective, target, glitch, containment) [editor][visual]
-- [ ] Persistent Bootstrap scene + level loading/cleanup [editor]
-- [ ] Placeholder audio set (original/licensed) [editor]
+## Milestone 5 — Vertical-slice level (current)
+- [x] Core `ObjectiveTracker`: sequential, latching, cascades when alternatives satisfy later goals. 8 tests (121 total) [auto]
+- [~] Level mechanics: `PressurePlate` (weight incl. frozen bodies and copies), `GateController` (latched, announces world change), `HeroHazard` (hero refuses dangerous machinery; unfreeze/restore vetoed while someone is in its path), `WorldBoundsGuard` kill plane [editor]
+- [~] `ObjectiveDirector` + `HeroReachedZone` (objectives describe goals, not solutions → alternatives count) [editor]
+- [~] Pause menu (resume / restart / quit), level-complete screen, minimal HUD (objective + hint, glitch + cooldown, contextual prompt) [editor][visual]
+- [~] Procedural placeholder SFX (original, no licensing) wired to selection, glitches, patches, containment stages, objectives [editor][listen]
+- [~] Builder refactor: shared helpers + `SliceLevelBuilder` → `Level_01_TrainingLab.unity`, first in Build Settings; `[OptionalReference]` for legitimately empty fields [editor]
+- [~] Tests: LevelMechanicsTests (8), SliceLevelSceneTests (7), and **SliceLevelPlaythroughTests**, which plays the whole level with the intended solution through the player workflow [editor]
+- [ ] Manual playtest with PLAYTEST.md (deferred by owner; covers M1–M5 in plain language) [visual]
+- [ ] Remove unused template packages (Visual Scripting, Collab Proxy) [editor]
 
 ## Milestones 6–8
 See PROJECT_PLAN §3. Not broken down yet, deliberately, to avoid planning against unknowns.

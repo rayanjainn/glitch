@@ -38,6 +38,14 @@ namespace BugReport
         public ContainmentModel Containment { get; }
         public bool IsDisposed { get; private set; }
 
+        /// <summary>
+        /// Raised when level machinery (doors, lifts) changes what is passable without a glitch.
+        /// Glitch changes are already covered by GlitchManager events.
+        /// </summary>
+        public event Action WorldChanged;
+
+        public void RaiseWorldChanged() => WorldChanged?.Invoke();
+
         public static GameServices Current => current;
         public static bool IsReady => current != null;
 
@@ -80,6 +88,7 @@ namespace BugReport
             Uninstall(this);
             // Glitches first: ending operations restores objects while they are still registered.
             Glitches.Dispose();
+            WorldChanged = null;
             Selection.Dispose();
             Registry.Clear();
         }
