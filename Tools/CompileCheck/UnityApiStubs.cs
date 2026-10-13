@@ -78,10 +78,12 @@ namespace UnityEngine
         public Vector3 localScale { get => throw null; set { } }
         public Vector3 lossyScale => throw null;
         public Transform parent { get => throw null; set { } }
+        public Vector3 forward => throw null; public Vector3 right => throw null; public Vector3 up => throw null;
         public Vector3 TransformPoint(Vector3 p) => throw null;
         public void SetParent(Transform p, bool worldPositionStays) { }
         public void SetPositionAndRotation(Vector3 p, Quaternion r) { }
         public bool IsChildOf(Transform t) => throw null;
+        public Transform Find(string n) => throw null;
         public System.Collections.IEnumerator GetEnumerator() => throw null;
     }
     public struct Vector2
@@ -104,9 +106,12 @@ namespace UnityEngine
         public static Vector3 forward => default; public static Vector3 back => default;
         public static Vector3 right => default; public static Vector3 left => default; public static Vector3 down => default;
         public static Vector3 ClampMagnitude(Vector3 v, float m) => throw null;
+        public static Vector3 Slerp(Vector3 a, Vector3 b, float t) => throw null;
+        public static Vector3 Lerp(Vector3 a, Vector3 b, float t) => throw null;
         public float magnitude => throw null; public float sqrMagnitude => throw null; public Vector3 normalized => throw null;
         public static Vector3 Cross(Vector3 a, Vector3 b) => throw null;
         public static Vector3 Scale(Vector3 a, Vector3 b) => throw null;
+        public static float Dot(Vector3 a, Vector3 b) => throw null;
         public static float Distance(Vector3 a, Vector3 b) => throw null;
         public static Vector3 MoveTowards(Vector3 a, Vector3 b, float d) => throw null;
         public static Vector3 SmoothDamp(Vector3 c, Vector3 t, ref Vector3 v, float s) => throw null;
@@ -127,6 +132,8 @@ namespace UnityEngine
         public static Quaternion Euler(float x, float y, float z) => throw null;
         public static Quaternion AngleAxis(float a, Vector3 axis) => throw null;
         public static Quaternion LookRotation(Vector3 f, Vector3 up) => throw null;
+        public static Quaternion LookRotation(Vector3 f) => throw null;
+        public static Quaternion Euler(Vector3 e) => throw null;
         public static Quaternion RotateTowards(Quaternion a, Quaternion b, float d) => throw null;
         public static Vector3 operator *(Quaternion q, Vector3 v) => throw null;
         public static Quaternion operator *(Quaternion a, Quaternion b) => throw null;
@@ -136,13 +143,14 @@ namespace UnityEngine
         public float r, g, b, a;
         public Color(float r, float g, float b) { this.r = r; this.g = g; this.b = b; a = 1; }
         public Color(float r, float g, float b, float a) { this.r = r; this.g = g; this.b = b; this.a = a; }
-        public static Color white => default; public static Color blue => default; public static Color magenta => default;
+        public static Color white => default; public static Color blue => default; public static Color magenta => default; public static Color black => default;
         public static Color operator *(Color c, float f) => throw null;
         public static Color Lerp(Color a, Color b, float t) => throw null;
         public static void RGBToHSV(Color rgb, out float h, out float s, out float v) => throw null;
     }
     public struct Pose { public Vector3 position; public Quaternion rotation; public Pose(Vector3 p, Quaternion r) { position = p; rotation = r; } }
-    public struct Rect { public Rect(float x, float y, float w, float h) { } }
+    public struct Rect { public Rect(float x, float y, float w, float h) { this.x = x; this.y = y; width = w; height = h; } public float x, y, width, height; }
+    public static class PlayerPrefs { public static int GetInt(string k, int d) => throw null; public static void SetInt(string k, int v) { } public static void Save() { } }
     public struct Bounds
     {
         public Bounds(Vector3 c, Vector3 s) { }
@@ -179,6 +187,7 @@ namespace UnityEngine
         public static int Clamp(int v, int a, int b) => throw null;
         public static float Min(float a, float b) => throw null;
         public static float Clamp01(float v) => throw null;
+        public static float Sqrt(float v) => throw null;
         public static float Exp(float v) => throw null;
         public static bool Approximately(float a, float b) => throw null;
         public static float Abs(float v) => throw null; public static float Sin(float v) => throw null; public static float Cos(float v) => throw null;
@@ -230,7 +239,12 @@ namespace UnityEngine
         public bool receiveShadows { get => throw null; set { } } public bool allowOcclusionWhenDynamic { get => throw null; set { } }
     }
     public class MeshRenderer : Renderer { }
-    public class TrailRenderer : Renderer { }
+    public class TrailRenderer : Renderer
+    {
+        public float time { get => throw null; set { } } public float startWidth { get => throw null; set { } } public float endWidth { get => throw null; set { } }
+        public Color startColor { get => throw null; set { } } public Color endColor { get => throw null; set { } }
+        public float minVertexDistance { get => throw null; set { } }
+    }
     public class ParticleSystemRenderer : Renderer { }
     public class LineRenderer : Renderer
     {
@@ -248,6 +262,8 @@ namespace UnityEngine
         public float fieldOfView { get => throw null; set { } } public CameraClearFlags clearFlags { get => throw null; set { } }
         public Color backgroundColor { get => throw null; set { } }
         public Ray ViewportPointToRay(Vector3 p) => throw null;
+        public Vector3 WorldToScreenPoint(Vector3 p) => throw null;
+        public static Camera main => throw null;
     }
     public enum CameraClearFlags { Skybox = 1, SolidColor = 2, Depth = 3, Nothing = 4 }
     public class AudioListener : Behaviour { }
@@ -280,6 +296,7 @@ namespace UnityEngine
         public string[] shaderKeywords { get => throw null; set { } }
         public MaterialGlobalIlluminationFlags globalIlluminationFlags { get => throw null; set { } }
         public void SetColor(string n, Color c) { } public void SetFloat(string n, float f) { }
+        public void SetTexture(string n, Texture t) { } public void SetTextureScale(string n, Vector2 s) { }
         public void EnableKeyword(string k) { } public void CopyPropertiesFromMaterial(Material m) { }
         public int renderQueue { get => throw null; set { } }
         public void SetOverrideTag(string tag, string value) { }
@@ -291,7 +308,22 @@ namespace UnityEngine
         public static int GetQualityLevel() => throw null;
         public static Rendering.RenderPipelineAsset renderPipeline { get => throw null; set { } }
     }
-    public class Texture2D : Object { public static Texture2D whiteTexture => throw null; }
+    public enum TextureFormat { RGBA32 = 4 }
+    public enum TextureWrapMode { Repeat, Clamp }
+    public class Texture : Object { public TextureWrapMode wrapMode { get => throw null; set { } } }
+    public class Texture2D : Texture
+    {
+        public Texture2D(int w, int h, TextureFormat f, bool mipChain) { }
+        public static Texture2D whiteTexture => throw null;
+        public void SetPixels(Color[] c) { } public void Apply() { }
+    }
+    public static class ImageConversion { public static byte[] EncodeToPNG(this Texture2D t) => throw null; }
+    public sealed class Mesh : Object
+    {
+        public Vector3[] vertices { get => throw null; set { } } public int[] triangles { get => throw null; set { } }
+        public void RecalculateNormals() { } public void RecalculateBounds() { }
+    }
+    public sealed class MeshFilter : Component { public Mesh sharedMesh { get => throw null; set { } } }
     public enum ColorSpace { Uninitialized = -1, Gamma = 0, Linear = 1 }
     public static class RenderSettings
     {
@@ -321,6 +353,7 @@ namespace UnityEngine
         public static Color color { get => throw null; set { } } public static GUISkin skin => throw null;
         public static void DrawTexture(Rect r, Texture2D t) { }
         public static void Label(Rect r, string t, GUIStyle s) { }
+        public static void Label(Rect r, GUIContent c, GUIStyle s) { }
         public static void Box(Rect r, GUIContent c, GUIStyle s) { }
         public static bool Button(Rect r, string text, GUIStyle s) => throw null;
     }
@@ -341,12 +374,53 @@ namespace UnityEngine
 
 namespace UnityEngine.Rendering
 {
+    public class VolumeComponent : ScriptableObject { public bool active { get => throw null; set { } } }
+    public class VolumeParameter<T> { public T value { get => throw null; set { } } public bool overrideState { get => throw null; set { } } public void Override(T v) { } }
+    public class FloatParameter : VolumeParameter<float> { }
+    public class MinFloatParameter : VolumeParameter<float> { }
+    public class ClampedFloatParameter : VolumeParameter<float> { }
+    public class ColorParameter : VolumeParameter<Color> { }
+    public class VolumeProfile : ScriptableObject
+    {
+        public System.Collections.Generic.List<VolumeComponent> components => throw null;
+        public T Add<T>(bool overrides = false) where T : VolumeComponent => throw null;
+        public bool TryGet<T>(out T component) where T : VolumeComponent => throw null;
+        public bool Has<T>() where T : VolumeComponent => throw null;
+    }
+    public class Volume : MonoBehaviour
+    {
+        public bool isGlobal { get => throw null; set { } }
+        public float priority { get => throw null; set { } }
+        public float weight { get => throw null; set { } }
+        public VolumeProfile sharedProfile { get => throw null; set { } }
+        public VolumeProfile profile { get => throw null; set { } }
+    }
     public enum ShadowCastingMode { Off, On, TwoSided, ShadowsOnly }
     public enum BlendMode { Zero = 0, One = 1, DstColor = 2, SrcColor = 3, OneMinusDstColor = 4, SrcAlpha = 5, OneMinusSrcColor = 6, DstAlpha = 7, OneMinusDstAlpha = 8, SrcAlphaSaturate = 9, OneMinusSrcAlpha = 10 }
     public enum RenderQueue { Background = 1000, Geometry = 2000, AlphaTest = 2450, GeometryLast = 2500, Transparent = 3000, Overlay = 4000 }
     public enum AmbientMode { Skybox = 0, Trilight = 1, Flat = 3, Custom = 4 }
     public class RenderPipelineAsset : ScriptableObject { }
     public static class GraphicsSettings { public static RenderPipelineAsset defaultRenderPipeline { get => throw null; set { } } public static RenderPipelineAsset currentRenderPipeline => throw null; }
+}
+
+namespace UnityEngine.Rendering.Universal
+{
+    using UnityEngine.Rendering;
+    public sealed class Bloom : VolumeComponent { public MinFloatParameter intensity, threshold; public ClampedFloatParameter scatter; }
+    public sealed class Vignette : VolumeComponent { public ClampedFloatParameter intensity, smoothness; public ColorParameter color; }
+    public sealed class ChromaticAberration : VolumeComponent { public ClampedFloatParameter intensity; }
+    public sealed class LensDistortion : VolumeComponent { public ClampedFloatParameter intensity; }
+    public enum TonemappingMode { None, Neutral, ACES }
+    public sealed class TonemappingModeParameter : VolumeParameter<TonemappingMode> { }
+    public sealed class Tonemapping : VolumeComponent { public TonemappingModeParameter mode; }
+    public sealed class ColorAdjustments : VolumeComponent { public FloatParameter postExposure; public ClampedFloatParameter contrast, saturation; }
+    public enum AntialiasingMode { None, FastApproximateAntialiasing, SubpixelMorphologicalAntiAliasing, TemporalAntiAliasing }
+    public sealed class UniversalAdditionalCameraData : MonoBehaviour
+    {
+        public bool renderPostProcessing { get => throw null; set { } }
+        public AntialiasingMode antialiasing { get => throw null; set { } }
+    }
+    public static class CameraExtensions { public static UniversalAdditionalCameraData GetUniversalAdditionalCameraData(this Camera c) => throw null; }
 }
 
 namespace UnityEngine.SceneManagement
@@ -438,6 +512,8 @@ namespace UnityEditor
         public static string CreateFolder(string parent, string name) => throw null;
         public static void CreateAsset(Object o, string p) { }
         public static string[] FindAssets(string filter) => throw null;
+        public static void ImportAsset(string path) { }
+        public static void AddObjectToAsset(Object o, Object asset) { }
         public static string GUIDToAssetPath(string guid) => throw null;
         public static string GetAssetPath(Object o) => throw null;
     }

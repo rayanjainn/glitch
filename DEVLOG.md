@@ -181,3 +181,16 @@
 - **Guard rails:**
   - EditMode `ScriptFileNameTests` checks every MonoBehaviour/ScriptableObject resolves to its own MonoScript.
   - `Tools/CompileCheck/check-unity-filenames.py` runs the same check without Unity (run before every push).
+
+## 2026-10-13 — Milestone 5 merged; Milestone 6 pass 1 implemented (Editor verification pending)
+
+- PR #5 merged; all Unity tests passing, **including the full automated playthrough** of TRAINING LAB.
+- **Milestone 6, pass 1** on `feature/art-polish-pass`:
+  - every visual feature is gated by `VisualSettings` (quick rollback while unreviewed);
+  - post-processing volume + glitch camera bursts with a comfort toggle;
+  - inspection labels and property panel;
+  - hero body language and state icons;
+  - anomaly shards, eye and trail;
+  - spawn/freeze outline flashes, HUD panels, grid floor, SMAA.
+- **New dependencies:** Unity.RenderPipelines.Core/Universal.Runtime (already in the project via URP) are now referenced by the Runtime, Editor and test assemblies.
+- **Honest limitation:** this is a visual milestone and nobody has looked at it yet. Values are first guesses, and every feature can be turned off. **Profiling is not done** (needs the Unity Profiler on the reference PC).

@@ -1,5 +1,6 @@
 using System;
 using BugReport.Core.GameFlow;
+using BugReport.Presentation;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -70,6 +71,9 @@ namespace BugReport.Level
                 GUI.Label(new Rect(x, y, w, 40), "PAUSED", title);
                 y += 60;
                 if (GUI.Button(new Rect(x, y, w, 40), "RESUME", button)) services.State.TogglePause();
+                y += 50;
+                string comfort = "COLOUR-SPLIT EFFECTS: " + (ComfortSettings.ChromaticEffects ? "ON" : "OFF");
+                if (GUI.Button(new Rect(x, y, w, 40), comfort, button)) ComfortSettings.ChromaticEffects = !ComfortSettings.ChromaticEffects;
                 y += 50;
             }
             else

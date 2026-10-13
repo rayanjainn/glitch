@@ -90,9 +90,12 @@ namespace BugReport.EditorTools.Setup
                 return false;
             }
 
+            var presentation = PresentationBuilder.LoadOrCreateAssets(mats);
+
             BuildLighting();
             var env = new GameObject("--- ENVIRONMENT ---").transform;
             BuildHall(env, mats);
+            env.Find("Floor").GetComponent<MeshRenderer>().sharedMaterial = PresentationBuilder.GridFloor(HalfX * 2f, HalfZ * 2f);
 
             int world = GameLayers.Index(GameLayers.World);
             int intangible = GameLayers.Index(GameLayers.Intangible);
@@ -211,6 +214,7 @@ namespace BugReport.EditorTools.Setup
             var systems = BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze },
                 containmentSettings, objectives, debugOverlayVisible: false, levelTitle: LevelTitle);
             WirePlayer(anomaly, motor, cameraRig, systems);
+            PresentationBuilder.Apply(presentation, mats, systems, anomaly, hero, cameraRig.GetComponent<Camera>());
 
             var missingRefs = FindUnassignedReferences(scene);
             if (missingRefs.Count > 0)

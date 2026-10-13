@@ -1,6 +1,6 @@
 # BUG//REPORT — Technical Architecture
 
-Status: **Milestones 1–4: automated tests verified in Unity 6000.6.0f1 (manual playtests deferred). Milestone 5 (vertical-slice level) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
+Status: **Milestones 1–5: automated tests verified in Unity 6000.6.0f1, including a full automated level playthrough (manual playtests deferred). Milestone 6 pass 1 (presentation) implemented, pending Editor verification.** Sections marked *(planned)* describe designs for later milestones. They are commitments of intent, not existing code.
 
 Engine: Unity 6.6 (6000.6.x) · C# 9 (Unity's language level) · URP · Input System.
 
@@ -284,6 +284,18 @@ Consequences:
 - **UI:** IMGUI placeholders until the UI pass. `LevelHud` shows the objective and hint plus the glitch and prompt. `LevelMenus` is the pause / level-complete screen. Restart reloads the scene, which recreates all services.
 - **Audio:** `ProceduralSfx` synthesizes original placeholder sounds at runtime, so there is nothing to license. `AudioFeedback` maps game events to sounds: select, invalid, per-glitch tone, undo, patch, stage alerts, objective chimes.
 - **Not yet:** save data uses versioned POCOs with authored stable ids, and no Unity references are persisted. Settings live in a separate file. Input rebinding uses `SaveBindingOverridesAsJson` on the runtime action copy. **(M8)**
+
+## 8b. Presentation *(M6 pass 1)*
+
+- **Rule:** presentation reads state, never drives gameplay. Animation moves visual pivots, not physics transforms.
+- **Feature switches:** every feature is gated by `VisualSettings` (`VS_Default` asset). A missing asset means everything is on. This is the rollback switch while visuals are unreviewed.
+- **Post-processing:**
+  - `VP_BugReport` (URP VolumeProfile, components saved as sub-assets) applied by one global Volume.
+  - `GlitchCameraFx` modifies a **runtime copy** of the profile: chromatic aberration and lens distortion bursts on glitch application, a red vignette pulse on patches.
+  - Timing comes from the core `BurstEnvelope`/`BurstMixer`, so effects are short and never stack past full strength.
+  - The player can disable colour-split effects (`ComfortSettings`, persisted, pause menu).
+- **Placeholder art is procedural:** tetrahedron mesh asset, grid texture PNG (through LFS), materials. Models and designed UI replace them in later passes.
+- **UI is still IMGUI.** A designed UI (UI Toolkit or uGUI) is a later pass, once the information layout has been playtested.
 
 ## 9. Physics layers
 

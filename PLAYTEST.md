@@ -56,5 +56,16 @@ You are the small glowing thing. The yellow capsule is "the hero". You can't con
 - Press **Esc**, then **RESTART LEVEL**. Everything should be back to the start.
 - Fly into walls and corners. The camera should never show the inside of a wall.
 
+## Part 5: How it looks (after Milestone 6)
+Just look and tell me what you like or dislike. Nothing here can break the game.
+- **Tab:** small dark name tags appear over things you can affect, with coloured dots (blue = collision, pink = copy, light blue = freeze).
+- **E on something:** a panel at the top right describes it.
+- **The hero:** bobs while walking, shows "..." when waiting, "?" when confused, "!" when it sets off, and hops at the exit.
+- **You (the glowing thing):** pointy shards spin around you, a dark "eye" looks at what you aim at, and you leave a short trail.
+- **Every power:** a quick colour-split flash. If you dislike it, press **Esc** and turn **COLOUR-SPLIT EFFECTS** off.
+- **Overall:** brighter highlights (bloom), a slightly darker screen edge, and a grid on the lab floor.
+
+If something looks bad, you can switch it off yourself without me. Click `Assets/_Project/ScriptableObjects/Presentation/VS_Default`, untick the feature in the Inspector, and press Play again. Tell me which one you turned off and why.
+
 ## What to send me
 For each part: **worked / didn't work**, plus anything weird you noticed. Screenshots help. If a red error appears at the bottom of Unity, click it and copy the text.
