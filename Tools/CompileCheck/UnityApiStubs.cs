@@ -228,6 +228,12 @@ namespace UnityEngine
         public void SetColor(string n, Color c) { } public void SetFloat(string n, float f) { }
         public void EnableKeyword(string k) { } public void CopyPropertiesFromMaterial(Material m) { }
     }
+    public static class QualitySettings
+    {
+        public static string[] names => throw null;
+        public static int GetQualityLevel() => throw null;
+        public static Rendering.RenderPipelineAsset renderPipeline { get => throw null; set { } }
+    }
     public class Texture2D : Object { public static Texture2D whiteTexture => throw null; }
     public enum ColorSpace { Uninitialized = -1, Gamma = 0, Linear = 1 }
     public static class RenderSettings
@@ -279,7 +285,7 @@ namespace UnityEngine.Rendering
     public enum ShadowCastingMode { Off, On, TwoSided, ShadowsOnly }
     public enum AmbientMode { Skybox = 0, Trilight = 1, Flat = 3, Custom = 4 }
     public class RenderPipelineAsset : ScriptableObject { }
-    public static class GraphicsSettings { public static RenderPipelineAsset defaultRenderPipeline { get => throw null; set { } } }
+    public static class GraphicsSettings { public static RenderPipelineAsset defaultRenderPipeline { get => throw null; set { } } public static RenderPipelineAsset currentRenderPipeline => throw null; }
 }
 
 namespace UnityEngine.SceneManagement

@@ -167,20 +167,28 @@ namespace BugReport.EditorTools.Setup
             ok = false;
 #endif
 
-            var pipeline = GraphicsSettings.defaultRenderPipeline;
-            if (pipeline == null)
+            // currentRenderPipeline = the active Quality level's asset if set, otherwise the Graphics default.
+            var active = GraphicsSettings.currentRenderPipeline;
+            var fallback = GraphicsSettings.defaultRenderPipeline;
+            log.AppendLine("  INFO Graphics default pipeline: " + (fallback != null ? fallback.name : "<none>") +
+                           ", active quality level '" + QualitySettings.names[QualitySettings.GetQualityLevel()] + "' pipeline: " +
+                           (QualitySettings.renderPipeline != null ? QualitySettings.renderPipeline.name : "<inherits default>"));
+            if (active == null)
             {
-                log.AppendLine("  ERROR no render pipeline asset assigned (Built-in RP). Assign the URP asset in Project Settings > Graphics.");
+                log.AppendLine("  ERROR no render pipeline asset is active (Built-in RP). Assign a URP asset (e.g. Assets/Settings/PC_RPAsset) in " +
+                               "Project Settings > Graphics > Default Render Pipeline, and/or Project Settings > Quality > Render Pipeline Asset.");
                 ok = false;
             }
-            else if (!pipeline.GetType().FullName.Contains("Universal"))
+            else if (!active.GetType().FullName.Contains("Universal"))
             {
-                log.AppendLine("  ERROR render pipeline is " + pipeline.GetType().Name + ", expected URP");
+                log.AppendLine("  ERROR active render pipeline is " + active.GetType().Name + ", expected URP");
                 ok = false;
             }
             else
             {
-                log.AppendLine("  OK URP asset: " + pipeline.name);
+                log.AppendLine("  OK URP active: " + active.name);
+                if (fallback == null)
+                    log.AppendLine("  WARN Graphics > Default Render Pipeline is empty; quality levels without their own asset will fall back to Built-in RP");
             }
 
             if (PlayerSettings.colorSpace != ColorSpace.Linear)

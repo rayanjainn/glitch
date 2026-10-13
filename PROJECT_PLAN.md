@@ -122,7 +122,7 @@ Detailed, checkable tasks are in TASKS.md. How to test a branch before merging: 
 
 | Question | Status |
 |---|---|
-| Unity version | Unity 6.6 confirmed; exact build (e.g. `6000.6.0f1`) will be read from `ProjectSettings/ProjectVersion.txt` once it's committed |
+| Unity version | **6000.6.0f1** (reported by Configure Project on the owner's machine) |
 | Git LFS for binaries | **Yes.** Rules are in `.gitattributes`; every contributor runs `git lfs install` once |
 | Automated Unity test runs | Option A: run Claude Code on the owner's machine (Claude Desktop app, or `claude remote-control` in the repo folder) so it can call `Tools/UnityTests/run-unity-tests.*` directly. Option B (later): GitHub Actions with GameCI, using the Unity licence and login stored as **GitHub repository secrets**, never pasted into chat |
 | Merge flow | Owner tests the branch (TESTING.md) → I open a PR into `main` → owner merges |

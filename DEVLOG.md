@@ -41,3 +41,9 @@
 - **Fix:** renamed our type to `GameEntityId`, including the file and its tests.
 - **Gap:** the stub compile check missed this because the stubs didn't contain `UnityEngine.EntityId`. Added it so this class of collision now reproduces in `Tools/CompileCheck`.
 - Editor and test assemblies never compiled (they depend on Runtime), so more errors may still appear on the next import.
+
+## 2026-10-13 — Second Unity run: compiles; setup menu works
+
+- All assemblies compile in **Unity 6000.6.0f1**: the BUG REPORT menu ran, so the Editor assembly loaded.
+- Configure Project added the World/Props/Hero/Anomaly/Intangible layers at slots 8–12 and set the Intangible collision rule. The second run was idempotent ("OK layer exists").
+- It reported `ERROR no render pipeline asset assigned`. The check only read `GraphicsSettings.defaultRenderPipeline`; it now reads `GraphicsSettings.currentRenderPipeline` (quality-level asset first, Graphics default as fallback) and logs both. Root cause on the owner's machine still to be confirmed: a URP asset may genuinely be missing.
