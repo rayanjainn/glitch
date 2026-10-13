@@ -8,8 +8,8 @@ using UnityEngine.Rendering;
 namespace BugReport.Presentation
 {
     /// <summary>
-    /// Placeholder "transfer" effect: when a multi-target glitch is applied, a beam in
-    /// the glitch's colour shoots from the first target to the last and fades out.
+    /// Placeholder "transfer" effect: when a multi-target glitch is applied (or one creates a
+    /// copy), a beam in the glitch's colour shoots from the source to the result and fades out.
     /// Short and intentional (GDD 7.3), not continuous. Replaced in the art pass.
     /// </summary>
     public sealed class GlitchPulsePresenter : MonoBehaviour
@@ -45,8 +45,13 @@ namespace BugReport.Presentation
 
         private void OnStarted(GlitchOperation operation)
         {
-            if (lineMaterial == null || operation.TargetCount < 2) return;
-            if (!TryCenter(operation.Target(0), out var from) || !TryCenter(operation.Target(operation.TargetCount - 1), out var to)) return;
+            if (lineMaterial == null) return;
+            // Beam from the first target to the last target, or to the first thing the glitch created (a copy).
+            Core.Entities.GameEntityId endId;
+            if (operation.ProductCount > 0) endId = operation.Product(0);
+            else if (operation.TargetCount > 1) endId = operation.Target(operation.TargetCount - 1);
+            else return;
+            if (!TryCenter(operation.Target(0), out var from) || !TryCenter(endId, out var to)) return;
 
             var pulse = Acquire();
             pulse.Color = glitches != null ? glitches.ColorFor(operation) : Color.white;

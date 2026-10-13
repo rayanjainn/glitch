@@ -349,6 +349,65 @@ namespace BugReport.Core.Tests
             Assert.DoesNotThrow(() => registry.Unregister(a.Id));
         }
 
+        // ---------------------------------------------------------------- products (duplicates)
+
+        [Test]
+        public void Product_LostEndsOperation_AndRestoresTargets()
+        {
+            var copy = new FakeEntity("Copy").RegisterIn(registry);
+            effect.OnApplyHook = op => op.AddProduct(copy.Id);
+            var op1 = manager.TryApply(Spec(arity: 1), effect, new[] { a.Id }, 0f).Operation;
+            Assert.That(manager.IsInvolved(copy.Id), Is.True);
+            Assert.That(manager.IsTargeted(copy.Id), Is.False);
+
+            registry.Unregister(copy.Id);
+
+            Assert.That(op1.EndReason, Is.EqualTo(GlitchEndReason.TargetLost));
+            Assert.That(effect.Channel(a.Id).IsModified, Is.False);
+        }
+
+        [Test]
+        public void ChainOfCopies_CollapsesWhenTheFirstCopyGoes()
+        {
+            // copy1 is a product of op1 and the target of op2 (a copy of a copy).
+            var copy1 = new FakeEntity("Copy1", EntityCategory.Prop, EntityCapabilities.CollisionTransferable).RegisterIn(registry);
+            var copy2 = new FakeEntity("Copy2").RegisterIn(registry);
+            var spec = Spec(arity: 1);
+            effect.OnApplyHook = op => op.AddProduct(copy1.Id);
+            var op1 = manager.TryApply(spec, effect, new[] { a.Id }, 0f).Operation;
+            effect.OnApplyHook = op => op.AddProduct(copy2.Id);
+            var op2 = manager.TryApply(spec, effect, new[] { copy1.Id }, 0f).Operation;
+            // Reverting op1 destroys copy1 (simulated), which must end op2 too.
+            effect.OnApplyHook = null;
+            effect.OnEndedHook = (op, _) => { if (op == op1) registry.Unregister(copy1.Id); };
+
+            manager.Revert(op1.Id);
+
+            Assert.That(op2.EndReason, Is.EqualTo(GlitchEndReason.TargetLost));
+            Assert.That(manager.ActiveCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void CountActiveOn_CountsPerSourceAndSpec()
+        {
+            var spec = Spec(arity: 1);
+            effect.AppliedValue = 1;
+            manager.TryApply(spec, new FakeGlitchEffect(), new[] { a.Id }, 0f);
+            manager.TryApply(spec, new FakeGlitchEffect(), new[] { a.Id }, 0f);
+            manager.TryApply(spec, new FakeGlitchEffect(), new[] { b.Id }, 0f);
+            Assert.That(manager.CountActiveOn("collision", a.Id), Is.EqualTo(2));
+            Assert.That(manager.CountActiveOn("collision", b.Id), Is.EqualTo(1));
+            Assert.That(manager.CountActiveOn("other", a.Id), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void AddProduct_AfterEnd_Throws()
+        {
+            var op = ApplyAB().Operation;
+            manager.Revert(op.Id);
+            Assert.Throws<System.InvalidOperationException>(() => op.AddProduct(plain.Id));
+        }
+
         [Test]
         public void AddLease_FromAnotherOperation_Throws()
         {

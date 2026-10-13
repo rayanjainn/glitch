@@ -63,7 +63,7 @@ Status: `[x]` done and verified · `[~]` implemented, verification pending · `[
 
 ---
 
-## Milestone 2 — Glitch framework + Collision Transfer (current)
+## Milestone 2 — Glitch framework + Collision Transfer ✅ (verified in Unity, merged)
 - [x] Core `ModifierStack<T>`: owner leases, priority, conflict policy (Exclusive/Stack), base changes survive revert. 10 tests [auto]
 - [x] Core `GlitchSpec`, `GlitchOperation`, `GlitchManager`: apply/validate, cooldown, max active, expiry (injected clock), revert, LIFO revert, EndAll, target-lost cascade, effect veto (`CanEnd`), exception isolation. 28 tests [auto]
 - [~] `GlitchDefinition` ScriptableObject (slots, duration, cooldown, max active, colour, containment weight) + `CollisionTransferDefinition` [editor]
@@ -94,11 +94,29 @@ After **BUG REPORT ▸ Setup ▸ 2. Build Test Room Scene → Rebuild**, press P
    - LMB with nothing selected (prompt).
 8. Esc pause → LMB/R do nothing. Resume works.
 
-## Milestone 3 — Duplication + Freeze
-- [ ] `DuplicationCapability` (prefab reference), prefab-only instantiation, approved state transfer, lineage, caps, spawn overlap check [editor]
-- [ ] `FreezeCapability`: kinematic + LocalTimeScale + animator channels; `EntityClock` for scripted movers; release policies [editor]
-- [ ] Cross-glitch tests: freeze + collision; duplicate of frozen object; collision on duplicate then despawn [editor]
-- [ ] Demonstration scene / test-room additions [editor][visual]
+## Milestone 3 — Duplication + Freeze (current)
+- [x] Core: operation products (`AddProduct`, `Involves`, `CountActiveOn`); losing a product ends the operation; copy-of-copy chains collapse. 4 new tests (91 total) [auto]
+- [~] `FreezeCapability` (exclusive frozen channel, kinematic + animator handling, release at rest), `ITimeScaled` + `PingPongMover`, `FreezeDefinition` (duration, release policy), `FreezeEffect` (velocity snapshot in the operation) [editor]
+- [~] `DuplicationProfile` (prefab, per-source cap, objective policy, inherit velocity), `DuplicationCapability`, `DuplicateMarker`, `DuplicationDefinition` (global cap), `DuplicationEffect` (prefab-only spawn under inactive holder, free-space placement, despawn lease) [editor]
+- [~] `RendererOverrides` (priority material arbitration); collision/freeze visuals use it [editor][visual]
+- [~] Presenters: per-glitch outline colours, outlines on copies, beam source → copy [editor][visual]
+- [~] Test room: crates are prefab instances (PF_Crate + DP_Crate), ball starts mid-air, LIFT_PLATFORM oscillates; Q cycles COLLISION → DUPLICATION → FREEZE [editor]
+- [~] Tests: FreezeTests (11), DuplicationTests (12), RendererOverridesTests (1), EditMode capability/prefab checks [editor]
+- [ ] Remove unused template packages (Visual Scripting, Collab Proxy) [editor]
+
+### Manual playtest checklist (Milestone 3)
+After **Build Test Room Scene → Rebuild**, press Play:
+1. Q cycles the glitch shown in the overlay: COLLISION TRANSFER → DUPLICATION → FREEZE.
+2. **FREEZE** on TEST_BALL while it falls: it hangs pale cyan in mid-air for 8 s, then drops from rest. The crates and the lift keep working meanwhile.
+3. **FREEZE** on LIFT_PLATFORM: it stops mid-travel, then resumes from the same height (no jump).
+4. **DUPLICATION** on CRATE_A: a magenta beam, then "CRATE_A COPY n" appears beside it (not inside anything) and stays outlined magenta.
+   - A second copy works. A third gives "COPY LIMIT".
+   - R removes the newest copy.
+5. Freeze a copy, then revert the duplication: the copy vanishes and its freeze ends ("TARGET LOST").
+6. Freeze CRATE_A, then duplicate it: the copy falls and is not frozen.
+7. Duplicate a crate pushed into a corner: "NO SPACE" when every side is blocked.
+8. Invalid cases: duplicating the firewall, freezing the hero, freezing the pillar → red reticle and a reason.
+9. F5 restart: no copies remain, nothing stays frozen, ENTITIES count matches a fresh load.
 
 ## Milestone 4 — Hero behaviour + Containment
 - [ ] Navigation spike: NavMesh carving vs waypoint graph with runtime passability. Decide and record it [editor]

@@ -17,6 +17,8 @@ namespace BugReport.Core.Tests
         public bool ThrowOnEnded;
         public string BlockEnd;
         public Action<GlitchOperation, GlitchEndReason> OnEndedHook;
+        /// <summary>Optional: called during Apply, e.g. to register a product.</summary>
+        public Action<GlitchOperation> OnApplyHook;
 
         public ModifierStack<int> Channel(GameEntityId id)
         {
@@ -51,6 +53,7 @@ namespace BugReport.Core.Tests
                     return false;
                 }
             }
+            OnApplyHook?.Invoke(operation);
             failure = null;
             return true;
         }

@@ -104,3 +104,31 @@
   - `Tools/CompileCheck`: 0 errors. The stubs gained only real Unity APIs: Sprite, CreateAssetMenu, OverlapBoxNonAlloc, BlendMode, RenderQueue, LogAssert, …
   - The committed collision matrix has Intangible colliding with nothing.
 - **Not verified:** Unity compile, the 21 new PlayMode and 4 new EditMode tests, the transparent ghost material's look (URP properties set by script), and the playtest checklist.
+
+## 2026-10-13 — Milestone 2 merged; Milestone 3 implemented (Editor verification pending)
+
+- PR #2 merged (Milestone 2; owner reported all Unity tests passing). The owner pushed the generated assets to `main`; audit: no missing metas, every scene reference resolves.
+- Unity's ProjectSettings changes in that commit: splash screen on (required by Unity Personal), fullscreen/resizable/run-in-background changed. Revisit in release prep (M8).
+- **Milestone 3** on `feature/duplication-freeze`:
+  - **Core:** operation products, `IsInvolved`, `CountActiveOn` (91/91 tests).
+  - **Freeze:** capability, mover, definition, effect, visual.
+  - **Duplication:** profile, capability, marker, definition, effect.
+  - **Presentation:** `RendererOverrides`; per-glitch outline colours; copy beam.
+  - **Builder:** crate prefab + profile, ball, lift, three glitch assets (load-or-create).
+- **Decisions:**
+  - Copies come only from prefab assets, via a profile ScriptableObject (a prefab can't reference itself).
+  - Copies spawn under an inactive holder.
+  - Freeze releases at rest by default; momentum lives in the operation.
+  - Collision Transfer judges "dynamic" by the authored body state.
+  - A despawn lease skips copies that are already unregistering, to avoid double destruction.
+- **Moved files:** collision scripts now live in `Runtime/Glitches/Collision/`, moved together with their `.meta` files so the committed scene keeps its references.
+- **Not verified:** Unity compile, the new PlayMode/EditMode tests, prefab generation via `PrefabUtility`, the visuals, and the playtest checklist.
+
+## 2026-10-13 — Milestone 3 first Unity run: 2 failures, one regression
+
+- **Failures:** `CollisionTransferTests.DynamicSource_IsRejected` and `FreezeTests.FrozenDynamicBody_StillCountsAsDynamicForCollisionTransfer`.
+- **Cause:** both came from M3 changing `CollisionCapability.HasDynamicBody` to a snapshot taken at initialisation.
+  - The snapshot missed bodies added later (DynamicSource, a regression of a passing M2 test).
+  - `attachedRigidbody` is null for colliders on inactive objects, which is when the capability initialises.
+- **Fix:** evaluate live again. Fall back to `GetComponentInParent<Rigidbody>(true)`, and treat a body that is kinematic only because of a freeze as dynamic (`FreezeCapability.KinematicBeforeFreeze`).
+- **Lesson:** snapshotting state at init is fragile with deferred activation; prefer live queries plus explicit ownership information.

@@ -53,15 +53,26 @@ namespace BugReport.Glitches
             }
         }
 
-        /// <summary>True if any collider belongs to a non-kinematic rigidbody (it would fall through the world if intangible).</summary>
+        /// <summary>
+        /// True if any collider belongs to a dynamic rigidbody, i.e. it would fall through the world
+        /// if it lost its collision. Evaluated live (bodies can be added after initialisation), and a
+        /// body that is only kinematic because it is frozen still counts as dynamic: otherwise
+        /// "freeze crate, make it intangible, unfreeze" drops it through the floor.
+        /// </summary>
         public bool HasDynamicBody
         {
             get
             {
                 for (int i = 0; i < colliders.Length; i++)
                 {
-                    var body = colliders[i] != null ? colliders[i].attachedRigidbody : null;
-                    if (body != null && !body.isKinematic) return true;
+                    var c = colliders[i];
+                    if (c == null) continue;
+                    // attachedRigidbody is null for inactive colliders; GetComponentInParent(true) is not.
+                    var body = c.attachedRigidbody != null ? c.attachedRigidbody : c.GetComponentInParent<Rigidbody>(true);
+                    if (body == null) continue;
+                    var freeze = body.GetComponent<FreezeCapability>();
+                    bool kinematic = freeze != null && freeze.IsFrozen ? freeze.KinematicBeforeFreeze : body.isKinematic;
+                    if (!kinematic) return true;
                 }
                 return false;
             }
