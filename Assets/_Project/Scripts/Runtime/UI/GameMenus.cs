@@ -72,7 +72,7 @@ namespace BugReport.UI
             pauseScreen = Ui.Add(layer, MakeScreen("pause"));
             var pauseCard = Ui.Add(pauseScreen, Ui.Element("pause-card", "br-card"));
             pauseCard.Add(Ui.Text("pause-caption", levelTitle, "br-caption"));
-            pauseCard.Add(Ui.Text("pause-title", "PAUSED", "br-title"));
+            pauseCard.Add(Ui.Text("pause-title", "PAUSED", "br-title", "br-display"));
             var columns = Ui.Add(pauseCard, Ui.Element("pause-columns", "br-card__columns"));
             var buttons = Ui.Add(columns, Ui.Element("pause-buttons", "br-card__buttons"));
             resumeButton = Ui.Add(buttons, MenuButton("resume", "RESUME", Resume));
@@ -92,7 +92,7 @@ namespace BugReport.UI
             completeScreen = Ui.Add(layer, MakeScreen("complete"));
             var completeCard = Ui.Add(completeScreen, Ui.Element("complete-card", "br-card", "br-card--success"));
             completeCard.Add(Ui.Text("complete-caption", "REPORT CLOSED", "br-caption"));
-            completeCard.Add(Ui.Text("complete-title", levelTitle + " COMPLETE", "br-title"));
+            completeCard.Add(Ui.Text("complete-title", levelTitle + " COMPLETE", "br-title", "br-display"));
             completeSummary = Ui.Add(completeCard, Ui.Text("complete-summary", string.Empty, "br-card__body"));
             var completeButtons = Ui.Add(completeCard, Ui.Element("complete-buttons", "br-card__buttons"));
             completeRestartButton = Ui.Add(completeButtons, MenuButton("complete-restart", "RESTART LEVEL", LevelFlow.RestartLevel));

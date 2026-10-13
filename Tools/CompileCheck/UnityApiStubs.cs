@@ -44,6 +44,8 @@ namespace UnityEngine
         public T[] GetComponents<T>() => throw null;
         public T[] GetComponentsInChildren<T>(bool includeInactive) => throw null;
         public void GetComponentsInChildren<T>(bool includeInactive, List<T> results) { }
+        public T GetComponentInChildren<T>() => throw null;
+        public T GetComponentInChildren<T>(bool includeInactive) => throw null;
         public bool CompareTag(string t) => throw null;
     }
     public class Behaviour : Component { public bool enabled { get => throw null; set { } } public bool isActiveAndEnabled => throw null; }
@@ -55,6 +57,7 @@ namespace UnityEngine
         public GameObject(string name, params Type[] components) { }
         public Transform transform => throw null;
         public int layer { get => throw null; set { } }
+        public bool isStatic { get => throw null; set { } }
         public string tag { get => throw null; set { } }
         public bool activeInHierarchy => throw null;
         public bool activeSelf => throw null;
@@ -71,6 +74,7 @@ namespace UnityEngine
     public enum PrimitiveType { Sphere, Capsule, Cylinder, Cube, Plane, Quad }
     public class Transform : Component, System.Collections.IEnumerable
     {
+        public Vector3 InverseTransformPoint(Vector3 position) => throw null;
         public Vector3 position { get => throw null; set { } }
         public Vector3 localPosition { get => throw null; set { } }
         public Quaternion rotation { get => throw null; set { } }
@@ -163,7 +167,7 @@ namespace UnityEngine
     {
         public Bounds(Vector3 c, Vector3 s) { }
         public Vector3 center => throw null; public Vector3 size => throw null; public Vector3 extents => throw null; public Vector3 min => throw null; public Vector3 max => throw null;
-        public void Encapsulate(Bounds b) { } public void Expand(float a) { } public bool Contains(Vector3 p) => throw null;
+        public void Encapsulate(Bounds b) { } public void Encapsulate(Vector3 point) { } public void Expand(float a) { } public bool Contains(Vector3 p) => throw null;
     }
     public struct Ray { }
     public struct RaycastHit { public float distance => throw null; public Transform transform => throw null; public Collider collider => throw null; public Vector3 point => throw null; }
@@ -194,6 +198,7 @@ namespace UnityEngine
         public static float Clamp(float v, float a, float b) => throw null;
         public static int Clamp(int v, int a, int b) => throw null;
         public static float Min(float a, float b) => throw null;
+        public static float Min(params float[] values) => throw null;
         public static float Clamp01(float v) => throw null;
         public static float Sqrt(float v) => throw null;
         public static float Exp(float v) => throw null;
@@ -275,6 +280,7 @@ namespace UnityEngine
     }
     public enum CameraClearFlags { Skybox = 1, SolidColor = 2, Depth = 3, Nothing = 4 }
     public class AudioListener : Behaviour { }
+    public class Font : Object { }
     public sealed class AudioClip : Object
     {
         public static AudioClip Create(string name, int lengthSamples, int channels, int frequency, bool stream) => throw null;
@@ -286,6 +292,11 @@ namespace UnityEngine
         public bool playOnAwake { get => throw null; set { } }
         public float spatialBlend { get => throw null; set { } }
         public void PlayOneShot(AudioClip clip, float volumeScale) { }
+        public bool loop { get => throw null; set { } } public bool isPlaying => throw null;
+        public float minDistance { get => throw null; set { } } public float maxDistance { get => throw null; set { } }
+        public AudioRolloffMode rolloffMode { get => throw null; set { } }
+        public AudioClip clip { get => throw null; set { } } public float volume { get => throw null; set { } }
+        public void Play() { } public void Stop() { }
     }
     public enum LightType { Spot, Directional, Point }
     public enum LightShadows { None, Hard, Soft }
@@ -370,7 +381,28 @@ namespace UnityEngine
     [AttributeUsage(AttributeTargets.Class)] public class DefaultExecutionOrder : Attribute { public DefaultExecutionOrder(int o) { } }
     [AttributeUsage(AttributeTargets.Class)] public class DisallowMultipleComponent : Attribute { }
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)] public class RequireComponent : Attribute { public RequireComponent(Type t) { } public RequireComponent(Type a, Type b) { } public RequireComponent(Type a, Type b, Type c) { } }
-    public class Animator : Behaviour { public float speed { get => throw null; set { } } }
+    public enum AnimatorCullingMode { AlwaysAnimate = 0, CullUpdateTransforms = 1, CullCompletely = 2 }
+    public enum AnimatorControllerParameterType { Float = 1, Int = 3, Bool = 4, Trigger = 9 }
+    public class AnimatorControllerParameter
+    {
+        public string name { get => throw null; set { } } public AnimatorControllerParameterType type { get => throw null; set { } }
+        public float defaultFloat { get => throw null; set { } } public int defaultInt { get => throw null; set { } }
+    }
+    public class Motion : Object { }
+    public class AnimationClip : Motion { }
+    public class RuntimeAnimatorController : Object { }
+    public class Animator : Behaviour
+    {
+        public float speed { get => throw null; set { } }
+        public RuntimeAnimatorController runtimeAnimatorController { get => throw null; set { } }
+        public bool applyRootMotion { get => throw null; set { } }
+        public AnimatorCullingMode cullingMode { get => throw null; set { } }
+        public static int StringToHash(string name) => throw null;
+        public void SetInteger(int id, int value) { } public void SetInteger(string name, int value) { }
+        public void SetFloat(int id, float value) { } public void SetFloat(string name, float value) { }
+        public int GetInteger(int id) => throw null; public int GetInteger(string name) => throw null;
+    }
+    public enum AudioRolloffMode { Logarithmic, Linear, Custom }
     [AttributeUsage(AttributeTargets.Field)] public class SerializeField : Attribute { }
     public class PropertyAttribute : Attribute { }
     public class HeaderAttribute : PropertyAttribute { public HeaderAttribute(string h) { } }
@@ -520,6 +552,7 @@ namespace UnityEditor
     {
         public static T LoadAssetAtPath<T>(string p) where T : Object => throw null;
         public static void SaveAssetIfDirty(Object o) { }
+        public static bool DeleteAsset(string path) => throw null;
         public static Object[] LoadAllAssetsAtPath(string p) => throw null;
         public static void SaveAssets() { }
         public static bool IsValidFolder(string p) => throw null;
@@ -542,8 +575,25 @@ namespace UnityEditor
     public static class EditorApplication { public static bool isPlaying { get => throw null; set { } } }
     public static class EditorBuildSettings { public static EditorBuildSettingsScene[] scenes { get => throw null; set { } } }
     public static class PlayerSettings { public static ColorSpace colorSpace { get => throw null; set { } } }
+    public class AssetImporter : Object { public string assetPath => throw null; public static AssetImporter GetAtPath(string path) => throw null; }
+    public enum ModelImporterMaterialImportMode { None = 0, ImportStandard = 1, ImportViaMaterialDescription = 2 }
+    public enum ModelImporterAnimationType { None = 0, Legacy = 1, Generic = 2, Human = 3 }
+    public class ModelImporterClipAnimation { public string name { get => throw null; set { } } public bool loopTime { get => throw null; set { } } }
+    public class ModelImporter : AssetImporter
+    {
+        public ModelImporterMaterialImportMode materialImportMode { get => throw null; set { } }
+        public bool importCameras { get => throw null; set { } } public bool importLights { get => throw null; set { } }
+        public bool addCollider { get => throw null; set { } } public bool importAnimation { get => throw null; set { } }
+        public ModelImporterAnimationType animationType { get => throw null; set { } }
+        public ModelImporterClipAnimation[] defaultClipAnimations => throw null;
+        public ModelImporterClipAnimation[] clipAnimations { get => throw null; set { } }
+    }
+    public class AssetPostprocessor { public string assetPath { get => throw null; set { } } public AssetImporter assetImporter => throw null; }
+    public enum PrefabUnpackMode { OutermostRoot, Completely }
+    public enum InteractionMode { AutomatedAction, UserAction }
     public static class PrefabUtility
     {
+        public static void UnpackPrefabInstance(GameObject instanceRoot, PrefabUnpackMode unpackMode, InteractionMode action) { }
         public static GameObject SaveAsPrefabAsset(GameObject instanceRoot, string assetPath) => throw null;
         public static Object InstantiatePrefab(Object assetComponentOrGameObject, Transform parent) => throw null;
         public static void RecordPrefabInstancePropertyModifications(Object targetObject) { }
@@ -621,7 +671,11 @@ namespace UnityEngine.UIElements
         StyleFloat opacity { get; set; }
         StyleColor color { get; set; } StyleColor backgroundColor { get; set; }
         StyleColor borderBottomColor { get; set; } StyleColor borderLeftColor { get; set; }
+        StyleFontDefinition unityFontDefinition { get; set; }
     }
+    public struct FontDefinition { public static FontDefinition FromFont(Font f) => throw null; }
+    public struct StyleFontDefinition { public StyleFontDefinition(FontDefinition v) { } }
+    public struct UQueryBuilder<T> where T : VisualElement { public void ForEach(System.Action<T> funcCall) { } }
     public interface IPanel { }
     public interface IVisualElementScheduledItem { }
     public interface IVisualElementScheduler { IVisualElementScheduledItem Execute(System.Action timerUpdateEvent); }
@@ -655,6 +709,7 @@ namespace UnityEngine.UIElements
     {
         public static T Q<T>(this VisualElement e, string name = null, params string[] classes) where T : VisualElement => throw null;
         public static VisualElement Q(this VisualElement e, string name = null, params string[] classes) => throw null;
+        public static UQueryBuilder<VisualElement> Query(this VisualElement e, string name = null, string className = null) => throw null;
     }
     public class StyleSheet : ScriptableObject { }
     public class ThemeStyleSheet : StyleSheet { }
@@ -678,5 +733,38 @@ namespace UnityEngine.UIElements
     public static class RuntimePanelUtils
     {
         public static Vector2 CameraTransformWorldToPanel(IPanel panel, Vector3 worldPosition, Camera camera) => throw null;
+    }
+}
+
+namespace UnityEditor.Animations
+{
+    using UnityEngine;
+    public enum AnimatorConditionMode { If = 1, IfNot = 2, Greater = 3, Less = 4, Equals = 6, NotEqual = 7 }
+    public class AnimatorStateTransition : Object
+    {
+        public void AddCondition(AnimatorConditionMode mode, float threshold, string parameter) { }
+        public bool hasExitTime { get => throw null; set { } } public float duration { get => throw null; set { } }
+        public bool canTransitionToSelf { get => throw null; set { } }
+    }
+    public class AnimatorState : Object
+    {
+        public Motion motion { get => throw null; set { } }
+        public bool speedParameterActive { get => throw null; set { } } public string speedParameter { get => throw null; set { } }
+    }
+    public struct ChildAnimatorState { public AnimatorState state { get => throw null; set { } } }
+    public class AnimatorStateMachine : Object
+    {
+        public ChildAnimatorState[] states { get => throw null; set { } }
+        public AnimatorState AddState(string name) => throw null;
+        public AnimatorStateTransition AddAnyStateTransition(AnimatorState destination) => throw null;
+        public AnimatorState defaultState { get => throw null; set { } }
+    }
+    public class AnimatorControllerLayer { public AnimatorStateMachine stateMachine { get => throw null; set { } } }
+    public class AnimatorController : RuntimeAnimatorController
+    {
+        public static AnimatorController CreateAnimatorControllerAtPath(string path) => throw null;
+        public void AddParameter(string name, AnimatorControllerParameterType type) { }
+        public AnimatorControllerParameter[] parameters { get => throw null; set { } }
+        public AnimatorControllerLayer[] layers { get => throw null; set { } }
     }
 }

@@ -22,6 +22,8 @@ namespace BugReport.Audio
         [SerializeField, OptionalReference] private ObjectiveDirector objectives;
         [SerializeField, OptionalReference] private Tutorial.GuideDirector guide;
         [SerializeField, Range(0f, 1f)] private float volume = 0.7f;
+        [SerializeField, OptionalReference, Tooltip("Recorded objective sound; the synthesized chime is used when empty.")]
+        private AudioClip objectiveClip;
 
         private readonly Dictionary<string, AudioClip> glitchTones = new Dictionary<string, AudioClip>();
         private readonly List<AudioClip> created = new List<AudioClip>();
@@ -129,7 +131,7 @@ namespace BugReport.Audio
         }
 
         private void OnPatched(Core.Glitches.GlitchOperation _) => Play(patch);
-        private void OnObjective(int _) => Play(objective);
+        private void OnObjective(int _) => Play(objectiveClip != null ? objectiveClip : objective);
         private void OnLevelCompleted() => Play(levelComplete);
         private void OnGuideAdvanced() => Play(guideStep);
 

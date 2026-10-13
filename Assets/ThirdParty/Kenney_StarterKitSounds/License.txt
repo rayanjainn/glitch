@@ -1,0 +1,9 @@
+Sound effects by Kenney (www.kenney.nl), licensed CC0 1.0 Universal
+(https://creativecommons.org/publicdomain/zero/1.0/).
+
+Source: official Kenney starter kits on GitHub
+  https://github.com/KenneyNL/Starter-Kit-3D-Platformer  (sounds/)
+  https://github.com/KenneyNL/Starter-Kit-FPS           (sounds/, files prefixed fps_ where names clashed)
+
+From the starter kits' README: "Assets included in this package (2D sprites, 3D models and
+sound effects) are CC0 licensed". The kits' code is MIT; no code was copied.

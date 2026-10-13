@@ -166,6 +166,8 @@ namespace BugReport.EditorTools.Setup
             AddEntity(exitRoot, "EXIT_DOOR", EntityCategory.Objective, EntityCapabilities.Inspectable | EntityCapabilities.ObjectiveRelevant,
                 "Level objective. The hero wants to be here.");
 
+            Decorate(env);
+
             CreatePointLight("Light_RoomB", new Vector3(-1f, 3.5f, 0f), new Color(1f, 0.85f, 0.6f), 2.5f, 12f);
             CreatePointLight("Light_RoomC", new Vector3(12f, 3.5f, 0f), new Color(1f, 0.45f, 0.3f), 2.5f, 10f);
 
@@ -266,6 +268,36 @@ namespace BugReport.EditorTools.Setup
             }
             AddToBuildSettings(ScenePath, first: true);
             return true;
+        }
+
+        /// <summary>
+        /// PROJECT HERO set dressing from the KayKit dungeon kit (skipped if the CC0 art isn't fetched).
+        /// Everything stands against the side walls (|z| ≥ 5), clear of the hero's route along z = 0,
+        /// the plates, the shadows and the piston corridor. The chest is what the hero walks towards.
+        /// </summary>
+        private static void Decorate(Transform env)
+        {
+            if (!ArtBuilder.DungeonAvailable) return;
+            var material = ArtBuilder.AtlasMaterial("M_Dungeon", ArtBuilder.DungeonTexturePath);
+            int world = GameLayers.Index(GameLayers.World);
+            var root = new GameObject("Decor").transform;
+            root.SetParent(env, false);
+            (string model, Vector3 position, float yaw, float height)[] props =
+            {
+                ("barrel_large", new Vector3(-18.6f, 0f, 5.1f), 0f, 1.1f),
+                ("barrel_small_stack", new Vector3(-17.2f, 0f, 5.2f), 30f, 1.0f),
+                ("crates_stacked", new Vector3(-18.4f, 0f, -5.0f), 90f, 1.3f),
+                ("keg", new Vector3(-9.8f, 0f, -5.1f), 0f, 0.9f),
+                ("box_stacked", new Vector3(-6.4f, 0f, -5.0f), 15f, 1.2f),
+                ("barrel_large", new Vector3(2.5f, 0f, 5.1f), 0f, 1.1f),
+                ("shelf_small_candles", new Vector3(4.6f, 0f, 5.3f), 180f, 1.6f),
+                ("barrel_small_stack", new Vector3(8.2f, 0f, 5.1f), 0f, 1.0f),
+                ("crates_stacked", new Vector3(8.2f, 0f, -5.0f), 0f, 1.3f),
+                ("table_small_decorated_A", new Vector3(16.5f, 0f, 5.0f), 0f, 0.9f),
+                ("chest_gold", new Vector3(19.0f, 0f, -2.4f), -90f, 0.8f),
+                ("barrel_large", new Vector3(18.8f, 0f, 4.8f), 0f, 1.1f),
+            };
+            foreach (var p in props) ArtBuilder.Decor(p.model, root, p.position, p.yaw, p.height, material, world);
         }
 
         private static void BuildHall(Transform parent, MaterialSet mats)

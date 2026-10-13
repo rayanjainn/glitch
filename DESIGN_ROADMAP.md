@@ -64,6 +64,9 @@ Always confirm the licence on the download page; keep each pack's licence file n
 | UI font | **Rajdhani** or **Exo 2** + **JetBrains Mono** (Google Fonts, SIL Open Font License: free, ships with the game) | UI and the system layer |
 | Music | Not chosen yet. CC0 music is rarer; options are opengameart.org (filter CC0) or commissioning. **Avoid CC-BY** unless we add a credits screen |
 
+### Status (2026-10-14)
+Fetched from the authors' official GitHub repos: KayKit Adventurers (Knight), KayKit Dungeon Remastered, Kenney starter-kit sounds, Lilita One font. See CREDITS.md and `Tools/Assets/fetch-cc0-assets.sh`. Still needed: an outdoor fantasy kit for chapter 1 (Kenney Nature/Castle kits aren't on GitHub officially; KayKit's other packs are worth checking), music.
+
 ### How assets enter the project
 1. The owner downloads the zips (this cloud environment blocks those sites; or allow them in the environment's Network settings and I fetch them).
 2. Unzip into `Assets/ThirdParty/<PackName>/` with the pack's `License.txt`. Binary files go through Git LFS (already configured).

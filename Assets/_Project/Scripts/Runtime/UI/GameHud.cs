@@ -119,11 +119,11 @@ namespace BugReport.UI
             reticle.Add(Ui.Element("reticle-dot", "br-reticle__dot"));
 
             toastStack = Ui.Add(layer, Ui.Element("toasts", "br-toasts"));
-            banner = Ui.Add(layer, Ui.Text("banner", string.Empty, "br-banner"));
+            banner = Ui.Add(layer, Ui.Text("banner", string.Empty, "br-banner", "br-display"));
 
             objectivePanel = Ui.Add(layer, Ui.Element("objective", "br-panel", "br-objective"));
             objectiveHeader = Ui.Add(objectivePanel, Ui.Text("objective-header", string.Empty, "br-caption"));
-            objectiveTitle = Ui.Add(objectivePanel, Ui.Text("objective-title", string.Empty, "br-objective__title"));
+            objectiveTitle = Ui.Add(objectivePanel, Ui.Text("objective-title", string.Empty, "br-objective__title", "br-display"));
             objectiveHint = Ui.Add(objectivePanel, Ui.Text("objective-hint", string.Empty, "br-objective__hint"));
 
             guideCard = Ui.Add(layer, Ui.Element("guide", "br-guide"));
