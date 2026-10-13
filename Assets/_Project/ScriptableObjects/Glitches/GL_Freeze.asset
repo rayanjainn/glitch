@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e00fb5b3b9da4c9296cc89e1ed1a385, type: 3}
+  m_Name: GL_Freeze
+  m_EditorClassIdentifier: BugReport.Runtime::BugReport.Glitches.FreezeDefinition
+  id: freeze
+  displayName: FREEZE
+  description: Stops one object's time. Everything else keeps moving.
+  icon: {fileID: 0}
+  color: {r: 0.6, g: 0.95, b: 1, a: 1}
+  duration: 8
+  cooldown: 0.5
+  maxActive: 3
+  containmentWeight: 1
+  slots:
+  - label: TARGET
+    requiredCapabilities: 9
+    excludedCategories: 0700000003000000i
+  release: 0
+  maxReleaseSpeed: 12
