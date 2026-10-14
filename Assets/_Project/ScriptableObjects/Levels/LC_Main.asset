@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cbb47ee54ad14dddab18d7873dc4523, type: 3}
+  m_Name: LC_Main
+  m_EditorClassIdentifier: BugReport.Runtime::BugReport.Progress.LevelCatalog
+  levels:
+  - id: training_lab
+    sceneName: Level_01_TrainingLab
+    title: TRAINING LAB
+    chapter: TUTORIAL
+  - id: bridge_out
+    sceneName: Level_02_BridgeOut
+    title: BRIDGE OUT
+    chapter: '1: HELLO, WORLD'
+  - id: two_doors
+    sceneName: Level_03_TwoDoors
+    title: TWO DOORS, ONE SHADOW
+    chapter: '1: HELLO, WORLD'
+  - id: two_birds
+    sceneName: Level_04_TwoBirds
+    title: TWO BIRDS
+    chapter: '1: HELLO, WORLD'
+  - id: three_plates
+    sceneName: Level_05_ThreePlates
+    title: THREE PLATES
+    chapter: '2: DUPLICATE OBJECTIVE'
+  - id: copy_the_copy
+    sceneName: Level_06_CopyTheCopy
+    title: COPY THE COPY
+    chapter: '2: DUPLICATE OBJECTIVE'
+  - id: stop_the_platform
+    sceneName: Level_07_StopThePlatform
+    title: STOP THE PLATFORM
+    chapter: '3: TIME DOES NOT APPLY'
+  - id: two_pistons
+    sceneName: Level_08_TwoPistons
+    title: TWO PISTONS
+    chapter: '3: TIME DOES NOT APPLY'
+  - id: the_build
+    sceneName: Level_09_TheBuild
+    title: THE BUILD
+    chapter: FINALE
