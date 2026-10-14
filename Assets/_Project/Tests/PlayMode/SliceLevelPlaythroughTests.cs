@@ -30,6 +30,7 @@ namespace BugReport.Tests.PlayMode
         public IEnumerator UnloadLevel()
         {
             Time.timeScale = previousTimeScale;
+            Progress.SaveStore.RedirectForTests(null);
             var level = SceneManager.GetSceneByPath(ScenePath);
             if (!level.IsValid() || !level.isLoaded) yield break;
             var empty = SceneManager.CreateScene("PlaythroughCleanup");
@@ -43,6 +44,7 @@ namespace BugReport.Tests.PlayMode
         public IEnumerator Level01_IsCompletableWithTheIntendedSolution()
         {
             if (!System.IO.File.Exists(ScenePath)) Assert.Ignore("Level not built yet: BUG REPORT > Setup > 3. Build Vertical Slice Level.");
+            PlayModeTestBase.RedirectSave(); // finishing the level records progress: keep it out of the real save
 
             var load = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             while (!load.isDone) yield return null;

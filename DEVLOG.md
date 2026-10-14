@@ -263,3 +263,48 @@
   - crate prefab = dungeon `box_large`; TRAINING LAB set dressing (12 props, chest at the exit);
   - `HeroAudio` footsteps; recorded objective chime; Lilita One on headings.
 - **Unknowns until the owner runs it:** the Knight's facing direction and size, whether the walk clip matches the hero's walk speed (`walkCycleSpeed` on HeroAnimator), and prop orientations.
+
+## 2026-10-14 — Milestones 7 and 8 (pass 1) merged; Milestone 9: front end
+
+- PRs #8 (guided tutorial) and #9 (CC0 art) merged after the owner's Unity run and a macOS build playthrough. The Knight faces the right way and animates; the guide walks through all three objectives.
+- **Seen in the owner's screenshots and fixed:**
+  - Rejecting a one-target glitch said "SOURCE ACCESS DENIED": `GlitchResult` now names the slot only for multi-target glitches.
+  - The anomaly filled the screen when the camera was squeezed against walls: `AnomalyVisual` now shrinks to 40% as the camera distance drops.
+- **Front end (`feature/front-end-menus-saves`):**
+  - `MainMenu` scene: Continue, New Game, Level Select (locked until the previous level is done), Settings, Credits, Quit; idle Knight on a small stage; orbiting camera.
+  - Saved progress and settings in one JSON file (`SaveStore`: atomic write; a corrupt file is kept aside and the game starts fresh; values sanitized).
+  - Level identity comes from `LevelCatalog` (`LC_Main`) stable ids, never build indices.
+  - Settings: master volume, mouse sensitivity, invert Y, colour-split effects (moved from PlayerPrefs into the save), fullscreen (builds only). Reachable from the main menu and the pause menu.
+  - The complete screen offers NEXT LEVEL when the catalog has one; pause and complete screens have MAIN MENU.
+  - Build Settings are kept in order by the builders: main menu, levels in catalog order, then TestRoom.
+- **Tests never touch the player's save:** every PlayMode test (and the playthrough) redirects `SaveStore` to a temporary file.
+
+## 2026-10-14 — Milestone 10: the 3-chapter demo, plus key rebinding (all untested in Unity)
+
+- **Owner's instruction:** implement what's left now; they will pull and test everything together later. Scope chosen: the 3-chapter demo (the recommended first finish line) plus key rebinding. Chapters 4–7 (Property Swap, guards and AI Override, Desync, finale) each need a large new system and were deliberately **not** started blind.
+- **Levels** (`Editor/Levels/DemoLevels.cs`, built by `LevelKit`):
+  - BRIDGE OUT, TWO DOORS ONE SHADOW, TWO BIRDS;
+  - THREE PLATES, COPY THE COPY;
+  - STOP THE PLATFORM, TWO PISTONS;
+  - THE BUILD.
+  - With TRAINING LAB that is nine levels in `LC_Main`, unlocked in order.
+- **New mechanics:**
+  - Routes can require solid floor (an intangible bridge is no floor).
+  - The hero respawns at its start if it falls out of the world.
+  - Pistons can start out of phase.
+- **Design correction found while writing the tests:** an object can only be part of one active Collision Transfer ("ALREADY GLITCHED"). TWO DOORS therefore teaches undo: [R] gives the shadow back once the hero is through the first wall.
+- **Testing strategy for a big untested batch:**
+  - `DemoLevelPlaythroughTests` plays every level with its intended solution, plus TWO BIRDS' trap and its undo recovery. A failure names the step that timed out.
+  - Mechanic tests cover the floor check, respawn and piston phase.
+- **Key rebinding:**
+  - The Settings screen lists 12 keyboard/mouse bindings, including the movement composite parts. Click one, press a key (Esc cancels); RESET KEYS restores the defaults.
+  - Overrides are stored in the save file and applied to runtime copies of the controls asset, never to the asset itself. The pause screen's controls list shows the player's keys.
+- **"5. Build ALL"** builds the test room, every level and the main menu in one go, and reports OK/FAIL per scene.
+- **Correction:** my previous message said Core tests were 151/151; the real count was 150/150 (re-run).
+- **Known limitation:** pressing Esc while rebinding in the pause menu also unpauses the game (the game's input sees Esc too).
+
+## 2026-10-14 — Milestone 9/10 first Unity compile: `Cursor` clash
+
+- **Error:** `CS0104 'Cursor' is ambiguous between UnityEngine.UIElements.Cursor and UnityEngine.Cursor` in `MainMenu.cs`. It is the same class of problem as `DebugOverlay`: a file that imports `UnityEngine.UIElements` gains that namespace's type names.
+- **Fix:** `UnityEngine.Cursor` is spelled out. The compile-check stubs now include `UIElements.Cursor`, so it reproduces offline (verified: the same 2 errors before the fix, 0 after).
+- **Docs:** TESTING.md says to run `Tools/Assets/fetch-cc0-assets.sh` only if `Assets/ThirdParty` is missing. The files are in the repo through LFS (`git lfs pull`).

@@ -1,6 +1,6 @@
 # BUG//REPORT — Design roadmap (full game)
 
-Status: **proposal for the owner to react to.** Nothing here is built yet except where marked.
+Status: chapters 1–3 of the demo are implemented as 9 levels (TRAINING LAB + 8; see PLAYTEST.md), untested in Unity. Later chapters are still proposals.
 It follows the GDD (Parts 1–7), stretched from 8 levels to a 20+ level game, as the owner asked.
 
 ## 1. What the first playtest told us
@@ -22,7 +22,7 @@ Each chapter introduces one glitch (GDD 4.7) in its own location, then combines 
 
 | Ch | Name (GDD level) | Location | New glitch | Levels (one-line puzzle idea) |
 |---|---|---|---|---|
-| 1 | Hello, World | Tutorial meadow of PROJECT HERO | Inspect + Collision Transfer | 1 **First Steps**: wall → shadow (guided). 2 **Bridge Out**: a hologram bridge is not solid; take solidity from a wall the hero doesn't need. 3 **Two Doors, One Shadow**: transfer, wait, undo, transfer again (teaches `[R]` and timing). 4 **Where Did It Go?**: solidity must land somewhere; give it to the wrong thing and a ledge collapses |
+| 1 | Hello, World | Tutorial meadow of PROJECT HERO | Inspect + Collision Transfer | 1 **First Steps**: wall → shadow (guided). 2 **Bridge Out**: a hologram bridge is not solid; take solidity from a wall the hero doesn't need. 3 **Two Doors, One Shadow**: transfer, wait, undo, transfer again (an object can be in only one active transfer; teaches `[R]` and timing). 4 **Where Did It Go?**: solidity must land somewhere; give it to the wrong thing and a ledge collapses |
 | 2 | Duplicate Objective | Small laboratory | Duplication | 5 **Twin Plates** (current gate). 6 **One Key, Two Locks**: copy the key; the hero gets confused about which to take, and the game notices. 7 **Stairway**: copies of crates become steps. 8 **Copy Protection**: duplicates get patched after a while, so timing matters |
 | 3 | Time Does Not Apply | Moving industrial facility | Freeze | 9 **Piston** (current). 10 **Conveyor**: freeze a moving platform where it bridges a gap. 11 **Falling Floor**: freeze crumbling tiles under the hero. 12 **Pendulum**: freeze a swinging hammer at the right angle as a ramp |
 | 4 | Mass Confusion | Physics testing chamber | Property Swap (amber) | 13 **Heavy Feather**: swap mass so a light box presses a plate. 14 **Rubber Crate**: swap bounciness to bounce a crate onto a ledge. 15 **Fast Lane**: swap speed between a slow lift and a fast fan. 16 **Size Matters**: swap size (within limits) to fit a crate through a hatch |

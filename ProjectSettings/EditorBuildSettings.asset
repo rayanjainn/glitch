@@ -6,8 +6,35 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/MainMenu.unity
+    guid: 11da693c669b54950a74cec80a9129b7
+  - enabled: 1
     path: Assets/_Project/Scenes/Level_01_TrainingLab.unity
     guid: 20ecb22bc2626497abc729fb7febfe73
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_02_BridgeOut.unity
+    guid: 676f24f4c3fdc49f98d9480c6fe5e478
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_03_TwoDoors.unity
+    guid: 0aada1f35ded6443b976e82bc3c6d573
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_04_TwoBirds.unity
+    guid: d9f9f1b9acd3b4a0ababa032f1805696
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_05_ThreePlates.unity
+    guid: 3fb242d00a5524c0a90fc4a8f897cd40
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_06_CopyTheCopy.unity
+    guid: 4f9a6fec24be946c18181cfb07c5c452
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_07_StopThePlatform.unity
+    guid: 25da48b374bdf4565a10548838eca7ba
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_08_TwoPistons.unity
+    guid: f8979a906bdb549e7846257b40e84924
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_09_TheBuild.unity
+    guid: ddfa14e29db304dc8a817ad5789153ad
   - enabled: 1
     path: Assets/_Project/Scenes/TestRoom.unity
     guid: 8c78bcf6da2354d7db410ad7df1ae096

@@ -140,10 +140,13 @@ namespace BugReport.Tests.EditMode
         }
 
         [Test]
-        public void IsTheFirstSceneInBuildSettings()
+        public void IsTheFirstLevelInBuildSettings_AfterTheMainMenu()
         {
-            Assert.That(EditorBuildSettings.scenes.Length, Is.GreaterThan(0));
-            Assert.That(EditorBuildSettings.scenes[0].path, Is.EqualTo(SliceLevelBuilder.ScenePath));
+            var paths = EditorBuildSettings.scenes.Select(s => s.path).ToList();
+            Assert.That(paths.Count, Is.GreaterThan(0));
+            int menu = paths.IndexOf(LevelCatalogBuilder.MainMenuPath);
+            if (menu >= 0) Assert.That(menu, Is.EqualTo(0), "a build starts at the main menu");
+            Assert.That(paths.IndexOf(SliceLevelBuilder.ScenePath), Is.EqualTo(menu >= 0 ? 1 : 0));
         }
     }
 }

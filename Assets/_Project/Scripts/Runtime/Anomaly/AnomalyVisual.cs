@@ -16,7 +16,28 @@ namespace BugReport.Anomaly
         [SerializeField] private float bobAmplitude = 0.06f;
         [SerializeField] private float bobFrequency = 1.4f;
 
+        [Header("Near the camera")]
+        [SerializeField, OptionalReference, Tooltip("When the camera is pushed close (walls behind it), the anomaly shrinks so it doesn't fill the screen.")]
+        private AnomalyCameraRig cameraRig;
+        [SerializeField, Min(0.1f)] private float nearDistance = 1.0f;
+        [SerializeField, Min(0.2f)] private float farDistance = 2.6f;
+        [SerializeField, Range(0.1f, 1f)] private float nearScale = 0.4f;
+        [SerializeField, Min(0.1f)] private float scaleSpeed = 4f;
+
         private Vector3 coreRestPosition;
+        private float currentScale = 1f;
+
+        /// <summary>Current visual scale (tests).</summary>
+        public float CurrentScale => currentScale;
+
+        public void Configure(AnomalyCameraRig rig) => cameraRig = rig;
+
+        /// <summary>Scale for a camera distance: full size when far, <see cref="nearScale"/> when squeezed. Public for tests.</summary>
+        public float ScaleForDistance(float cameraDistance)
+        {
+            float t = Mathf.InverseLerp(nearDistance, Mathf.Max(nearDistance + 0.01f, farDistance), cameraDistance);
+            return Mathf.Lerp(nearScale, 1f, t);
+        }
 
         private void Awake()
         {
@@ -25,6 +46,12 @@ namespace BugReport.Anomaly
 
         private void Update()
         {
+            if (cameraRig != null)
+            {
+                currentScale = Mathf.MoveTowards(currentScale, ScaleForDistance(cameraRig.CurrentDistance), scaleSpeed * Time.unscaledDeltaTime);
+                transform.localScale = Vector3.one * currentScale;
+            }
+
             float t = Time.time;
             if (core != null)
             {

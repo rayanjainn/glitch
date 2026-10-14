@@ -57,6 +57,7 @@ namespace UnityEngine
         public GameObject(string name, params Type[] components) { }
         public Transform transform => throw null;
         public int layer { get => throw null; set { } }
+        public T GetComponentInChildren<T>(bool includeInactive) => throw null;
         public bool isStatic { get => throw null; set { } }
         public string tag { get => throw null; set { } }
         public bool activeInHierarchy => throw null;
@@ -75,6 +76,7 @@ namespace UnityEngine
     public class Transform : Component, System.Collections.IEnumerable
     {
         public Vector3 InverseTransformPoint(Vector3 position) => throw null;
+        public void LookAt(Vector3 worldPosition) { }
         public Vector3 position { get => throw null; set { } }
         public Vector3 localPosition { get => throw null; set { } }
         public Quaternion rotation { get => throw null; set { } }
@@ -183,6 +185,7 @@ namespace UnityEngine
     {
         public const int AllLayers = -1;
         public static void SyncTransforms() { }
+        public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction q) => throw null;
         public static bool SphereCast(Vector3 o, float r, Vector3 d, out RaycastHit h, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static int SphereCastNonAlloc(Ray ray, float r, RaycastHit[] results, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static void IgnoreLayerCollision(int a, int b, bool ignore) { }
@@ -199,6 +202,7 @@ namespace UnityEngine
         public static int Clamp(int v, int a, int b) => throw null;
         public static float Min(float a, float b) => throw null;
         public static float Min(params float[] values) => throw null;
+        public static float InverseLerp(float a, float b, float value) => throw null;
         public static float Clamp01(float v) => throw null;
         public static float Sqrt(float v) => throw null;
         public static float Exp(float v) => throw null;
@@ -211,8 +215,14 @@ namespace UnityEngine
     public static class Time { public static float fixedDeltaTime => throw null; public static float deltaTime => throw null; public static float unscaledDeltaTime => throw null; public static float time => throw null; public static float unscaledTime => throw null; public static float timeScale { get => throw null; set { } } }
     public enum CursorLockMode { None, Locked, Confined }
     public static class Cursor { public static CursorLockMode lockState { get => throw null; set { } } public static bool visible { get => throw null; set { } } }
-    public static class Screen { public static int width => throw null; public static int height => throw null; }
-    public static class Application { public static string unityVersion => throw null; public static bool isPlaying => throw null; }
+    public static class Screen { public static int width => throw null; public static int height => throw null; public static bool fullScreen { get => throw null; set { } } }
+    public static class Application
+    {
+        public static string unityVersion => throw null; public static bool isPlaying => throw null;
+        public static string persistentDataPath => throw null; public static bool isEditor => throw null; public static string temporaryCachePath => throw null;
+        public static void Quit() { }
+    }
+    public static class JsonUtility { public static string ToJson(object obj, bool prettyPrint) => throw null; public static T FromJson<T>(string json) => throw null; }
     public static class Gizmos
     {
         public static Color color { get => throw null; set { } }
@@ -279,7 +289,7 @@ namespace UnityEngine
         public static Camera main => throw null;
     }
     public enum CameraClearFlags { Skybox = 1, SolidColor = 2, Depth = 3, Nothing = 4 }
-    public class AudioListener : Behaviour { }
+    public class AudioListener : Behaviour { public static float volume { get => throw null; set { } } }
     public class Font : Object { }
     public sealed class AudioClip : Object
     {
@@ -476,6 +486,7 @@ namespace UnityEngine.SceneManagement
         public static Scene GetActiveScene() => throw null;
         public static Scene GetSceneByPath(string p) => throw null;
         public static void LoadScene(int i) { }
+        public static void LoadScene(string sceneName) { }
         public static Scene CreateScene(string name) => throw null;
         public static bool SetActiveScene(Scene s) => throw null;
         public static UnityEngine.AsyncOperation UnloadSceneAsync(Scene s) => throw null;
@@ -503,7 +514,32 @@ namespace UnityEngine.InputSystem
     public class InputControl { public InputDevice device => throw null; }
     public class ButtonControl : InputControl { public bool wasPressedThisFrame => throw null; }
     public class Keyboard : InputDevice { public static Keyboard current => throw null; public ButtonControl f1Key => throw null; public ButtonControl f5Key => throw null; }
-    public struct InputBinding { public bool isComposite => throw null; public string groups => throw null; }
+    public struct InputBinding
+    {
+        public bool isComposite => throw null; public bool isPartOfComposite => throw null; public string groups => throw null;
+        public string name => throw null; public string path => throw null; public string effectivePath => throw null;
+        [Flags] public enum DisplayStringOptions { DontUseShortDisplayNames = 1 }
+    }
+    public interface IInputActionCollection2 { }
+    public static class InputActionRebindingExtensions
+    {
+        public sealed class RebindingOperation : IDisposable
+        {
+            public RebindingOperation WithControlsExcluding(string path) => throw null;
+            public RebindingOperation WithCancelingThrough(string binding) => throw null;
+            public RebindingOperation OnMatchWaitForAnother(float seconds) => throw null;
+            public RebindingOperation OnComplete(Action<RebindingOperation> callback) => throw null;
+            public RebindingOperation OnCancel(Action<RebindingOperation> callback) => throw null;
+            public RebindingOperation Start() => throw null;
+            public void Cancel() { } public void Dispose() { }
+        }
+        public static RebindingOperation PerformInteractiveRebinding(this InputAction action, int bindingIndex = -1) => throw null;
+        public static void RemoveAllBindingOverrides(this IInputActionCollection2 actions) { }
+        public static string SaveBindingOverridesAsJson(this IInputActionCollection2 actions) => throw null;
+        public static void LoadBindingOverridesFromJson(this IInputActionCollection2 actions, string json, bool removeExisting = true) { }
+        public static void ApplyBindingOverride(this InputAction action, int bindingIndex, string path) { }
+        public static string GetBindingDisplayString(this InputAction action, int bindingIndex, InputBinding.DisplayStringOptions options = default) => throw null;
+    }
     public struct InputControlScheme { public string name => throw null; }
     public sealed class InputAction
     {
@@ -519,7 +555,7 @@ namespace UnityEngine.InputSystem
         public InputAction FindAction(string n, bool throwIfNotFound = false) => throw null;
         public void Enable() { } public void Disable() { }
     }
-    public class InputActionAsset : ScriptableObject
+    public class InputActionAsset : ScriptableObject, IInputActionCollection2
     {
         public InputActionMap FindActionMap(string n, bool throwIfNotFound = false) => throw null;
         public IReadOnlyList<InputControlScheme> controlSchemes => throw null;
@@ -634,6 +670,7 @@ namespace UnityEditor.SceneManagement
 
 namespace UnityEngine.UIElements
 {
+    public struct Cursor { }
     public enum PickingMode { Position, Ignore }
     public enum DisplayStyle { Flex, None }
     public enum StyleKeyword { Undefined, Null, Auto, None, Initial }
@@ -701,8 +738,25 @@ namespace UnityEngine.UIElements
         public void Clear() { } public void RemoveFromHierarchy() { }
         public void AddToClassList(string c) { } public void RemoveFromClassList(string c) { }
         public void EnableInClassList(string c, bool enable) { } public bool ClassListContains(string c) => throw null;
+        public void SetEnabled(bool value) { } public bool enabledSelf => throw null;
     }
     public class TextElement : VisualElement { public virtual string text { get => throw null; set { } } }
+    public delegate void EventCallback<in TEventType>(TEventType evt);
+    public class ChangeEvent<T> { public T previousValue => throw null; public T newValue => throw null; }
+    public interface INotifyValueChanged<T> { T value { get; set; } void SetValueWithoutNotify(T newValue); }
+    public static class INotifyValueChangedExtensions
+    {
+        public static bool RegisterValueChangedCallback<T>(this INotifyValueChanged<T> control, EventCallback<ChangeEvent<T>> callback) => throw null;
+    }
+    public abstract class BaseField<TValueType> : VisualElement, INotifyValueChanged<TValueType>
+    {
+        public string label { get => throw null; set { } }
+        public virtual TValueType value { get => throw null; set { } }
+        public virtual void SetValueWithoutNotify(TValueType newValue) { }
+    }
+    public abstract class BaseSlider<TValueType> : BaseField<TValueType> { public TValueType lowValue { get => throw null; set { } } public TValueType highValue { get => throw null; set { } } }
+    public class Slider : BaseSlider<float> { public Slider() { } public Slider(string label, float start = 0f, float end = 10f) { } }
+    public class Toggle : BaseField<bool> { public Toggle() { } public Toggle(string label) { } }
     public class Label : TextElement { public Label() { } public Label(string text) { } }
     public class Button : TextElement { public Button() { } public Button(System.Action clickEvent) { } public event System.Action clicked; }
     public static class UQueryExtensions

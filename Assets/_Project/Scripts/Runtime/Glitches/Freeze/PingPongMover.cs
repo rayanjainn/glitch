@@ -14,6 +14,8 @@ namespace BugReport.Glitches
         [SerializeField] private Vector3 offset = new Vector3(0f, 3f, 0f);
         [SerializeField, Min(0.1f)] private float period = 4f;
         [SerializeField] private bool autoStep = true;
+        [SerializeField, Range(0f, 1f), Tooltip("Where in the cycle it starts (0 = at its start position, 0.5 = fully moved).")]
+        private float startPhase;
 
         private Rigidbody body;
         private FreezeCapability freeze;
@@ -27,10 +29,11 @@ namespace BugReport.Glitches
             set => autoStep = value;
         }
 
-        public void Configure(Vector3 newOffset, float newPeriod)
+        public void Configure(Vector3 newOffset, float newPeriod, float newStartPhase = 0f)
         {
             offset = newOffset;
             period = Mathf.Max(0.1f, newPeriod);
+            startPhase = Mathf.Repeat(newStartPhase, 1f);
         }
 
         private void Awake()
@@ -40,6 +43,8 @@ namespace BugReport.Glitches
             body.interpolation = RigidbodyInterpolation.Interpolate;
             freeze = GetComponent<FreezeCapability>();
             start = transform.position;
+            Phase = startPhase;
+            if (startPhase > 0f) transform.position = PositionAt(Phase);
         }
 
         private void FixedUpdate()

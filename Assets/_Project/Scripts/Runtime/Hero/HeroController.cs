@@ -93,10 +93,34 @@ namespace BugReport.Hero
             ResetHero();
         }
 
+        private Pose spawnPose;
+
+        /// <summary>Times the hero fell out of the world and was put back at its start.</summary>
+        public int RespawnCount { get; private set; }
+
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
+            spawnPose = new Pose(transform.position, transform.rotation);
             ResetHero();
+        }
+
+        /// <summary>
+        /// Puts the hero back where the level started it (it fell into a pit, e.g. a bridge stopped
+        /// being solid under it). The CharacterController must be disabled to teleport.
+        /// </summary>
+        public void Respawn()
+        {
+            if (controller == null) controller = GetComponent<CharacterController>();
+            bool wasEnabled = controller.enabled;
+            controller.enabled = false;
+            transform.SetPositionAndRotation(spawnPose.position, spawnPose.rotation);
+            controller.enabled = wasEnabled;
+            verticalVelocity = 0f;
+            RespawnCount++;
+            ResetHero();
+            timer = confusedDuration;
+            SetState(HeroState.Confused);
         }
 
         private void OnEnable()

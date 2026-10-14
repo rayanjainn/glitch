@@ -204,8 +204,27 @@ Playtest finding: the owner needed the written guide to finish TRAINING LAB.
 - [ ] Tune: Knight facing/size, walk-cycle speed, prop placement [visual]
 - [ ] Next: gate/exit/plates models, the fantasy "meadow" kit for chapter 1 (needs a source that isn't GLB-only, or the glTFast package)
 
-## Milestones 9+
-See DESIGN_ROADMAP.md §6.
+## Milestone 9 — Front end (current, `feature/front-end-menus-saves`)
+- [x] Core `SaveData`, `GameSettingsData` (sanitize), `LevelProgress` (unlock, continue, next). 5 tests (150 total) [auto]
+- [x] Fix: one-target rejections no longer say "SOURCE"; 1 test [auto]
+- [~] `SaveStore` (JSON, atomic, corrupt-safe), `LevelCatalog`, `LevelCompletionRecorder`, `SettingsApplier` [editor]
+- [~] `MainMenu` (continue, new game, level select, settings, credits, quit), `SettingsPanel`; pause gets SETTINGS + MAIN MENU; complete screen gets NEXT LEVEL + MAIN MENU [visual]
+- [~] `MenuBuilder` ("4. Build Main Menu"), `LevelCatalogBuilder` (LC_Main + Build Settings order) [editor]
+- [~] Anomaly shrinks when the camera is squeezed close [visual]
+- [~] Tests: SaveStoreTests (4), MainMenuSceneTests (3), FrontEndTests (5), GameUiTests updated (+1) [editor]
+- [~] Key rebinding: 12 keyboard/mouse bindings in Settings, saved in the save file, reset button; pause list shows current keys [editor][visual]
+- [~] Tests: BindingOverridesTests (3) [editor]
+
+## Milestone 10 — 3-chapter demo (implemented, untested in Unity)
+- [~] `LevelKit` (pits, firewalls, barriers, hologram bridges/doors, plates + gates, pistons, moving platforms, exit, routes, objectives, decor) [editor]
+- [~] Mechanics: route floor check (`requireGround`), hero respawn below the kill plane, piston start phase [editor]
+- [~] Levels 2–9 (see PLAYTEST.md) + `5. Build ALL` [editor][visual]
+- [~] Tests: DemoLevelPlaythroughTests (9: every level + one trap/undo), LevelMechanicsDemoTests (5) [editor]
+- [ ] **Owner:** Build ALL, run both test suites, play the demo (PLAYTEST.md), one fresh player
+- [ ] Profiling at 1080p on the reference PC
+
+## Milestones 11+
+See DESIGN_ROADMAP.md §6: Property Swap, guards/AI Override, Desync, finale, release prep. Not started, deliberately: each needs a large new system and should be built on a verified demo.
 
 ---
 

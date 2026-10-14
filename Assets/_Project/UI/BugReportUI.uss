@@ -511,3 +511,104 @@
     font-size: 13px;
     color: var(--br-text-soft);
 }
+
+/* ---------------------------------------------------------------- main menu */
+
+.br-menu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: center;
+    padding-left: 120px;
+    background-color: rgba(2, 6, 10, 0.35);
+}
+
+.br-menu__home {
+    align-items: flex-start;
+}
+
+.br-menu__title {
+    font-size: 96px;
+    -unity-font-style: bold;
+    letter-spacing: 6px;
+    color: #FFFFFF;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.5);
+}
+
+.br-menu__tagline {
+    margin-bottom: 28px;
+    font-size: 20px;
+    color: var(--br-accent);
+    letter-spacing: 2px;
+}
+
+.br-menu .br-card {
+    max-width: 640px;
+}
+
+.br-credits {
+    white-space: normal;
+    font-size: 15px;
+}
+
+.br-button.unity-button:disabled {
+    opacity: 0.4;
+}
+
+/* ---------------------------------------------------------------- settings */
+
+.br-settings {
+    min-width: 640px;
+}
+
+.br-settings__column {
+    width: 520px;
+}
+
+.br-settings .br-controls {
+    margin-left: 40px;
+}
+
+.br-key-button.unity-button {
+    min-width: 150px;
+    height: 28px;
+    margin: 0 10px 0 0;
+    padding: 0 8px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: #0A1620;
+    background-color: var(--br-text-soft);
+    border-width: 0;
+    border-radius: 3px;
+}
+
+.br-key-button.unity-button:hover,
+.br-key-button.unity-button:focus {
+    background-color: var(--br-accent);
+}
+
+.br-setting {
+    margin: 0 0 12px 0;
+    min-height: 36px;
+}
+
+.br-setting .unity-base-field__label,
+.br-setting .unity-label {
+    min-width: 260px;
+    font-size: 15px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    color: var(--br-text-soft);
+}
+
+.br-setting:focus .unity-base-field__label {
+    color: var(--br-accent);
+}
+
+.br-settings .br-button.unity-button {
+    margin-top: 10px;
+}

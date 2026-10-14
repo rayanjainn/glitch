@@ -45,18 +45,25 @@ Don't copy anything else from the donor (no `Library`, no `Scenes`, no `Tutorial
 3. If Unity asks to **enable the new Input System backends and restart**, click **Yes**.
 4. If Unity offers **Safe Mode**, there are compile errors. Enter Safe Mode, open the Console (Window ▸ General ▸ Console), and send me every red error line. Stop here.
 
-## 5. Set up and build the test room
+## 4b. Get the free art
+The art files are in the repository through Git LFS: run `git lfs pull` and check that `Assets/ThirdParty/KayKit_Adventurers/Knight.fbx` is about 20 MB. Only if `Assets/ThirdParty` is missing, run:
+```bash
+bash Tools/Assets/fetch-cc0-assets.sh
+```
+(slow and silent: it downloads about 140 MB). Ends with "OK: 224 files ... match". It downloads the CC0 models, sounds and font from their authors' GitHub repositories (see CREDITS.md).
+
+## 5. Set up and build everything
 1. Top menu **BUG REPORT ▸ Setup ▸ 1. Configure Project** → OK. The Console prints a report. Lines starting with `ERROR` need fixing, so send them to me.
-2. **BUG REPORT ▸ Setup ▸ 2. Build Test Room Scene.**
-3. In the Project window open `Assets/_Project/Scenes/TestRoom.unity`.
+2. **BUG REPORT ▸ Setup ▸ 5. Build ALL (menu + every level).** The Console lists each scene as OK or FAIL.
+3. In the Project window open `Assets/_Project/Scenes/MainMenu.unity`.
 
 ## 6. Play it
-Press **Play**, then click inside the Game view to capture the mouse. Work through the *Manual playtest checklist* at the bottom of `TASKS.md` (10 short checks). Press Esc to free the mouse.
+Press **Play**, then NEW GAME. Follow `PLAYTEST.md` (plain language). Press Esc to free the mouse.
 
 ## 7. Run the automated tests
 Window ▸ General ▸ **Test Runner**:
 - **EditMode** tab → *Run All*
-- **PlayMode** tab → *Run All*
+- **PlayMode** tab → *Run All* (several minutes: it plays every level to the end, at 3× speed)
 
 Green ticks mean pass. For any red test, click it and copy the message at the bottom.
 

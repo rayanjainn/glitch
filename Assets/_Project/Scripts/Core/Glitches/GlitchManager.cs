@@ -251,7 +251,8 @@ namespace BugReport.Core.Glitches
                 if (!targets[i].IsValid) validation = new TargetValidationResult(TargetValidationFailure.NoTarget);
                 else if (!registry.TryGet(targets[i], out var entity)) validation = new TargetValidationResult(TargetValidationFailure.Destroyed);
                 else validation = TargetValidator.Validate(entity, spec.Slot(i));
-                if (!validation.IsValid) return new GlitchResult(GlitchFailure.InvalidTarget, targetIndex: i, targetValidation: validation);
+                if (!validation.IsValid)
+                    return new GlitchResult(GlitchFailure.InvalidTarget, targetIndex: i, targetValidation: validation, slotCount: spec.Arity);
             }
 
             float cooldown = CooldownRemaining(spec.Id, now);
