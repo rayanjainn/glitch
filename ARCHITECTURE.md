@@ -309,6 +309,17 @@ Consequences:
 - **Input:** Unity 6 UI Toolkit reads the Input System directly; no EventSystem in the scene.
 - **Still IMGUI:** `DiagnosticsOverlay` (developer tool, F1).
 
+## 8d. Guide / tutorial *(M7)*
+
+- **`GuideDirector`** holds authored steps, each with a section (objective index), a short instruction, a condition and optional target/glitch references.
+- **Conditions:**
+  - *Latching* (an action happened): Move, Apply, Revert, Inspect.
+  - *State* (true only while it holds): LookAt (optionally while something is selected), Select, Equip.
+  - WaitForObjective is never met; it is shown until the objective completes.
+- **Core `GuideTracker`:** shows the step after the furthest satisfied one in the current section. Deselecting walks back; acting early skips ahead; completing the objective finishes the section whatever the guide said. **The guide can never block progress.**
+- **Unlocks:** glitches whose section hasn't started are locked in `GlitchController` (skipped by cycling, hidden in the dock). Unlocking happens in the same call that completes the objective, and announces "NEW GLITCH".
+- **Presentation:** `GameHud` shows the instruction above the dock (keys highlighted by `GuideText`). `InspectionOverlay` puts a bobbing marker over the step's target. `AudioFeedback` plays a soft chime the first time each step is passed (not again when a state step is lost and regained).
+
 ## 9. Physics layers
 
 | Layer | Used by | Notes |

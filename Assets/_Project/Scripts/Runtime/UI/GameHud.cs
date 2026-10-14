@@ -7,6 +7,8 @@ using BugReport.Glitches;
 using BugReport.Interaction;
 using BugReport.Level;
 using BugReport.Presentation;
+using BugReport.Core.Tutorial;
+using BugReport.Tutorial;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -24,6 +26,7 @@ namespace BugReport.UI
         [SerializeField] private ContainmentDirector containment;
         [SerializeField, OptionalReference] private ObjectiveDirector objectives;
         [SerializeField, OptionalReference] private VisualSettings settings;
+        [SerializeField, OptionalReference] private GuideDirector guide;
         [SerializeField, Min(0.5f)] private float objectiveBannerSeconds = 2.5f;
         [SerializeField, Min(0.1f)] private float stageFlashSeconds = 1.2f;
 
@@ -43,6 +46,11 @@ namespace BugReport.UI
         private Label objectiveHeader;
         private Label objectiveTitle;
         private Label objectiveHint;
+        private VisualElement guideCard;
+        private Label guideStep;
+        private Label guideText;
+        private string guideRaw;
+        private float guideFlashUntil;
         private VisualElement dock;
         private VisualElement slotRow;
         private Label prompt;
@@ -57,8 +65,10 @@ namespace BugReport.UI
         protected override int SortKey => 10;
 
         public void Configure(GlitchController glitchController, SelectionController selectionController,
-            ContainmentDirector containmentDirector, ObjectiveDirector objectiveDirector, VisualSettings visualSettings)
+            ContainmentDirector containmentDirector, ObjectiveDirector objectiveDirector, VisualSettings visualSettings,
+            GuideDirector guideDirector = null)
         {
+            guide = guideDirector;
             glitches = glitchController;
             selection = selectionController;
             containment = containmentDirector;
@@ -73,6 +83,7 @@ namespace BugReport.UI
             if (glitches != null) glitches.Feedback += OnGlitchFeedback;
             if (selection != null) selection.Feedback += OnSelectionFeedback;
             if (objectives != null) objectives.ObjectiveCompleted += OnObjectiveCompleted;
+            if (guide != null) guide.Advanced += OnGuideAdvanced;
             subscribed = true;
         }
 
@@ -83,6 +94,7 @@ namespace BugReport.UI
                 if (glitches != null) glitches.Feedback -= OnGlitchFeedback;
                 if (selection != null) selection.Feedback -= OnSelectionFeedback;
                 if (objectives != null) objectives.ObjectiveCompleted -= OnObjectiveCompleted;
+                if (guide != null) guide.Advanced -= OnGuideAdvanced;
                 subscribed = false;
             }
             toasts.Clear();
@@ -114,6 +126,11 @@ namespace BugReport.UI
             objectiveTitle = Ui.Add(objectivePanel, Ui.Text("objective-title", string.Empty, "br-objective__title"));
             objectiveHint = Ui.Add(objectivePanel, Ui.Text("objective-hint", string.Empty, "br-objective__hint"));
 
+            guideCard = Ui.Add(layer, Ui.Element("guide", "br-guide"));
+            guideStep = Ui.Add(guideCard, Ui.Text("guide-step", string.Empty, "br-caption"));
+            guideText = Ui.Add(guideCard, Ui.Text("guide-text", string.Empty, "br-guide__text"));
+            guideRaw = null;
+
             dock = Ui.Add(layer, Ui.Element("dock", "br-dock"));
             var row = Ui.Add(dock, Ui.Element("dock-row", "br-dock__row"));
             row.Add(Ui.Text("dock-key", "Q", "br-key"));
@@ -140,6 +157,7 @@ namespace BugReport.UI
             RefreshAlert(now);
             RefreshReticle();
             RefreshToasts(now);
+            RefreshGuide(now);
             RefreshObjective(now);
             RefreshDock();
         }
@@ -219,13 +237,30 @@ namespace BugReport.UI
             Ui.SetText(objectiveHeader, HudFormat.ObjectiveHeader(i, objectives.Count));
             Ui.SetText(objectiveTitle, entry.title);
             Ui.SetText(objectiveHint, entry.hint);
-            Ui.Show(objectiveHint, !string.IsNullOrEmpty(entry.hint));
+            // While the guide is talking, the objective panel shows only the goal.
+            Ui.Show(objectiveHint, !string.IsNullOrEmpty(entry.hint) && !Ui.IsShown(guideCard));
+        }
+
+        private void RefreshGuide(float now)
+        {
+            bool active = guide != null && guide.IsActive;
+            Ui.Show(guideCard, active);
+            if (!active) return;
+            string raw = guide.CurrentText;
+            if (raw != guideRaw)
+            {
+                guideRaw = raw;
+                guideText.text = GuideText.HighlightKeys(raw, "#40F2FF");
+            }
+            var (number, total) = guide.Position;
+            Ui.SetText(guideStep, total > 1 ? "GUIDE  " + number + "/" + total : "GUIDE");
+            guideCard.EnableInClassList("br-guide--advanced", now < guideFlashUntil);
         }
 
         private void RefreshDock()
         {
             int count = glitches != null ? glitches.LoadedCount : 0;
-            Ui.Show(dock, count > 0);
+            Ui.Show(dock, count > 0 && glitches.UnlockedCount > 0);
             if (count == 0) return;
 
             if (slots.Count != count) BuildSlots(count);
@@ -234,6 +269,7 @@ namespace BugReport.UI
             {
                 var def = glitches.DefinitionAt(i);
                 var slot = slots[i];
+                Ui.Show(slot, glitches.IsUnlocked(i));
                 float cooldown = Services.Glitches.CooldownRemaining(def.Id, time);
                 bool active = i == glitches.CurrentIndex;
                 slot.EnableInClassList("br-slot--active", active);
@@ -283,6 +319,11 @@ namespace BugReport.UI
             if (feedback.Kind != SelectionFeedbackKind.Rejected) return;
             toasts.Push(feedback.Message, ToastTone.Negative, Ui.Pack(new Color(1f, 0.3f, 0.35f)), Time.unscaledTime);
         }
+
+        private void OnGuideAdvanced() => guideFlashUntil = Time.unscaledTime + 0.35f;
+
+        /// <summary>Plain text of the instruction on screen, or empty (tests).</summary>
+        public string GuideTextShown => guideCard != null && Ui.IsShown(guideCard) ? guideRaw ?? string.Empty : string.Empty;
 
         private void OnObjectiveCompleted(int index)
         {

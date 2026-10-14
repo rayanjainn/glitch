@@ -17,7 +17,9 @@ namespace BugReport.Anomaly
         [Header("Framing")]
         [SerializeField, Min(0.5f)] private float distance = 4.5f;
         [SerializeField, Min(0.1f)] private float minDistance = 0.6f;
-        [SerializeField] private float pivotHeight = 0.35f;
+        [SerializeField] private float pivotHeight = 0.55f;
+        [SerializeField, Min(0f), Tooltip("Over-the-shoulder offset to the right, so the anomaly doesn't cover the reticle. Shrinks near walls.")]
+        private float shoulderOffset = 0.75f;
         [SerializeField, Min(0f)] private float followSmoothTime = 0.06f;
         [SerializeField, Min(0.1f)] private float zoomOutSpeed = 6f;
 
@@ -97,7 +99,7 @@ namespace BugReport.Anomaly
         public void SnapToTarget()
         {
             if (target == null) return;
-            pivot = target.position + Vector3.up * pivotHeight;
+            pivot = DesiredPivot();
             pivotVelocity = Vector3.zero;
             currentDistance = ResolveDistance(pivot, ViewRotation);
             ApplyPose();
@@ -106,7 +108,7 @@ namespace BugReport.Anomaly
         private void LateUpdate()
         {
             if (target == null) return;
-            var desiredPivot = target.position + Vector3.up * pivotHeight;
+            var desiredPivot = DesiredPivot();
             pivot = followSmoothTime > 0f
                 ? Vector3.SmoothDamp(pivot, desiredPivot, ref pivotVelocity, followSmoothTime)
                 : desiredPivot;
@@ -117,6 +119,18 @@ namespace BugReport.Anomaly
                 ? wanted
                 : Mathf.MoveTowards(currentDistance, wanted, zoomOutSpeed * Time.deltaTime);
             ApplyPose();
+        }
+
+        /// <summary>Above the anomaly and to its right, pulled in if a wall is that close on the right.</summary>
+        private Vector3 DesiredPivot()
+        {
+            var basePivot = target.position + Vector3.up * pivotHeight;
+            if (shoulderOffset <= 0f) return basePivot;
+            var right = YawRotation * Vector3.right;
+            float side = shoulderOffset;
+            if (Physics.SphereCast(basePivot, collisionRadius, right, out var hit, shoulderOffset, mask, QueryTriggerInteraction.Ignore))
+                side = Mathf.Max(0f, hit.distance - 0.05f);
+            return basePivot + right * side;
         }
 
         private float ResolveDistance(Vector3 from, Quaternion rotation)

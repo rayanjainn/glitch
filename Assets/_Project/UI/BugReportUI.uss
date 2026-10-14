@@ -185,6 +185,56 @@
     -unity-text-outline-color: rgba(0, 0, 0, 0.7);
 }
 
+/* ---------------------------------------------------------------- guide (above the dock) */
+
+.br-guide {
+    position: absolute;
+    bottom: 104px;
+    left: 50%;
+    max-width: 760px;
+    translate: -50% 0;
+    padding: 10px 18px 12px 18px;
+    border-radius: 4px;
+    border-left-width: 4px;
+    border-left-color: var(--br-accent);
+    background-color: rgba(5, 12, 20, 0.86);
+    transition-property: background-color;
+    transition-duration: 0.3s;
+}
+
+.br-guide--advanced { background-color: rgba(64, 242, 255, 0.35); }
+
+.br-guide__text {
+    margin-top: 2px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    white-space: normal;
+    color: #FFFFFF;
+}
+
+.br-guide-marker {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    translate: -50% -100%;
+    transition-property: translate;
+    transition-duration: 0.5s;
+}
+
+.br-guide-marker--up { translate: -50% -140%; }
+
+.br-guide-marker__diamond {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    rotate: 45deg;
+    border-width: 3px;
+    border-color: var(--br-accent);
+    background-color: rgba(64, 242, 255, 0.25);
+}
+
 /* ---------------------------------------------------------------- objective (bottom-left) */
 
 .br-objective {
@@ -319,7 +369,7 @@
 .br-hero-icon {
     position: absolute;
     translate: -50% -100%;
-    font-size: 30px;
+    font-size: 44px;
     -unity-font-style: bold;
     color: #FFD933;
     -unity-text-outline-width: 1px;

@@ -5,6 +5,7 @@ using BugReport.Core.Entities;
 using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.Level;
+using BugReport.Tutorial;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -105,12 +106,12 @@ namespace BugReport.EditorTools.Setup
             AddEntity(firewall, "FIREWALL_01", EntityCategory.Structure, EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
                 "Blocks the way to the lab. Its collision looks... negotiable.");
             AddCollision(firewall, CollisionMode.Solid, mats);
-            ShadowDecal(env, mats, "ShadowA", "SHADOW_DECAL_A", new Vector3(-13f, 0.02f, 3.5f), intangible);
+            var shadowA = ShadowDecal(env, mats, "ShadowA", "SHADOW_DECAL_A", new Vector3(-13f, 0.02f, 3.5f), intangible);
 
             // ---- Room B: plates, crate, gate
             var plate1 = Plate(env, mats, "Plate_1", new Vector3(-1.5f, 0f, -3f));
             var plate2 = Plate(env, mats, "Plate_2", new Vector3(-0.4f, 0f, -3f));
-            CrateInstance(cratePrefab, env, "Crate_Lab", "CRATE_LAB", "Heavy enough for one pressure plate. Only one of it. Officially.",
+            var crate = CrateInstance(cratePrefab, env, "Crate_Lab", "CRATE_LAB", "Heavy enough for one pressure plate. Only one of it. Officially.",
                 new Vector3(-1.5f, 0.62f, -3f), Quaternion.identity);
             ShadowDecal(env, mats, "ShadowB", "SHADOW_DECAL_B", new Vector3(-4.5f, 0.02f, 3.5f), intangible);
 
@@ -200,11 +201,11 @@ namespace BugReport.EditorTools.Setup
             objectives.Configure(new[]
             {
                 new ObjectiveDirector.Entry("firewall", "GET THE HERO PAST THE FIREWALL",
-                    "Select the firewall [E], aim at a shadow on the floor, [LMB]. Collision Transfer gives the wall's solidity away.", zoneLab),
+                    "Give the firewall's solidity to something harmless.", zoneLab),
                 new ObjectiveDirector.Entry("gate", "OPEN THE SECURITY GATE",
-                    "Both plates need weight and there is only one crate. [Q] to DUPLICATION, aim at the crate, [LMB].", zoneCorridorRoom),
+                    "Both plates need weight. There is only one crate. Officially.", zoneCorridorRoom),
                 new ObjectiveDirector.Entry("piston", "GET THE HERO PAST THE PISTON",
-                    "The hero won't walk into moving machinery. [Q] to FREEZE and freeze the piston while it is pulled back.", zoneExit),
+                    "The hero won't walk into moving machinery.", zoneExit),
             });
 
             // ---- Player, camera, systems
@@ -214,6 +215,42 @@ namespace BugReport.EditorTools.Setup
             var systems = BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze },
                 containmentSettings, objectives, debugOverlayVisible: false, levelTitle: LevelTitle);
             WirePlayer(anomaly, motor, cameraRig, systems);
+
+            // ---- Guide: this level is the tutorial. One glitch per objective, taught step by step.
+            var guide = new GameObject("--- GUIDE ---").AddComponent<GuideDirector>();
+            var firewallEntity = firewall.GetComponent<GameEntity>();
+            var pistonEntity = piston.GetComponent<GameEntity>();
+            guide.Configure(new[]
+            {
+                new GuideDirector.Step(0, "Fly with [W][A][S][D] and the mouse. [SPACE] and [CTRL] move up and down.", GuideCondition.Move),
+                new GuideDirector.Step(0, "The hero is stuck behind the blue FIREWALL. Look at it.", GuideCondition.LookAt, firewallEntity),
+                new GuideDirector.Step(0, "Press [E] to select the firewall.", GuideCondition.Select, firewallEntity),
+                new GuideDirector.Step(0, "Now look at the dark SHADOW on the floor.", GuideCondition.LookAt, shadowA, requireSelected: firewallEntity),
+                new GuideDirector.Step(0, "Click [LMB]: the wall's solidity moves into the shadow.", GuideCondition.Apply, shadowA, collisionTransfer),
+                new GuideDirector.Step(0, "The firewall is a ghost now. Watch the hero walk through.", GuideCondition.WaitForObjective),
+
+                new GuideDirector.Step(1, "New glitch: DUPLICATION. Press [Q] to switch to it.", GuideCondition.Equip, glitch: duplication),
+                new GuideDirector.Step(1, "Both red plates need weight, and there is one crate. Look at the CRATE.", GuideCondition.LookAt, crate),
+                new GuideDirector.Step(1, "Click [LMB] to copy it. The copy lands on the empty plate.", GuideCondition.Apply, crate, duplication),
+                new GuideDirector.Step(1, "The gate opens when both plates are pressed. Made a mistake? [R] undoes your last glitch.", GuideCondition.WaitForObjective),
+
+                new GuideDirector.Step(2, "New glitch: FREEZE. Press [Q] until FREEZE is selected.", GuideCondition.Equip, glitch: freeze),
+                new GuideDirector.Step(2, "The hero won't walk into the moving PISTON. Look at it.", GuideCondition.LookAt, pistonEntity),
+                new GuideDirector.Step(2, "Wait until it pulls back out of the corridor, then click [LMB].", GuideCondition.Apply, pistonEntity, freeze),
+                new GuideDirector.Step(2, "Frozen. The hero can pass safely.", GuideCondition.WaitForObjective),
+            }, new[]
+            {
+                new GuideDirector.Unlock(1, duplication),
+                new GuideDirector.Unlock(2, freeze),
+            }, systems.Glitches, objectives, anomaly.transform);
+            var guideProblem = guide.Validate();
+            if (guideProblem != null)
+            {
+                error = "Guide: " + guideProblem;
+                return false;
+            }
+            systems.Guide = guide;
+            Wire(systems.Root.GetComponent<BugReport.Audio.AudioFeedback>(), "guide", guide);
             PresentationBuilder.Apply(presentation, mats, systems, anomaly, hero, cameraRig.GetComponent<Camera>());
 
             var missingRefs = FindUnassignedReferences(scene);
@@ -251,7 +288,7 @@ namespace BugReport.EditorTools.Setup
             InvisibleBox("Bounds_East", parent, new Vector3(HalfX, extY, 0f), new Vector3(Thickness, extHeight, HalfZ * 2f), world);
         }
 
-        private static void ShadowDecal(Transform parent, MaterialSet mats, string objectName, string displayName, Vector3 position, int intangible)
+        private static GameEntity ShadowDecal(Transform parent, MaterialSet mats, string objectName, string displayName, Vector3 position, int intangible)
         {
             var shadow = Primitive(PrimitiveType.Quad, objectName, parent, position, new Vector3(3f, 3f, 1f), mats.Shadow, intangible, keepCollider: false);
             shadow.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
@@ -261,6 +298,7 @@ namespace BugReport.EditorTools.Setup
             AddEntity(shadow, displayName, EntityCategory.Decoration, EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
                 "A shadow. Harmless. Not solid. Yet.");
             AddCollision(shadow, CollisionMode.Intangible, mats);
+            return shadow.GetComponent<GameEntity>();
         }
 
         private static PressurePlate Plate(Transform parent, MaterialSet mats, string name, Vector3 position)

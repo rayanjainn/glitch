@@ -20,12 +20,13 @@ namespace BugReport.Audio
         [SerializeField, OptionalReference] private GlitchController glitches;
         [SerializeField, OptionalReference] private ContainmentDirector containment;
         [SerializeField, OptionalReference] private ObjectiveDirector objectives;
+        [SerializeField, OptionalReference] private Tutorial.GuideDirector guide;
         [SerializeField, Range(0f, 1f)] private float volume = 0.7f;
 
         private readonly Dictionary<string, AudioClip> glitchTones = new Dictionary<string, AudioClip>();
         private readonly List<AudioClip> created = new List<AudioClip>();
         private AudioSource source;
-        private AudioClip select, deselect, invalid, revert, info, patch, objective, levelComplete;
+        private AudioClip select, deselect, invalid, revert, info, patch, objective, levelComplete, guideStep;
         private AudioClip[] stageAlerts;
         private GameServices services;
         private Action<GameServices> bindCallback;
@@ -49,6 +50,7 @@ namespace BugReport.Audio
             info = Make(ProceduralSfx.Sweep("sfx_info", 700f, 700f, 0.06f, ProceduralSfx.Wave.Sine, 0.25f));
             patch = Make(ProceduralSfx.Sweep("sfx_patch", 2000f, 200f, 0.35f, ProceduralSfx.Wave.Square, 0.3f, 0.3f));
             objective = Make(ProceduralSfx.Sequence("sfx_objective", new[] { 660f, 880f }, 0.12f, ProceduralSfx.Wave.Sine));
+            guideStep = Make(ProceduralSfx.Sequence("sfx_guide_step", new[] { 988f, 1319f }, 0.06f, ProceduralSfx.Wave.Sine, 0.18f));
             levelComplete = Make(ProceduralSfx.Sequence("sfx_complete", new[] { 523f, 659f, 784f, 1047f }, 0.14f, ProceduralSfx.Wave.Sine));
             stageAlerts = new[]
             {
@@ -70,6 +72,7 @@ namespace BugReport.Audio
                 objectives.ObjectiveCompleted += OnObjective;
                 objectives.LevelCompleted += OnLevelCompleted;
             }
+            if (guide != null) guide.Advanced += OnGuideAdvanced;
             bindCallback = Bind;
             GameServices.WhenReady(bindCallback);
         }
@@ -84,6 +87,7 @@ namespace BugReport.Audio
                 objectives.ObjectiveCompleted -= OnObjective;
                 objectives.LevelCompleted -= OnLevelCompleted;
             }
+            if (guide != null) guide.Advanced -= OnGuideAdvanced;
             GameServices.CancelWhenReady(bindCallback);
             if (services != null && !services.IsDisposed) services.Containment.StageChanged -= OnStageChanged;
             services = null;
@@ -127,6 +131,7 @@ namespace BugReport.Audio
         private void OnPatched(Core.Glitches.GlitchOperation _) => Play(patch);
         private void OnObjective(int _) => Play(objective);
         private void OnLevelCompleted() => Play(levelComplete);
+        private void OnGuideAdvanced() => Play(guideStep);
 
         private void OnStageChanged(int previous, int current)
         {

@@ -22,6 +22,8 @@ You don't need to know how the game works inside. Just play, and write down anyt
 
 You are the small glowing thing. The yellow capsule is "the hero". You can't control the hero; it walks to the green exit by itself. Your job is to clear its way.
 
+**New (Milestone 7): the game now teaches itself.** Try it first **without reading Parts 1–3 below**: follow the instructions above the bottom bar and the diamond marker. Write down every moment you felt lost or had to guess. Only read Parts 1–3 if you are stuck for more than a minute (and tell me where).
+
 ---
 
 ## Part 1: The wall

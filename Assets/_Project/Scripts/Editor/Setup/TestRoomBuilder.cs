@@ -429,6 +429,8 @@ namespace BugReport.EditorTools.Setup
             public ContainmentDirector Containment;
             public ObjectiveDirector Objectives;
             public string LevelTitle;
+            /// <summary>Set by levels that teach (optional); wired into the UI by PresentationBuilder.</summary>
+            public BugReport.Tutorial.GuideDirector Guide;
         }
 
         /// <summary>Bootstrap, state, selection, glitches, containment, presenters, audio, kill plane. The UI is added by PresentationBuilder.</summary>
@@ -538,7 +540,7 @@ namespace BugReport.EditorTools.Setup
             return prefab;
         }
 
-        internal static void CrateInstance(GameObject prefab, Transform parent, string objectName, string displayName, string description, Vector3 position, Quaternion rotation)
+        internal static GameEntity CrateInstance(GameObject prefab, Transform parent, string objectName, string displayName, string description, Vector3 position, Quaternion rotation)
         {
             var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
             go.name = objectName;
@@ -547,6 +549,7 @@ namespace BugReport.EditorTools.Setup
             entity.Configure(displayName, entity.Category, entity.Capabilities, description);
             PrefabUtility.RecordPrefabInstancePropertyModifications(entity);
             PrefabUtility.RecordPrefabInstancePropertyModifications(go.transform);
+            return entity;
         }
 
         /// <summary>Loads a designer asset if it exists (never overwrites tuning), otherwise creates it with defaults.</summary>
@@ -597,14 +600,33 @@ namespace BugReport.EditorTools.Setup
             return problems;
         }
 
-        /// <summary>True for a top-level field marked [OptionalReference].</summary>
+        /// <summary>
+        /// True when the field at <paramref name="propertyPath"/> is marked [OptionalReference]. Follows
+        /// nested paths through structs and arrays ("steps.Array.data[2].target").
+        /// </summary>
         internal static bool IsOptional(System.Type type, string propertyPath)
         {
-            if (propertyPath.Contains(".")) return false;
-            for (var t = type; t != null; t = t.BaseType)
+            const System.Reflection.BindingFlags Flags = System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+            var segments = propertyPath.Split('.');
+            var current = type;
+            for (int i = 0; i < segments.Length; i++)
             {
-                var field = t.GetField(propertyPath, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                if (field != null) return System.Attribute.IsDefined(field, typeof(OptionalReferenceAttribute));
+                if (segments[i] == "Array" && i + 1 < segments.Length && segments[i + 1].StartsWith("data["))
+                {
+                    current = current.IsArray ? current.GetElementType()
+                        : current.IsGenericType ? current.GetGenericArguments()[0]
+                        : null;
+                    if (current == null) return false;
+                    i++;
+                    continue;
+                }
+
+                System.Reflection.FieldInfo field = null;
+                for (var t = current; t != null && field == null; t = t.BaseType) field = t.GetField(segments[i], Flags);
+                if (field == null) return false;
+                if (i == segments.Length - 1) return System.Attribute.IsDefined(field, typeof(OptionalReferenceAttribute));
+                current = field.FieldType;
             }
             return false;
         }

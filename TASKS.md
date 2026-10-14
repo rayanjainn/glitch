@@ -184,8 +184,19 @@ After **Build Test Room Scene → Rebuild**, press Play:
 - [ ] Profiling on the reference PC (see above)
 - [ ] Real models and animation, designed audio, lighting bake
 
-## Milestones 7–8
-See PROJECT_PLAN §3. Not broken down yet, deliberately, to avoid planning against unknowns.
+## Milestone 7 — Onboarding (current, `feature/onboarding-tutorial`)
+Playtest finding: the owner needed the written guide to finish TRAINING LAB.
+- [x] Core `GuideTracker` (steps per objective; latching vs state steps; never blocks progress) and `GuideText` (key highlighting). 9 tests (144 total) [auto]
+- [~] `GuideDirector`: authored steps (Move, LookAt, Select, Equip, Apply, Revert, Inspect, WaitForObjective), glitch unlocks per objective, step sound [editor]
+- [~] `GlitchController` locking: locked glitches are skipped and hidden; unlocking announces "NEW GLITCH" [editor]
+- [~] HUD guide card above the dock; world marker over the object the step is about; objective hint hidden while the guide talks [visual]
+- [~] TRAINING LAB is the guided tutorial: 14 steps over 3 objectives; one glitch per objective [editor][visual]
+- [~] Camera: over-the-shoulder offset so the anomaly no longer covers the reticle; hero state icon bigger [visual]
+- [~] Tests: GuideDirectorTests (6 PlayMode), SliceLevelSceneTests guide check; scene validation follows nested `[OptionalReference]` fields [editor]
+- [ ] **Exit:** someone who has never played finishes TRAINING LAB without help (observed)
+
+## Milestones 8+
+See DESIGN_ROADMAP.md §6.
 
 ---
 

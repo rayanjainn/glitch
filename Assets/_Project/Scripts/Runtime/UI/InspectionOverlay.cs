@@ -4,6 +4,7 @@ using BugReport.Core.GameFlow;
 using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.Presentation;
+using BugReport.Tutorial;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -27,12 +28,14 @@ namespace BugReport.UI
         [SerializeField] private Camera viewCamera;
         [SerializeField, OptionalReference] private HeroAnimator heroAnimator;
         [SerializeField, OptionalReference] private VisualSettings settings;
+        [SerializeField, OptionalReference] private GuideDirector guide;
         [SerializeField, Min(1f)] private float maxDistance = 28f;
 
         private readonly List<IEntityDescriptor> buffer = new List<IEntityDescriptor>();
         private readonly List<VisualElement> tags = new List<VisualElement>();
         private VisualElement tagLayer;
         private Label heroIcon;
+        private VisualElement guideMarker;
         private VisualElement panel;
         private Label panelName;
         private Label panelId;
@@ -47,9 +50,11 @@ namespace BugReport.UI
         /// <summary>Tags currently placed (tests).</summary>
         public int VisibleTagCount { get; private set; }
         public bool PanelVisible => panel != null && Ui.IsShown(panel);
+        public bool GuideMarkerVisible => guideMarker != null && Ui.IsShown(guideMarker);
 
-        public void Configure(Camera cam, HeroAnimator hero, VisualSettings visualSettings)
+        public void Configure(Camera cam, HeroAnimator hero, VisualSettings visualSettings, GuideDirector guideDirector = null)
         {
+            guide = guideDirector;
             viewCamera = cam;
             heroAnimator = hero;
             settings = visualSettings;
@@ -59,6 +64,8 @@ namespace BugReport.UI
         {
             tagLayer = Ui.Add(layer, Ui.Element("tags", "br-tags"));
             heroIcon = Ui.Add(layer, Ui.Text("hero-icon", string.Empty, "br-hero-icon"));
+            guideMarker = Ui.Add(layer, Ui.Element("guide-marker", "br-guide-marker"));
+            guideMarker.Add(Ui.Element("guide-marker-diamond", "br-guide-marker__diamond"));
 
             panel = Ui.Add(layer, Ui.Element("inspect-panel", "br-panel", "br-inspect"));
             var head = Ui.Add(panel, Ui.Element("inspect-head", "br-inspect__head"));
@@ -103,6 +110,7 @@ namespace BugReport.UI
             for (int i = VisibleTagCount; i < tags.Count; i++) Ui.Show(tags[i], false);
 
             RefreshHeroIcon();
+            RefreshGuideMarker();
             RefreshPanel(labels);
         }
 
@@ -158,6 +166,23 @@ namespace BugReport.UI
             heroIcon.style.left = position.x;
             heroIcon.style.top = position.y;
             Ui.SetText(heroIcon, icon);
+        }
+
+        private void RefreshGuideMarker()
+        {
+            var target = guide != null ? guide.CurrentTarget : null;
+            Vector2 position = default;
+            bool on = false;
+            if (target != null)
+            {
+                var bounds = target.GetWorldBounds();
+                on = TryPlace(bounds.center + Vector3.up * (bounds.extents.y + 0.6f), out position);
+            }
+            Ui.Show(guideMarker, on);
+            if (!on) return;
+            guideMarker.style.left = position.x;
+            guideMarker.style.top = position.y;
+            guideMarker.EnableInClassList("br-guide-marker--up", Mathf.Repeat(Time.unscaledTime, 1f) < 0.5f);
         }
 
         // ---------------------------------------------------------------- selected panel
