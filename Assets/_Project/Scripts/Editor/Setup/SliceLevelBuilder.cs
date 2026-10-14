@@ -321,7 +321,7 @@ namespace BugReport.EditorTools.Setup
             InvisibleBox("Bounds_East", parent, new Vector3(HalfX, extY, 0f), new Vector3(Thickness, extHeight, HalfZ * 2f), world);
         }
 
-        private static GameEntity ShadowDecal(Transform parent, MaterialSet mats, string objectName, string displayName, Vector3 position, int intangible)
+        internal static GameEntity ShadowDecal(Transform parent, MaterialSet mats, string objectName, string displayName, Vector3 position, int intangible)
         {
             var shadow = Primitive(PrimitiveType.Quad, objectName, parent, position, new Vector3(3f, 3f, 1f), mats.Shadow, intangible, keepCollider: false);
             shadow.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
@@ -334,7 +334,7 @@ namespace BugReport.EditorTools.Setup
             return shadow.GetComponent<GameEntity>();
         }
 
-        private static PressurePlate Plate(Transform parent, MaterialSet mats, string name, Vector3 position)
+        internal static PressurePlate Plate(Transform parent, MaterialSet mats, string name, Vector3 position)
         {
             int world = GameLayers.Index(GameLayers.World);
             var visual = Block(name, parent, position + new Vector3(0f, 0.05f, 0f), new Vector3(1f, 0.1f, 1f), mats.PlateIdle, world);
@@ -350,7 +350,7 @@ namespace BugReport.EditorTools.Setup
             return plate;
         }
 
-        private static ObjectiveCondition Zone(Transform parent, string name, Vector3 center, Vector3 size, HeroController hero)
+        internal static ObjectiveCondition Zone(Transform parent, string name, Vector3 center, Vector3 size, HeroController hero)
         {
             var go = new GameObject(name, typeof(BoxCollider));
             go.transform.SetParent(parent, false);

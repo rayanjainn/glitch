@@ -38,6 +38,16 @@ namespace BugReport.Level
             foreach (var descriptor in buffer)
             {
                 if (!(descriptor is GameEntity entity)) continue;
+                var hero = entity.GetComponent<Hero.HeroController>();
+                if (hero != null)
+                {
+                    if (entity.transform.position.y < minY)
+                    {
+                        hero.Respawn();
+                        handled++;
+                    }
+                    continue;
+                }
                 var body = entity.GetComponent<Rigidbody>();
                 if (body == null) continue;
 

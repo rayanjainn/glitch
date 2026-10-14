@@ -185,6 +185,7 @@ namespace UnityEngine
     {
         public const int AllLayers = -1;
         public static void SyncTransforms() { }
+        public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction q) => throw null;
         public static bool SphereCast(Vector3 o, float r, Vector3 d, out RaycastHit h, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static int SphereCastNonAlloc(Ray ray, float r, RaycastHit[] results, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static void IgnoreLayerCollision(int a, int b, bool ignore) { }

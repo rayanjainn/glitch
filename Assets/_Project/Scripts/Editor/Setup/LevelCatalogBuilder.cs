@@ -20,8 +20,22 @@ namespace BugReport.EditorTools.Setup
 
         public static readonly LevelCatalog.Entry[] Levels =
         {
-            new LevelCatalog.Entry("training_lab", "Level_01_TrainingLab", SliceLevelBuilder.LevelTitle, "1"),
+            new LevelCatalog.Entry("training_lab", "Level_01_TrainingLab", SliceLevelBuilder.LevelTitle, "TUTORIAL"),
+            new LevelCatalog.Entry("bridge_out", "Level_02_BridgeOut", "BRIDGE OUT", "1: HELLO, WORLD"),
+            new LevelCatalog.Entry("two_doors", "Level_03_TwoDoors", "TWO DOORS, ONE SHADOW", "1: HELLO, WORLD"),
+            new LevelCatalog.Entry("two_birds", "Level_04_TwoBirds", "TWO BIRDS", "1: HELLO, WORLD"),
+            new LevelCatalog.Entry("three_plates", "Level_05_ThreePlates", "THREE PLATES", "2: DUPLICATE OBJECTIVE"),
+            new LevelCatalog.Entry("copy_the_copy", "Level_06_CopyTheCopy", "COPY THE COPY", "2: DUPLICATE OBJECTIVE"),
+            new LevelCatalog.Entry("stop_the_platform", "Level_07_StopThePlatform", "STOP THE PLATFORM", "3: TIME DOES NOT APPLY"),
+            new LevelCatalog.Entry("two_pistons", "Level_08_TwoPistons", "TWO PISTONS", "3: TIME DOES NOT APPLY"),
+            new LevelCatalog.Entry("the_build", "Level_09_TheBuild", "THE BUILD", "FINALE"),
         };
+
+        public static LevelCatalog.Entry Entry(string id)
+        {
+            foreach (var e in Levels) if (e.id == id) return e;
+            throw new System.ArgumentException("Unknown level id " + id);
+        }
 
         public static string ScenePath(LevelCatalog.Entry entry) => ScenesFolder + "/" + entry.sceneName + ".unity";
 

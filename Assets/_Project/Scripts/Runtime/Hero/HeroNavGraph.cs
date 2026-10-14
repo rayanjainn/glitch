@@ -21,6 +21,9 @@ namespace BugReport.Hero
         [SerializeField, Min(0f)] private float stepClearance = 0.3f;
         [Tooltip("Leave empty to use GameLayers.HeroBlockingMask.")]
         [SerializeField] private LayerMask blockingMask;
+        [Tooltip("Levels with gaps: an edge is only walkable if there is solid floor all along it (a hologram bridge is not).")]
+        [SerializeField] private bool requireGround;
+        [SerializeField, Min(0.1f)] private float groundSampleSpacing = 0.5f;
 
         private readonly Dictionary<HeroNavNode, int> ids = new Dictionary<HeroNavNode, int>();
         private readonly List<int> byDistance = new List<int>();
@@ -37,13 +40,16 @@ namespace BugReport.Hero
 
         public int Mask => blockingMask.value != 0 ? blockingMask.value : GameLayers.HeroBlockingMask;
 
-        public void Configure(HeroNavNode[] newNodes, float radius = 0.4f, float height = 2f)
+        public void Configure(HeroNavNode[] newNodes, float radius = 0.4f, float height = 2f, bool groundRequired = false)
         {
             nodes = newNodes ?? new HeroNavNode[0];
             agentRadius = radius;
             agentHeight = height;
+            requireGround = groundRequired;
             graph = null;
         }
+
+        public bool RequireGround => requireGround;
 
         /// <summary>(Re)builds the graph from the node list. Nodes are static; call again only if they move.</summary>
         public void Build()
@@ -92,12 +98,30 @@ namespace BugReport.Hero
             var bottom = fromFeet + Vector3.up * (stepClearance + r);
             var top = fromFeet + Vector3.up * Mathf.Max(stepClearance + r, agentHeight - r);
             if (Physics.CapsuleCast(bottom, top, r, delta / distance, distance, Mask, QueryTriggerInteraction.Ignore)) return false;
+            if (requireGround && !HasGround(fromFeet, toFeet)) return false;
 
             // Never route through machinery that is currently dangerous.
             var hazards = HeroHazard.Active;
             for (int i = 0; i < hazards.Count; i++)
             {
                 if (!hazards[i].IsSafe && hazards[i].Intersects(fromFeet, toFeet, agentRadius)) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Solid floor under every sample along the segment (start and end included). Only solid layers
+        /// count, so an Intangible bridge is no floor until Collision Transfer makes it solid.
+        /// </summary>
+        public bool HasGround(Vector3 fromFeet, Vector3 toFeet)
+        {
+            var flat = toFeet - fromFeet;
+            flat.y = 0f;
+            int samples = Mathf.Max(1, Mathf.CeilToInt(flat.magnitude / groundSampleSpacing));
+            for (int i = 0; i <= samples; i++)
+            {
+                var point = Vector3.Lerp(fromFeet, toFeet, i / (float)samples);
+                if (!Physics.Raycast(point + Vector3.up * 0.5f, Vector3.down, 1.2f, Mask, QueryTriggerInteraction.Ignore)) return false;
             }
             return true;
         }
