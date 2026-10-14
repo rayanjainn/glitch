@@ -28,6 +28,8 @@ Requires the .NET 8 SDK. Headless Unity test runs: `Tools/UnityTests/run-unity-t
 
 Binary assets use **Git LFS**: run `git lfs install` once before committing art or audio.
 
+Third-party CC0 art (see CREDITS.md) is fetched, not hand-copied: `bash Tools/Assets/fetch-cc0-assets.sh` downloads the pinned files from the authors' GitHub repos and verifies their checksums.
+
 ## Controls (default)
 WASD move · Mouse look · Space/Ctrl up/down · Shift boost · E select · RMB clear · Tab inspection · Esc pause · F1 debug overlay · F5 restart.
 Gamepad: sticks · LB/RB down/up · A select · B clear · LT inspection · Start pause.

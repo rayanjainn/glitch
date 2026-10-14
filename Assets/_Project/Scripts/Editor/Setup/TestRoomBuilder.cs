@@ -326,17 +326,21 @@ namespace BugReport.EditorTools.Setup
             hero.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
             hero.layer = heroLayer;
 
-            var body = Primitive(PrimitiveType.Capsule, "Body", hero.transform, Vector3.zero, Vector3.one, mats.Hero, heroLayer, keepCollider: false);
-            body.transform.localPosition = Vector3.zero;
-            var visor = Primitive(PrimitiveType.Cube, "Visor", hero.transform, Vector3.zero, new Vector3(0.55f, 0.15f, 0.2f), mats.HeroVisor, heroLayer, keepCollider: false);
-            visor.transform.localPosition = new Vector3(0f, 0.5f, 0.38f);
-
             cc = hero.AddComponent<CharacterController>();
             cc.height = 2f;
             cc.radius = 0.4f;
             cc.center = Vector3.zero;
             cc.stepOffset = 0.3f;
             cc.skinWidth = 0.04f;
+
+            // The KayKit Knight if the CC0 art has been fetched, otherwise the capsule placeholder.
+            if (ArtBuilder.BuildHeroModel(hero.transform, cc, 1.85f, heroLayer) == null)
+            {
+                var body = Primitive(PrimitiveType.Capsule, "Body", hero.transform, Vector3.zero, Vector3.one, mats.Hero, heroLayer, keepCollider: false);
+                body.transform.localPosition = Vector3.zero;
+                var visor = Primitive(PrimitiveType.Cube, "Visor", hero.transform, Vector3.zero, new Vector3(0.55f, 0.15f, 0.2f), mats.HeroVisor, heroLayer, keepCollider: false);
+                visor.transform.localPosition = new Vector3(0f, 0.5f, 0.38f);
+            }
 
             AddEntity(hero, "HERO", EntityCategory.Hero, EntityCapabilities.Inspectable | EntityCapabilities.AIControllable,
                 "PROJECT HERO protagonist. Follows the script. Trusts the level geometry.");
@@ -526,6 +530,8 @@ namespace BugReport.EditorTools.Setup
                 "Standard-issue crate.");
             temp.AddComponent<DuplicationCapability>().Configure(profile);
             AddFreeze(temp, mats);
+            if (ArtBuilder.DungeonAvailable)
+                ArtBuilder.SkinWithDungeonModel(temp, "box_large", ArtBuilder.AtlasMaterial("M_Dungeon", ArtBuilder.DungeonTexturePath));
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(temp, CratePrefabPath);
             Object.DestroyImmediate(temp);

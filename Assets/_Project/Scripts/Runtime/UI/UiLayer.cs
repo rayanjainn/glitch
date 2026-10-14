@@ -14,6 +14,8 @@ namespace BugReport.UI
     public abstract class UiLayer : MonoBehaviour
     {
         [SerializeField] private StyleSheet styleSheet;
+        [SerializeField, OptionalReference, Tooltip("Font for headings (elements with the br-display class). Theme font when empty.")]
+        private Font displayFont;
 
         private UIDocument document;
         private VisualElement builtFor;
@@ -89,6 +91,11 @@ namespace BugReport.UI
             root.Insert(index, Layer);
             builtFor = root;
             Build(Layer);
+            if (displayFont != null)
+            {
+                var definition = new StyleFontDefinition(FontDefinition.FromFont(displayFont));
+                Layer.Query(className: "br-display").ForEach(e => e.style.unityFontDefinition = definition);
+            }
             return true;
         }
     }

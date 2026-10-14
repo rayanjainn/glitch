@@ -68,6 +68,18 @@ namespace BugReport.Tests.EditMode
         }
 
         [Test]
+        public void Hero_IsTheAnimatedKnight_WhenTheArtIsAvailable()
+        {
+            if (!ArtBuilder.HeroAvailable) Assert.Ignore("Run Tools/Assets/fetch-cc0-assets.sh, then rebuild the level.");
+            var animator = All<HeroAnimator>().Single();
+            Assert.That(animator.HasAnimatedModel, Is.True);
+            var hero = All<HeroController>().Single();
+            var model = hero.GetComponentInChildren<Animator>(true);
+            Assert.That(model.runtimeAnimatorController, Is.Not.Null);
+            Assert.That(model.applyRootMotion, Is.False, "the CharacterController moves the hero, not the clips");
+        }
+
+        [Test]
         public void NoUnassignedReferences_OrMissingScripts()
         {
             Assert.That(TestRoomBuilder.FindUnassignedReferences(scene), Is.Empty);

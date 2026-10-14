@@ -195,7 +195,16 @@ Playtest finding: the owner needed the written guide to finish TRAINING LAB.
 - [~] Tests: GuideDirectorTests (6 PlayMode), SliceLevelSceneTests guide check; scene validation follows nested `[OptionalReference]` fields [editor]
 - [ ] **Exit:** someone who has never played finishes TRAINING LAB without help (observed)
 
-## Milestones 8+
+## Milestone 8 — Art pipeline (started early, `feature/cc0-art-pass`, stacked on M7)
+- [x] CC0 sources found on GitHub; licences checked; CREDITS.md [auto]
+- [x] `Tools/Assets/fetch-cc0-assets.sh` (pinned commits + SHA-256 for 224 files), tested end to end [auto]
+- [ ] **Owner:** run the fetch script, commit `Assets/ThirdParty` through LFS (LFS upload is blocked from the cloud session)
+- [~] Import rules, ArtBuilder, AC_Hero, Knight hero, crate model, lab decor, footsteps, objective chime, heading font [editor][visual]
+- [~] Tests: ThirdPartyArtTests (4), SliceLevelSceneTests hero check [editor]
+- [ ] Tune: Knight facing/size, walk-cycle speed, prop placement [visual]
+- [ ] Next: gate/exit/plates models, the fantasy "meadow" kit for chapter 1 (needs a source that isn't GLB-only, or the glTFast package)
+
+## Milestones 9+
 See DESIGN_ROADMAP.md §6.
 
 ---

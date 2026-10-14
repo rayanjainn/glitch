@@ -68,12 +68,15 @@ namespace BugReport.EditorTools.Setup
             UpgradeAnomaly(assets, mats, anomaly, cam);
             var heroAnimator = AttachHeroAnimator(assets, hero);
             Wire(systems.Root.GetComponent<EntityHighlightPresenter>(), "settings", assets.Settings);
+            var chime = AssetDatabase.LoadAssetAtPath<AudioClip>(ArtBuilder.SoundFolder + "/coin.ogg");
+            if (chime != null) Wire(systems.Root.GetComponent<Audio.AudioFeedback>(), "objectiveClip", chime);
             BuildUi(assets, systems, heroAnimator, cam);
         }
 
         /// <summary>One UIDocument; each UI layer adds its own subtree to it.</summary>
         private static void BuildUi(Assets assets, Systems systems, HeroAnimator heroAnimator, Camera cam)
         {
+            var displayFont = AssetDatabase.LoadAssetAtPath<Font>(ArtBuilder.DisplayFontPath);
             var go = new GameObject("UI");
             var document = go.AddComponent<UIDocument>();
             document.panelSettings = assets.Panel;
@@ -96,6 +99,11 @@ namespace BugReport.EditorTools.Setup
 
             var menus = go.AddComponent<GameMenus>();
             Wire(menus, "styleSheet", assets.Style);
+            if (displayFont != null)
+            {
+                Wire(menus, "displayFont", displayFont);
+                Wire(hud, "displayFont", displayFont);
+            }
             if (systems.Objectives != null) Wire(menus, "objectives", systems.Objectives);
             var so = new SerializedObject(menus);
             so.FindProperty("levelTitle").stringValue = systems.LevelTitle;
@@ -188,8 +196,15 @@ namespace BugReport.EditorTools.Setup
                 if (part != null) part.SetParent(pivot, true);
             }
             var animator = hero.gameObject.AddComponent<HeroAnimator>();
-            animator.Configure(hero, pivot);
+            animator.Configure(hero, pivot, pivot.GetComponentInChildren<Animator>(true));
             Wire(animator, "settings", assets.Settings);
+
+            var footsteps = AssetDatabase.LoadAssetAtPath<AudioClip>(ArtBuilder.SoundFolder + "/walking.ogg");
+            if (footsteps != null)
+            {
+                hero.gameObject.AddComponent<AudioSource>();
+                hero.gameObject.AddComponent<Audio.HeroAudio>().Configure(hero, footsteps);
+            }
             return animator;
         }
 

@@ -248,3 +248,18 @@
   - camera shoulder offset; bigger hero icon.
 - **Design choice:** the tutorial is TRAINING LAB itself, not a new level in front of it. A separate tutorial would teach the same three puzzles twice.
 - **Verified here:** Core 144/144; per-assembly compile 0/0; filename check OK. **Not verified:** whether the guide actually teaches, which needs a fresh player.
+
+## 2026-10-14 — CC0 art from GitHub (Milestone 8 started, stacked on the onboarding branch)
+
+- **Owner's request:** "get the assets from GitHub". Official CC0 sources found on GitHub (licence files checked in each repo):
+  - KayKit Character Pack: Adventurers (Knight) and KayKit Dungeon Remastered, by Kay Lousberg;
+  - Kenney's official starter kits: CC0 sound effects and the OFL font Lilita One. Their `.glb` models need a glTF importer package, so I didn't take them.
+- **Blocker:** this cloud environment cannot upload Git LFS objects (GitHub LFS answered 403 Forbidden). Normal pushes work.
+  - **Workaround:** `Tools/Assets/fetch-cc0-assets.sh` downloads the exact files from pinned commits on the owner's machine and verifies all 224 files against `Tools/Assets/cc0-assets.sha256`. Tested here from an empty folder. The owner then commits them through LFS.
+- **Code (works with or without the art; placeholders when files are missing):**
+  - `ThirdPartyModelImport` import rules (Generic rig and looping clips for characters, no embedded materials);
+  - `ArtBuilder`: URP materials from the atlas textures, `AC_Hero` (state per HeroState), fit-model helpers;
+  - hero = animated Knight (`HeroAnimator` drives `State`/`WalkSpeed`; procedural bob off when animated);
+  - crate prefab = dungeon `box_large`; TRAINING LAB set dressing (12 props, chest at the exit);
+  - `HeroAudio` footsteps; recorded objective chime; Lilita One on headings.
+- **Unknowns until the owner runs it:** the Knight's facing direction and size, whether the walk clip matches the hero's walk speed (`walkCycleSpeed` on HeroAnimator), and prop orientations.

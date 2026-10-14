@@ -14,6 +14,13 @@ namespace BugReport.Hero
         [SerializeField] private HeroController hero;
         [SerializeField] private Transform visual;
         [SerializeField, OptionalReference] private VisualSettings settings;
+        [SerializeField, OptionalReference, Tooltip("Animated model (Knight). When set, it plays the body language and the procedural bob is off.")]
+        private Animator animator;
+        [SerializeField, Min(0.1f), Tooltip("Walk clip playback speed; tune until the feet don't slide at the hero's walk speed.")]
+        private float walkCycleSpeed = 1.4f;
+
+        private static readonly int StateParameter = Animator.StringToHash("State");
+        private static readonly int WalkSpeedParameter = Animator.StringToHash("WalkSpeed");
 
         private Vector3 restPosition;
         private Quaternion restRotation;
@@ -23,11 +30,14 @@ namespace BugReport.Hero
 
         public string CurrentIcon { get; private set; } = string.Empty;
 
-        public void Configure(HeroController newHero, Transform newVisual)
+        public void Configure(HeroController newHero, Transform newVisual, Animator newAnimator = null)
         {
             hero = newHero;
             visual = newVisual;
+            animator = newAnimator;
         }
+
+        public bool HasAnimatedModel => animator != null;
 
         private void Awake()
         {
@@ -44,6 +54,11 @@ namespace BugReport.Hero
         public void Animate(float deltaTime, float time)
         {
             if (hero == null || visual == null) return;
+            if (animator != null && animator.runtimeAnimatorController != null)
+            {
+                animator.SetInteger(StateParameter, (int)hero.State);
+                animator.SetFloat(WalkSpeedParameter, walkCycleSpeed);
+            }
             if (!VisualSettings.On(settings, s => s.heroAnimation))
             {
                 visual.localPosition = restPosition;
@@ -84,6 +99,12 @@ namespace BugReport.Hero
                 default:
                     offset.y = Mathf.Sin(time * 2f) * 0.02f;
                     break;
+            }
+            if (animator != null)
+            {
+                // The clips carry the body language; keep only the "looking for a way" turn.
+                offset = Vector3.zero;
+                if (hero.State != HeroState.Blocked) euler = Vector3.zero;
             }
             visual.localPosition = restPosition + offset;
             visual.localRotation = restRotation * Quaternion.Euler(euler);
