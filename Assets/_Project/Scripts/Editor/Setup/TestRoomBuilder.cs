@@ -147,6 +147,7 @@ namespace BugReport.EditorTools.Setup
                 return false;
             }
             AddToBuildSettings(ScenePath);
+            LevelCatalogBuilder.SyncBuildSettings();
             return true;
         }
 
@@ -474,6 +475,13 @@ namespace BugReport.EditorTools.Setup
 
             systems.AddComponent<WorldBoundsGuard>();
 
+            if (objectives != null)
+            {
+                var recorder = systems.AddComponent<Progress.LevelCompletionRecorder>();
+                Wire(recorder, "objectives", objectives);
+                Wire(recorder, "catalog", LevelCatalogBuilder.LoadOrCreate());
+            }
+
             var overlay = systems.AddComponent<DiagnosticsOverlay>();
             Wire(overlay, "anomaly", motor);
             Wire(overlay, "selection", selection);
@@ -499,6 +507,11 @@ namespace BugReport.EditorTools.Setup
             Wire(controller, "cameraRig", cameraRig);
             Wire(controller, "selection", systems.Selection);
             Wire(controller, "glitches", systems.Glitches);
+
+            var visual = anomaly.GetComponentInChildren<AnomalyVisual>(true);
+            if (visual != null) Wire(visual, "cameraRig", cameraRig);
+            var settings = systems.Root.AddComponent<Progress.SettingsApplier>();
+            Wire(settings, "cameraRig", cameraRig);
         }
 
         internal static void AddCollision(GameObject go, CollisionMode authoredMode, MaterialSet mats)

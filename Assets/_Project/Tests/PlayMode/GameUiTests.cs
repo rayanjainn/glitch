@@ -164,7 +164,7 @@ namespace BugReport.Tests.PlayMode
         }
 
         [Test]
-        public void ComfortButton_TogglesSettingAndLabel()
+        public void PauseSettings_ChangeAndPersistTheColourSplitSetting()
         {
             bool previous = ComfortSettings.ChromaticEffects;
             try
@@ -172,15 +172,39 @@ namespace BugReport.Tests.PlayMode
                 ComfortSettings.ChromaticEffects = true;
                 services.State.TogglePause();
                 menus.RefreshNow();
-                StringAssert.EndsWith("ON", menus.ComfortButtonText);
-                menus.ToggleColourSplit();
+                menus.OpenSettings();
+                Assert.That(menus.SettingsVisible, Is.True);
+                Assert.That(menus.Find<Toggle>("setting-colour-split").value, Is.True);
+
+                menus.Settings.SetColourSplit(false);
                 Assert.That(ComfortSettings.ChromaticEffects, Is.False);
-                StringAssert.EndsWith("OFF", menus.ComfortButtonText);
+                menus.CloseSettings();
+                Assert.That(menus.SettingsVisible, Is.False);
+                Assert.That(Progress.SaveStore.Load().settings.colourSplitEffects, Is.False, "written to the save file on close");
             }
             finally
             {
                 ComfortSettings.ChromaticEffects = previous;
             }
+        }
+
+        [Test]
+        public void CompleteScreen_OffersNextLevel_OnlyWhenTheCatalogHasOne()
+        {
+            var catalog = Track(ScriptableObject.CreateInstance<Progress.LevelCatalog>());
+            catalog.Configure(new[]
+            {
+                new Progress.LevelCatalog.Entry("this", menus.gameObject.scene.name, "THIS", "1"),
+                new Progress.LevelCatalog.Entry("next", "SomeNextScene", "NEXT", "1"),
+            });
+            menus.Configure(null, "TEST LAB", catalog);
+            Assert.That(menus.NextLevelScene(), Is.EqualTo("SomeNextScene"));
+            services.State.TryTransition(GameState.Ending);
+            menus.RefreshNow();
+            Assert.That(menus.NextLevelAvailable, Is.True);
+
+            catalog.Configure(new[] { new Progress.LevelCatalog.Entry("this", menus.gameObject.scene.name, "THIS", "1") });
+            Assert.That(menus.NextLevelScene(), Is.Null, "last level: no next");
         }
 
         [Test]

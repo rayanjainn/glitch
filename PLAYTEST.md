@@ -3,9 +3,11 @@
 You don't need to know how the game works inside. Just play, and write down anything that looks wrong, feels confusing, or shows a red error.
 
 **Before you start (once):**
-1. In Unity, click the menu **BUG REPORT ▸ Setup ▸ 3. Build Vertical Slice Level**. If it asks to rebuild, click **Rebuild**.
-2. In the Project window, open `Assets/_Project/Scenes/Level_01_TrainingLab`.
-3. Press the **Play** button at the top. Click once inside the game picture so it takes your mouse.
+1. In Unity, click **BUG REPORT ▸ Setup ▸ 3. Build Vertical Slice Level** (click **Rebuild** if asked), then **4. Build Main Menu**.
+2. In the Project window, open `Assets/_Project/Scenes/MainMenu`.
+3. Press the **Play** button at the top, then **NEW GAME**. Click once inside the game picture so it takes your mouse.
+
+(A built game starts at the main menu by itself.)
 
 **Controls:**
 | Key | What it does |

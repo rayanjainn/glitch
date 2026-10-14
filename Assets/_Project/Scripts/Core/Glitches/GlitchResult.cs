@@ -28,10 +28,13 @@ namespace BugReport.Core.Glitches
         public readonly TargetValidationResult TargetValidation;
         /// <summary>Effect-provided reason, or cooldown seconds formatted, etc.</summary>
         public readonly string Detail;
+        /// <summary>How many targets the glitch takes; slot names ("SOURCE"/"TARGET") only matter when it is more than one.</summary>
+        public readonly int SlotCount;
 
         public GlitchResult(GlitchFailure failure, GlitchOperation operation = null, string detail = null,
-            int targetIndex = -1, TargetValidationResult targetValidation = default)
+            int targetIndex = -1, TargetValidationResult targetValidation = default, int slotCount = 0)
         {
+            SlotCount = slotCount;
             Failure = failure;
             Operation = operation;
             Detail = detail;
@@ -53,6 +56,7 @@ namespace BugReport.Core.Glitches
                 case GlitchFailure.WrongTargetCount: return "WRONG NUMBER OF TARGETS";
                 case GlitchFailure.DuplicateTarget: return "SOURCE AND TARGET MUST DIFFER";
                 case GlitchFailure.InvalidTarget:
+                    if (SlotCount == 1) return TargetValidation.Describe();
                     return (TargetIndex == 0 ? "SOURCE " : TargetIndex == 1 ? "TARGET " : string.Empty) + TargetValidation.Describe();
                 case GlitchFailure.OnCooldown: return "COOLDOWN " + Detail;
                 case GlitchFailure.LimitReached: return "LIMIT REACHED: REVERT ONE FIRST";

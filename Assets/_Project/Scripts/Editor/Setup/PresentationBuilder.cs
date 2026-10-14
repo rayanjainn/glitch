@@ -105,6 +105,7 @@ namespace BugReport.EditorTools.Setup
                 Wire(hud, "displayFont", displayFont);
             }
             if (systems.Objectives != null) Wire(menus, "objectives", systems.Objectives);
+            if (systems.Objectives != null) Wire(menus, "catalog", LevelCatalogBuilder.LoadOrCreate());
             var so = new SerializedObject(menus);
             so.FindProperty("levelTitle").stringValue = systems.LevelTitle;
             so.ApplyModifiedPropertiesWithoutUndo();
@@ -133,7 +134,7 @@ namespace BugReport.EditorTools.Setup
             return panel;
         }
 
-        private static void ConfigureCamera(Camera cam)
+        internal static void ConfigureCamera(Camera cam)
         {
             var data = cam.GetUniversalAdditionalCameraData();
             data.renderPostProcessing = true;

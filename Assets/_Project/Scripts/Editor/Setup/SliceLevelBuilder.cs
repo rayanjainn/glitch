@@ -266,7 +266,8 @@ namespace BugReport.EditorTools.Setup
                 error = "Could not save " + ScenePath;
                 return false;
             }
-            AddToBuildSettings(ScenePath, first: true);
+            AddToBuildSettings(ScenePath);
+            LevelCatalogBuilder.SyncBuildSettings();
             return true;
         }
 

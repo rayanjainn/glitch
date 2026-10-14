@@ -263,3 +263,18 @@
   - crate prefab = dungeon `box_large`; TRAINING LAB set dressing (12 props, chest at the exit);
   - `HeroAudio` footsteps; recorded objective chime; Lilita One on headings.
 - **Unknowns until the owner runs it:** the Knight's facing direction and size, whether the walk clip matches the hero's walk speed (`walkCycleSpeed` on HeroAnimator), and prop orientations.
+
+## 2026-10-14 — Milestones 7 and 8 (pass 1) merged; Milestone 9: front end
+
+- PRs #8 (guided tutorial) and #9 (CC0 art) merged after the owner's Unity run and a macOS build playthrough. The Knight faces the right way and animates; the guide walks through all three objectives.
+- **Seen in the owner's screenshots and fixed:**
+  - Rejecting a one-target glitch said "SOURCE ACCESS DENIED": `GlitchResult` now names the slot only for multi-target glitches.
+  - The anomaly filled the screen when the camera was squeezed against walls: `AnomalyVisual` now shrinks to 40% as the camera distance drops.
+- **Front end (`feature/front-end-menus-saves`):**
+  - `MainMenu` scene: Continue, New Game, Level Select (locked until the previous level is done), Settings, Credits, Quit; idle Knight on a small stage; orbiting camera.
+  - Saved progress and settings in one JSON file (`SaveStore`: atomic write; a corrupt file is kept aside and the game starts fresh; values sanitized).
+  - Level identity comes from `LevelCatalog` (`LC_Main`) stable ids, never build indices.
+  - Settings: master volume, mouse sensitivity, invert Y, colour-split effects (moved from PlayerPrefs into the save), fullscreen (builds only). Reachable from the main menu and the pause menu.
+  - The complete screen offers NEXT LEVEL when the catalog has one; pause and complete screens have MAIN MENU.
+  - Build Settings are kept in order by the builders: main menu, levels in catalog order, then TestRoom.
+- **Tests never touch the player's save:** every PlayMode test (and the playthrough) redirects `SaveStore` to a temporary file.

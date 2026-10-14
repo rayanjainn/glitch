@@ -12,6 +12,17 @@ namespace BugReport.Tests.PlayMode
     {
         private readonly List<Object> created = new List<Object>();
 
+        /// <summary>Every PlayMode test uses a throwaway save file, never the player's.</summary>
+        [SetUp]
+        public void BaseSetUp() => RedirectSave();
+
+        internal static void RedirectSave()
+        {
+            var path = System.IO.Path.Combine(Application.temporaryCachePath, "bugreport_test_save.json");
+            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            Progress.SaveStore.RedirectForTests(path);
+        }
+
         [TearDown]
         public void BaseTearDown()
         {
@@ -21,6 +32,7 @@ namespace BugReport.Tests.PlayMode
             }
             created.Clear();
             GameServices.Current?.Dispose();
+            Progress.SaveStore.RedirectForTests(null);
         }
 
         protected T Track<T>(T obj) where T : Object

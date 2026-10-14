@@ -90,6 +90,16 @@ namespace BugReport.Core.Tests
         }
 
         [Test]
+        public void OneTargetGlitch_RejectionHasNoSlotName()
+        {
+            var r = new GlitchResult(GlitchFailure.InvalidTarget, targetIndex: 0,
+                targetValidation: default, slotCount: 1);
+            Assert.That(r.Describe(), Does.Not.StartWith("SOURCE"));
+            var two = new GlitchResult(GlitchFailure.InvalidTarget, targetIndex: 0, targetValidation: default, slotCount: 2);
+            StringAssert.StartsWith("SOURCE ", two.Describe());
+        }
+
+        [Test]
         public void Apply_DestroyedOrNoTarget_Rejected()
         {
             a.IsAlive = false;

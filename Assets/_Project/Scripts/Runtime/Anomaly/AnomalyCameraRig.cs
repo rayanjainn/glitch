@@ -65,6 +65,13 @@ namespace BugReport.Anomaly
             set => stickSensitivity = Mathf.Max(0f, value);
         }
 
+        /// <summary>Player setting multiplying both pointer and stick sensitivity.</summary>
+        public float SensitivityScale { get; set; } = 1f;
+
+        /// <summary>Current camera distance (shorter than the desired one when a wall is behind).</summary>
+        public float CurrentDistance => currentDistance;
+        public float DesiredDistance => distance;
+
         public bool InvertY
         {
             get => invertY;
@@ -91,7 +98,7 @@ namespace BugReport.Anomaly
         /// <param name="fromPointer">True for mouse/pen/touch deltas.</param>
         public void AddLook(Vector2 delta, bool fromPointer, float deltaTime)
         {
-            float scale = fromPointer ? pointerSensitivity : stickSensitivity * Mathf.Max(0f, deltaTime);
+            float scale = (fromPointer ? pointerSensitivity : stickSensitivity * Mathf.Max(0f, deltaTime)) * SensitivityScale;
             yaw = Mathf.Repeat(yaw + delta.x * scale, 360f);
             pitch = Mathf.Clamp(pitch - delta.y * scale * (invertY ? -1f : 1f), minPitch, maxPitch);
         }

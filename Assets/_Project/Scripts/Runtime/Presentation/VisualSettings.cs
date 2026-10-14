@@ -28,19 +28,19 @@ namespace BugReport.Presentation
         public static bool On(VisualSettings settings, System.Func<VisualSettings, bool> feature) => settings == null || feature(settings);
     }
 
-    /// <summary>Player comfort preferences (persisted). Settings screen arrives in M8; the pause menu exposes these now.</summary>
+    /// <summary>Player comfort preferences, stored in the save file's settings (see SaveStore).</summary>
     public static class ComfortSettings
     {
-        private const string ChromaticKey = "bugreport.comfort.chromatic";
-
         /// <summary>Colour-split and lens-warp bursts. Some players find them uncomfortable (GDD 9.4).</summary>
         public static bool ChromaticEffects
         {
-            get => PlayerPrefs.GetInt(ChromaticKey, 1) != 0;
+            get => Progress.SaveStore.Settings.colourSplitEffects;
             set
             {
-                PlayerPrefs.SetInt(ChromaticKey, value ? 1 : 0);
-                PlayerPrefs.Save();
+                if (Progress.SaveStore.Settings.colourSplitEffects == value) return;
+                Progress.SaveStore.Settings.colourSplitEffects = value;
+                Progress.SaveStore.ApplySettings();
+                Progress.SaveStore.Flush();
             }
         }
     }

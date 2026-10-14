@@ -9,6 +9,18 @@ namespace BugReport.Level
     /// </summary>
     public static class LevelFlow
     {
+        /// <summary>Scene name of the main menu (first in Build Settings).</summary>
+        public const string MainMenuScene = "MainMenu";
+
+        public static void LoadLevel(string sceneName)
+        {
+            if (string.IsNullOrEmpty(sceneName)) return;
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(sceneName);
+        }
+
+        public static void LoadMainMenu() => LoadLevel(MainMenuScene);
+
         public static void RestartLevel()
         {
             var scene = SceneManager.GetActiveScene();
