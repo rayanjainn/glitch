@@ -50,8 +50,8 @@ namespace BugReport.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
         }
 
         protected override void OnDisable()

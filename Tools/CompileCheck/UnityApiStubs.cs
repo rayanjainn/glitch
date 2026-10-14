@@ -670,6 +670,7 @@ namespace UnityEditor.SceneManagement
 
 namespace UnityEngine.UIElements
 {
+    public struct Cursor { }
     public enum PickingMode { Position, Ignore }
     public enum DisplayStyle { Flex, None }
     public enum StyleKeyword { Undefined, Null, Auto, None, Initial }

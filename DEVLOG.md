@@ -302,3 +302,9 @@
 - **"5. Build ALL"** builds the test room, every level and the main menu in one go, and reports OK/FAIL per scene.
 - **Correction:** my previous message said Core tests were 151/151; the real count was 150/150 (re-run).
 - **Known limitation:** pressing Esc while rebinding in the pause menu also unpauses the game (the game's input sees Esc too).
+
+## 2026-10-14 — Milestone 9/10 first Unity compile: `Cursor` clash
+
+- **Error:** `CS0104 'Cursor' is ambiguous between UnityEngine.UIElements.Cursor and UnityEngine.Cursor` in `MainMenu.cs`. It is the same class of problem as `DebugOverlay`: a file that imports `UnityEngine.UIElements` gains that namespace's type names.
+- **Fix:** `UnityEngine.Cursor` is spelled out. The compile-check stubs now include `UIElements.Cursor`, so it reproduces offline (verified: the same 2 errors before the fix, 0 after).
+- **Docs:** TESTING.md says to run `Tools/Assets/fetch-cc0-assets.sh` only if `Assets/ThirdParty` is missing. The files are in the repo through LFS (`git lfs pull`).

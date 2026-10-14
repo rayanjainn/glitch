@@ -45,11 +45,12 @@ Don't copy anything else from the donor (no `Library`, no `Scenes`, no `Tutorial
 3. If Unity asks to **enable the new Input System backends and restart**, click **Yes**.
 4. If Unity offers **Safe Mode**, there are compile errors. Enter Safe Mode, open the Console (Window ▸ General ▸ Console), and send me every red error line. Stop here.
 
-## 4b. Get the free art (once, and after it changes)
+## 4b. Get the free art
+The art files are in the repository through Git LFS: run `git lfs pull` and check that `Assets/ThirdParty/KayKit_Adventurers/Knight.fbx` is about 20 MB. Only if `Assets/ThirdParty` is missing, run:
 ```bash
 bash Tools/Assets/fetch-cc0-assets.sh
 ```
-Ends with "OK: 224 files ... match". It downloads the CC0 models, sounds and font from their authors' GitHub repositories (see CREDITS.md).
+(slow and silent: it downloads about 140 MB). Ends with "OK: 224 files ... match". It downloads the CC0 models, sounds and font from their authors' GitHub repositories (see CREDITS.md).
 
 ## 5. Set up and build everything
 1. Top menu **BUG REPORT ▸ Setup ▸ 1. Configure Project** → OK. The Console prints a report. Lines starting with `ERROR` need fixing, so send them to me.
