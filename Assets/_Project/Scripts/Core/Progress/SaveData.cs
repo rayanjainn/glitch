@@ -16,6 +16,8 @@ namespace BugReport.Core.Progress
         public int version = CurrentVersion;
         public List<string> completedLevels = new List<string>();
         public GameSettingsData settings = new GameSettingsData();
+        /// <summary>Input System binding overrides (its own JSON format); empty = default keys.</summary>
+        public string bindingOverrides = string.Empty;
 
         public bool IsCompleted(string levelId) => completedLevels != null && completedLevels.Contains(levelId);
 
@@ -36,6 +38,7 @@ namespace BugReport.Core.Progress
             completedLevels.RemoveAll(string.IsNullOrEmpty);
             if (settings == null) settings = new GameSettingsData();
             settings.Sanitize();
+            if (bindingOverrides == null) bindingOverrides = string.Empty;
             if (version < 1) version = CurrentVersion;
         }
     }

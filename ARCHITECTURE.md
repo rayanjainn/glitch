@@ -320,6 +320,21 @@ Consequences:
 - **Unlocks:** glitches whose section hasn't started are locked in `GlitchController` (skipped by cycling, hidden in the dock). Unlocking happens in the same call that completes the objective, and announces "NEW GLITCH".
 - **Presentation:** `GameHud` shows the instruction above the dock (keys highlighted by `GuideText`). `InspectionOverlay` puts a bobbing marker over the step's target. `AudioFeedback` plays a soft chime the first time each step is passed (not again when a state step is lost and regained).
 
+## 8e. Front end, saves and levels *(M9–M10)*
+
+- **Save:** one JSON file (`SaveStore`, `Application.persistentDataPath`) holding completed level ids, settings and Input System binding overrides.
+  - Writes are atomic (temporary file, then replace). An unreadable file is kept as `.corrupt` and the game starts fresh.
+  - Values are sanitized on load. Tests redirect the store to a temporary file.
+- **Levels:**
+  - `LevelCatalog` (`LC_Main`) is the play order with stable ids; progress never uses build indices.
+  - Builders keep Build Settings as: main menu, levels in catalog order, dev scenes.
+  - `LevelCompletionRecorder` saves completion when the last objective is done.
+- **Settings:** `SettingsApplier` (per scene) applies volume, sensitivity, invert Y and fullscreen whenever `SaveStore.SettingsChanged` fires. `SettingsPanel` is shared by the main and pause menus.
+- **Rebinding:** `BindingOverrides` lists the rebindable keyboard/mouse bindings and stores overrides as Input System JSON in the save. `InputReader` applies them to its runtime copy at start and on change.
+- **Level building:** `LevelKit` composes levels from the same components TRAINING LAB uses.
+  - Routes can require solid floor (`HeroNavGraph.requireGround`, raycasts along each edge against solid layers), which makes hologram bridges and moving platforms work with the existing passability model.
+  - The hero respawns at its start if it falls below the kill plane.
+
 ## 9. Physics layers
 
 | Layer | Used by | Notes |

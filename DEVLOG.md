@@ -278,3 +278,27 @@
   - The complete screen offers NEXT LEVEL when the catalog has one; pause and complete screens have MAIN MENU.
   - Build Settings are kept in order by the builders: main menu, levels in catalog order, then TestRoom.
 - **Tests never touch the player's save:** every PlayMode test (and the playthrough) redirects `SaveStore` to a temporary file.
+
+## 2026-10-14 — Milestone 10: the 3-chapter demo, plus key rebinding (all untested in Unity)
+
+- **Owner's instruction:** implement what's left now; they will pull and test everything together later. Scope chosen: the 3-chapter demo (the recommended first finish line) plus key rebinding. Chapters 4–7 (Property Swap, guards and AI Override, Desync, finale) each need a large new system and were deliberately **not** started blind.
+- **Levels** (`Editor/Levels/DemoLevels.cs`, built by `LevelKit`):
+  - BRIDGE OUT, TWO DOORS ONE SHADOW, TWO BIRDS;
+  - THREE PLATES, COPY THE COPY;
+  - STOP THE PLATFORM, TWO PISTONS;
+  - THE BUILD.
+  - With TRAINING LAB that is nine levels in `LC_Main`, unlocked in order.
+- **New mechanics:**
+  - Routes can require solid floor (an intangible bridge is no floor).
+  - The hero respawns at its start if it falls out of the world.
+  - Pistons can start out of phase.
+- **Design correction found while writing the tests:** an object can only be part of one active Collision Transfer ("ALREADY GLITCHED"). TWO DOORS therefore teaches undo: [R] gives the shadow back once the hero is through the first wall.
+- **Testing strategy for a big untested batch:**
+  - `DemoLevelPlaythroughTests` plays every level with its intended solution, plus TWO BIRDS' trap and its undo recovery. A failure names the step that timed out.
+  - Mechanic tests cover the floor check, respawn and piston phase.
+- **Key rebinding:**
+  - The Settings screen lists 12 keyboard/mouse bindings, including the movement composite parts. Click one, press a key (Esc cancels); RESET KEYS restores the defaults.
+  - Overrides are stored in the save file and applied to runtime copies of the controls asset, never to the asset itself. The pause screen's controls list shows the player's keys.
+- **"5. Build ALL"** builds the test room, every level and the main menu in one go, and reports OK/FAIL per scene.
+- **Correction:** my previous message said Core tests were 151/151; the real count was 150/150 (re-run).
+- **Known limitation:** pressing Esc while rebinding in the pause menu also unpauses the game (the game's input sees Esc too).

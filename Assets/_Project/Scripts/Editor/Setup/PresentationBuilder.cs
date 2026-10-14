@@ -99,6 +99,7 @@ namespace BugReport.EditorTools.Setup
 
             var menus = go.AddComponent<GameMenus>();
             Wire(menus, "styleSheet", assets.Style);
+            Wire(menus, "actions", AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(InputActionsPath));
             if (displayFont != null)
             {
                 Wire(menus, "displayFont", displayFont);

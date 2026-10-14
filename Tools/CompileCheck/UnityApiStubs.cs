@@ -514,7 +514,32 @@ namespace UnityEngine.InputSystem
     public class InputControl { public InputDevice device => throw null; }
     public class ButtonControl : InputControl { public bool wasPressedThisFrame => throw null; }
     public class Keyboard : InputDevice { public static Keyboard current => throw null; public ButtonControl f1Key => throw null; public ButtonControl f5Key => throw null; }
-    public struct InputBinding { public bool isComposite => throw null; public string groups => throw null; }
+    public struct InputBinding
+    {
+        public bool isComposite => throw null; public bool isPartOfComposite => throw null; public string groups => throw null;
+        public string name => throw null; public string path => throw null; public string effectivePath => throw null;
+        [Flags] public enum DisplayStringOptions { DontUseShortDisplayNames = 1 }
+    }
+    public interface IInputActionCollection2 { }
+    public static class InputActionRebindingExtensions
+    {
+        public sealed class RebindingOperation : IDisposable
+        {
+            public RebindingOperation WithControlsExcluding(string path) => throw null;
+            public RebindingOperation WithCancelingThrough(string binding) => throw null;
+            public RebindingOperation OnMatchWaitForAnother(float seconds) => throw null;
+            public RebindingOperation OnComplete(Action<RebindingOperation> callback) => throw null;
+            public RebindingOperation OnCancel(Action<RebindingOperation> callback) => throw null;
+            public RebindingOperation Start() => throw null;
+            public void Cancel() { } public void Dispose() { }
+        }
+        public static RebindingOperation PerformInteractiveRebinding(this InputAction action, int bindingIndex = -1) => throw null;
+        public static void RemoveAllBindingOverrides(this IInputActionCollection2 actions) { }
+        public static string SaveBindingOverridesAsJson(this IInputActionCollection2 actions) => throw null;
+        public static void LoadBindingOverridesFromJson(this IInputActionCollection2 actions, string json, bool removeExisting = true) { }
+        public static void ApplyBindingOverride(this InputAction action, int bindingIndex, string path) { }
+        public static string GetBindingDisplayString(this InputAction action, int bindingIndex, InputBinding.DisplayStringOptions options = default) => throw null;
+    }
     public struct InputControlScheme { public string name => throw null; }
     public sealed class InputAction
     {
@@ -530,7 +555,7 @@ namespace UnityEngine.InputSystem
         public InputAction FindAction(string n, bool throwIfNotFound = false) => throw null;
         public void Enable() { } public void Disable() { }
     }
-    public class InputActionAsset : ScriptableObject
+    public class InputActionAsset : ScriptableObject, IInputActionCollection2
     {
         public InputActionMap FindActionMap(string n, bool throwIfNotFound = false) => throw null;
         public IReadOnlyList<InputControlScheme> controlSchemes => throw null;

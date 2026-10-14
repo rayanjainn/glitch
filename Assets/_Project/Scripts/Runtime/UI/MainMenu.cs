@@ -22,6 +22,8 @@ namespace BugReport.UI
 
         [SerializeField] private LevelCatalog catalog;
         [SerializeField] private string tagline = "You are not the hero. You are the bug.";
+        [SerializeField, OptionalReference, Tooltip("Enables key rebinding in Settings.")]
+        private UnityEngine.InputSystem.InputActionAsset actions;
 
         private VisualElement home;
         private VisualElement levels;
@@ -51,6 +53,15 @@ namespace BugReport.UI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
+
+        protected override void OnDisable()
+        {
+            settings?.Dispose();
+            settings = null;
+            base.OnDisable();
+        }
+
+        public SettingsPanel Settings => settings;
 
         // ---------------------------------------------------------------- actions
 
@@ -114,7 +125,8 @@ namespace BugReport.UI
             levelList = Ui.Add(levels, Ui.Element("level-list", "br-card__buttons"));
             levels.Add(GameMenus.MenuButton("levels-back", "BACK", ShowHome));
 
-            settings = new SettingsPanel(ShowHome, showFullscreen: !Application.isEditor);
+            settings?.Dispose();
+            settings = new SettingsPanel(ShowHome, showFullscreen: !Application.isEditor, actions);
             screen.Add(settings.Root);
 
             credits = Ui.Add(screen, Ui.Element("menu-credits", "br-card"));

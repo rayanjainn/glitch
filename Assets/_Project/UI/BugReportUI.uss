@@ -561,7 +561,34 @@
 /* ---------------------------------------------------------------- settings */
 
 .br-settings {
-    width: 640px;
+    min-width: 640px;
+}
+
+.br-settings__column {
+    width: 520px;
+}
+
+.br-settings .br-controls {
+    margin-left: 40px;
+}
+
+.br-key-button.unity-button {
+    min-width: 150px;
+    height: 28px;
+    margin: 0 10px 0 0;
+    padding: 0 8px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: #0A1620;
+    background-color: var(--br-text-soft);
+    border-width: 0;
+    border-radius: 3px;
+}
+
+.br-key-button.unity-button:hover,
+.br-key-button.unity-button:focus {
+    background-color: var(--br-accent);
 }
 
 .br-setting {

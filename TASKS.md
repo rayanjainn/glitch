@@ -212,10 +212,19 @@ Playtest finding: the owner needed the written guide to finish TRAINING LAB.
 - [~] `MenuBuilder` ("4. Build Main Menu"), `LevelCatalogBuilder` (LC_Main + Build Settings order) [editor]
 - [~] Anomaly shrinks when the camera is squeezed close [visual]
 - [~] Tests: SaveStoreTests (4), MainMenuSceneTests (3), FrontEndTests (5), GameUiTests updated (+1) [editor]
-- [ ] Key rebinding screen (deferred: Input System rebinding UI)
+- [~] Key rebinding: 12 keyboard/mouse bindings in Settings, saved in the save file, reset button; pause list shows current keys [editor][visual]
+- [~] Tests: BindingOverridesTests (3) [editor]
 
-## Milestones 10+
-See DESIGN_ROADMAP.md §6.
+## Milestone 10 — 3-chapter demo (implemented, untested in Unity)
+- [~] `LevelKit` (pits, firewalls, barriers, hologram bridges/doors, plates + gates, pistons, moving platforms, exit, routes, objectives, decor) [editor]
+- [~] Mechanics: route floor check (`requireGround`), hero respawn below the kill plane, piston start phase [editor]
+- [~] Levels 2–9 (see PLAYTEST.md) + `5. Build ALL` [editor][visual]
+- [~] Tests: DemoLevelPlaythroughTests (9: every level + one trap/undo), LevelMechanicsDemoTests (5) [editor]
+- [ ] **Owner:** Build ALL, run both test suites, play the demo (PLAYTEST.md), one fresh player
+- [ ] Profiling at 1080p on the reference PC
+
+## Milestones 11+
+See DESIGN_ROADMAP.md §6: Property Swap, guards/AI Override, Desync, finale, release prep. Not started, deliberately: each needs a large new system and should be built on a verified demo.
 
 ---
 

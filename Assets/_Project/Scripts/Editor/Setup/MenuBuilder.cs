@@ -114,6 +114,7 @@ namespace BugReport.EditorTools.Setup
             var menu = ui.AddComponent<MainMenu>();
             Wire(menu, "styleSheet", presentation.Style);
             Wire(menu, "catalog", catalog);
+            Wire(menu, "actions", AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(InputActionsPath));
             var font = AssetDatabase.LoadAssetAtPath<Font>(ArtBuilder.DisplayFontPath);
             if (font != null) Wire(menu, "displayFont", font);
             ui.AddComponent<SettingsApplier>();

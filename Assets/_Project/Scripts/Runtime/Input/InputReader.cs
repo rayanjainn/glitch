@@ -80,6 +80,7 @@ namespace BugReport.InputHandling
 
             // Work on a copy so enabling/rebinding at runtime never dirties the project asset.
             runtimeActions = Instantiate(actions);
+            BindingOverrides.ApplyTo(runtimeActions);
             map = runtimeActions.FindActionMap(AnomalyMapName, throwIfNotFound: false);
             if (map == null)
             {
@@ -100,9 +101,21 @@ namespace BugReport.InputHandling
             pause = Find(Actions.Pause);
         }
 
+        private string appliedOverrides;
+
+        /// <summary>Key bindings changed in the settings screen: re-apply them to this copy.</summary>
+        private void OnSettingsChanged()
+        {
+            var json = Progress.SaveStore.Current.bindingOverrides;
+            if (json == appliedOverrides || runtimeActions == null) return;
+            appliedOverrides = json;
+            BindingOverrides.ApplyTo(runtimeActions);
+        }
+
         private void OnEnable()
         {
             if (map == null) return;
+            appliedOverrides = Progress.SaveStore.Current.bindingOverrides;
             Subscribe(inspect, OnInspect);
             Subscribe(apply, OnApply);
             Subscribe(cancel, OnCancel);
@@ -110,6 +123,7 @@ namespace BugReport.InputHandling
             Subscribe(toggleInspection, OnToggleInspection);
             Subscribe(revert, OnRevert);
             Subscribe(pause, OnPause);
+            Progress.SaveStore.SettingsChanged += OnSettingsChanged;
             map.Enable();
         }
 
@@ -117,6 +131,7 @@ namespace BugReport.InputHandling
         {
             if (map == null) return;
             map.Disable();
+            Progress.SaveStore.SettingsChanged -= OnSettingsChanged;
             Unsubscribe(inspect, OnInspect);
             Unsubscribe(apply, OnApply);
             Unsubscribe(cancel, OnCancel);
