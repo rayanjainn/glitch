@@ -102,6 +102,7 @@ namespace BugReport.UI
 
         public void CloseSettings()
         {
+            SaveStore.Flush();
             RefreshControlKeys();
             Ui.Show(settings.Root, false);
             Ui.Show(pauseCard, true);
