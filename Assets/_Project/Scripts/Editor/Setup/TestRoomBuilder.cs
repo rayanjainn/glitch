@@ -794,7 +794,10 @@ namespace BugReport.EditorTools.Setup
                 EnsureFolder(MaterialFolder);
                 Floor = Lit(lit, "M_Floor", new Color(0.78f, 0.74f, 0.68f), 0.25f);
                 Wall = Lit(lit, "M_Wall", new Color(0.88f, 0.86f, 0.82f), 0.2f);
-                Firewall = Lit(lit, "M_Firewall", new Color(0.25f, 0.35f, 0.6f), 0.6f, new Color(0.1f, 0.35f, 1f) * 0.6f);
+                var hologram = Shader.Find("BugReport/Hologram");
+                Firewall = hologram != null
+                    ? Hologram(hologram, "M_Firewall", new Color(0.35f, 0.8f, 2.2f), 0.5f, rim: 1.6f, glitch: 0.18f)
+                    : Lit(lit, "M_Firewall", new Color(0.25f, 0.35f, 0.6f), 0.6f, new Color(0.1f, 0.35f, 1f) * 0.6f);
                 Exit = Lit(lit, "M_Exit", new Color(0.3f, 0.8f, 0.45f), 0.5f, new Color(0.2f, 1f, 0.45f) * 1.2f);
                 Crate = Lit(lit, "M_Crate", new Color(0.85f, 0.55f, 0.25f), 0.3f);
                 Ball = Lit(lit, "M_Ball", new Color(0.9f, 0.3f, 0.35f), 0.7f);
@@ -805,7 +808,9 @@ namespace BugReport.EditorTools.Setup
                 AnomalyFragment = Lit(lit, "M_AnomalyFragment", new Color(0.9f, 0.3f, 1f), 0.9f, new Color(0.9f, 0.2f, 1f) * 1.5f);
                 Line = Save(new Material(lineShader) { name = "M_DebugLine" }, "M_DebugLine");
                 // Collision Transfer placeholder looks (electric blue): see-through ghost, glowing solid.
-                Ghost = Transparent(lit, "M_CollisionGhost", new Color(0.2f, 0.55f, 1f, 0.28f), new Color(0.1f, 0.35f, 1f) * 0.4f);
+                Ghost = hologram != null
+                    ? Hologram(hologram, "M_CollisionGhost", new Color(0.3f, 0.75f, 2.4f), 0.2f, rim: 1.4f, glitch: 0.4f)
+                    : Transparent(lit, "M_CollisionGhost", new Color(0.2f, 0.55f, 1f, 0.28f), new Color(0.1f, 0.35f, 1f) * 0.4f);
                 Solidified = Lit(lit, "M_CollisionSolidified", new Color(0.15f, 0.4f, 0.95f), 0.8f, new Color(0.15f, 0.5f, 1f) * 1.6f);
                 Frozen = Lit(lit, "M_Frozen", new Color(0.75f, 0.95f, 1f), 0.95f, new Color(0.45f, 0.85f, 1f) * 0.9f);
                 Lift = Lit(lit, "M_Lift", new Color(0.45f, 0.5f, 0.58f), 0.5f);
@@ -815,6 +820,17 @@ namespace BugReport.EditorTools.Setup
                 Piston = Lit(lit, "M_Piston", new Color(0.35f, 0.37f, 0.42f), 0.7f, new Color(1f, 0.3f, 0.1f) * 0.3f);
                 AssetDatabase.SaveAssets();
                 return true;
+            }
+
+            /// <summary>Hologram look (see BugReportHologram.shader). <paramref name="color"/> is HDR.</summary>
+            internal static Material Hologram(Shader shader, string name, Color color, float alpha, float rim = 1.2f, float glitch = 0.25f)
+            {
+                var m = new Material(shader) { name = name };
+                m.SetColor("_Color", color);
+                m.SetFloat("_Alpha", alpha);
+                m.SetFloat("_RimBoost", rim);
+                m.SetFloat("_Glitch", glitch);
+                return Save(m, name);
             }
 
             private static Material Lit(Shader shader, string name, Color baseColor, float smoothness, Color? emission = null)
