@@ -208,12 +208,12 @@ namespace BugReport.UI
                 return;
             }
             Ui.SetText(completeStars, RunSummary.Stars(recorder.Stars));
-            Ui.SetText(completeStats, "TIME " + RunSummary.Time(recorder.Seconds) + "   GLITCHES " + recorder.GlitchUses
-                + " (PAR " + recorder.ParUses + ")   PEAK ALERT " + recorder.MaxStage);
+            string stats = "TIME " + RunSummary.Time(recorder.Seconds) + "   GLITCHES " + recorder.GlitchUses
+                + " (PAR " + recorder.ParUses + ")   PEAK ALERT " + recorder.MaxStage + "\nFILED UNDER: " + recorder.UsedSummary();
+            Ui.SetText(completeStats, stats);
             Ui.SetText(completeHint, RunSummary.NextStarHint(recorder.Stars, recorder.ParUses));
             string[] verdicts = { "WORKS AS INTENDED", "WON'T FIX", "CANNOT REPRODUCE", "CLOSED", "DUPLICATE OF ITSELF" };
             Ui.SetText(completeStamp, verdicts[System.Math.Abs(recorder.CurrentIndex()) % verdicts.Length]);
-            Ui.SetText(completeStats, completeStats.text + "\nFILED UNDER: " + recorder.UsedSummary());
             int index = recorder.CurrentIndex();
             Ui.SetText(completeOutro, index >= 0 && catalog != null ? catalog.Get(index).outro ?? string.Empty : string.Empty);
         }

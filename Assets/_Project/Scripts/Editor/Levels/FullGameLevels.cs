@@ -247,7 +247,7 @@ namespace BugReport.EditorTools.Levels
             kit.HeroOnRoute(V(-22f), true, V(-8f), V(10f), V(22f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("bridge", "CROSS THE LONG BRIDGE",
-                    "The system is on edge: with two glitches running it undoes the oldest one a few seconds later.",
+                    "The system is on edge: with two glitches running it undoes the oldest one a few seconds later. Set up your sacrifice right before you need the bridge.",
                     kit.ZoneBetween("Zone_Across", 8.5f, 12f), bridge),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Almost.", kit.ZoneAtExit(22f)));
             return kit.Finish(PathOf("stack_the_order"), TitleOf("stack_the_order"), new GlitchDefinition[] { kit.CollisionTransfer, kit.Freeze },
@@ -259,7 +259,7 @@ namespace BugReport.EditorTools.Levels
         /// <summary>
         /// FORK IN THE ROAD. Two lanes round a long wall; the hero takes the shortest road that is open. The south lane has
         /// one firewall, the north lane two, and there is one shadow. Solution: Collision Transfer FIREWALL_SOUTH → SHADOW_DECAL.
-        /// Opening the north lane's first wall only sends the hero to the second; opening the south lane later makes him turn back.
+        /// The north lane's two walls form one blocked road, so opening one of them changes nothing; opening the south lane later makes him turn back.
         /// Lesson: you steer the hero by choosing which road you open.
         /// </summary>
         public static bool ForkInTheRoad(out string error)

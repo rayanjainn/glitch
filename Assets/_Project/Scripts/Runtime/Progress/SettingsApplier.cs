@@ -29,6 +29,7 @@ namespace BugReport.Progress
         }
 
         private readonly System.Collections.Generic.List<UnityEngine.UIElements.UIDocument> documents = new System.Collections.Generic.List<UnityEngine.UIElements.UIDocument>();
+        private readonly System.Collections.Generic.Dictionary<UnityEngine.UIElements.PanelSettings, UnityEngine.UIElements.PanelSettings> cloneOf = new System.Collections.Generic.Dictionary<UnityEngine.UIElements.PanelSettings, UnityEngine.UIElements.PanelSettings>();
         private readonly System.Collections.Generic.HashSet<UnityEngine.UIElements.PanelSettings> clones = new System.Collections.Generic.HashSet<UnityEngine.UIElements.PanelSettings>();
 
         /// <summary>UI size: a smaller reference resolution makes every panel larger. Works on a runtime copy of the panel settings.</summary>
@@ -42,12 +43,25 @@ namespace BugReport.Progress
                 if (panel == null) continue;
                 if (!clones.Contains(panel))
                 {
-                    panel = Instantiate(panel); // never edit the project asset
-                    clones.Add(panel);
+                    // One copy per original, so documents that shared a panel still share one (never edit the project asset).
+                    if (!cloneOf.TryGetValue(panel, out var copy))
+                    {
+                        copy = Instantiate(panel);
+                        cloneOf[panel] = copy;
+                        clones.Add(copy);
+                    }
+                    panel = copy;
                     document.panelSettings = panel;
                 }
                 panel.referenceResolution = new Vector2Int(Mathf.RoundToInt(1920f / scale), Mathf.RoundToInt(1080f / scale));
             }
+        }
+
+        private void OnDestroy()
+        {
+            foreach (var clone in clones) if (clone != null) Destroy(clone);
+            clones.Clear();
+            cloneOf.Clear();
         }
 
         private void OnApplicationQuit() => SaveStore.Flush();

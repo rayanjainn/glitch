@@ -76,6 +76,7 @@ namespace BugReport.Tests.PlayMode
             services.Selection.ClearSelection();
             Assert.That(services.Selection.TrySelect(Named("GUARD_B").Id).IsValid, Is.True);
             services.Selection.SetHovered(Named("DECOY_BARREL").Id);
+            Assert.That(services.Glitches.CountActive("ai_override"), Is.EqualTo(1), "the first lure is still running");
             controller.ApplyCurrent();
             Assert.That(controller.LastFeedback.Kind, Is.Not.EqualTo(GlitchFeedbackKind.Applied), "decoy already in use");
             controller.RevertLatest();
