@@ -88,6 +88,10 @@ namespace BugReport.EditorTools.Setup
             Wire(inspection, "settings", assets.Settings);
             if (systems.Guide != null) Wire(inspection, "guide", systems.Guide);
 
+            var story = go.AddComponent<StoryOverlay>();
+            Wire(story, "styleSheet", assets.Style);
+            if (systems.Objectives != null) Wire(story, "catalog", LevelCatalogBuilder.LoadOrCreate());
+
             var hud = go.AddComponent<GameHud>();
             Wire(hud, "styleSheet", assets.Style);
             Wire(hud, "glitches", systems.Glitches);

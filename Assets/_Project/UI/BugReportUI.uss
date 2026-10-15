@@ -646,3 +646,16 @@
     border-color: rgba(60, 200, 255, 0.9);
     -unity-text-align: middle-center;
 }
+
+/* ---- story beat ---- */
+.br-story {
+    position: absolute;
+    left: 50%;
+    bottom: 150px;
+    translate: -50% 0;
+    width: 820px;
+    padding: 14px 22px;
+    border-left-width: 4px;
+    border-left-color: #35C8FF;
+}
+.br-story__text { font-size: 22px; color: #D8F3FF; white-space: normal; min-height: 56px; letter-spacing: 1px; }
