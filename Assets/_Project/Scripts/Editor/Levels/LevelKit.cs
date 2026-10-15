@@ -20,7 +20,7 @@ namespace BugReport.EditorTools.Levels
     /// gates, pistons, moving platforms, the exit, the hero's route and objectives. Gameplay objects
     /// are configured exactly like TRAINING LAB's (same components, layers and capabilities).
     /// </summary>
-    internal sealed class LevelKit
+    internal sealed partial class LevelKit
     {
         public const float WallHeight = 4.5f;
         public const float Thickness = 0.4f;
@@ -52,7 +52,7 @@ namespace BugReport.EditorTools.Levels
         {
             error = null;
             EnsureFolder(LevelCatalogBuilder.ScenesFolder);
-            var kit = new LevelKit { Scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single) };
+            var kit = new LevelKit { Chapter = chapter, Scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single) };
             kit.Mats = new MaterialSet();
             if (!kit.Mats.Create(out error)) return null;
             kit.Actions = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
@@ -91,6 +91,8 @@ namespace BugReport.EditorTools.Levels
             var cameraRig = BuildCamera(anomaly.transform, out var scanner);
             var systems = BuildSystems(Mats, scanner, motor, Hero, glitches, Containment, objectives, debugOverlayVisible: false, levelTitle: title);
             WirePlayer(anomaly, motor, cameraRig, systems);
+            foreach (var configure in deferred) configure(anomaly.transform, systems.Containment);
+            Surroundings(scenePath);
             PresentationBuilder.Apply(Presentation, Mats, systems, anomaly, Hero, cameraRig.GetComponent<Camera>());
 
             var missing = FindUnassignedReferences(Scene);

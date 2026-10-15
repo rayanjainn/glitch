@@ -546,6 +546,7 @@ namespace BugReport.EditorTools.Setup
             AddEntity(temp, "CRATE", EntityCategory.Prop,
                 EntityCapabilities.Inspectable | EntityCapabilities.Duplicable | EntityCapabilities.Freezable | EntityCapabilities.PropertyMutable,
                 "Standard-issue crate.");
+            temp.AddComponent<PropertyCapability>();
             temp.AddComponent<DuplicationCapability>().Configure(profile);
             AddFreeze(temp, mats);
             if (ArtBuilder.DungeonAvailable)
@@ -776,7 +777,7 @@ namespace BugReport.EditorTools.Setup
         internal sealed class MaterialSet
         {
             public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified, Frozen, Lift,
-                PlateIdle, PlatePressed, Gate, Piston;
+                PlateIdle, PlatePressed, Gate, Piston, SearchLight, GuardBody, Anvil, DesyncSurface, Drone;
 
             public bool Create(out string error)
             {
@@ -823,6 +824,11 @@ namespace BugReport.EditorTools.Setup
                 PlatePressed = Lit(lit, "M_PlatePressed", new Color(0.2f, 0.6f, 0.3f), 0.4f, new Color(0.1f, 0.9f, 0.3f) * 0.9f);
                 Gate = Lit(lit, "M_Gate", new Color(0.7f, 0.55f, 0.2f), 0.6f, new Color(0.9f, 0.5f, 0.1f) * 0.25f);
                 Piston = Lit(lit, "M_Piston", new Color(0.35f, 0.37f, 0.42f), 0.7f, new Color(1f, 0.3f, 0.1f) * 0.3f);
+                SearchLight = Transparent(lit, "M_SearchLight", new Color(1f, 0.85f, 0.3f, 0.25f), new Color(1f, 0.7f, 0.2f) * 0.5f);
+                GuardBody = Lit(lit, "M_GuardBody", new Color(0.82f, 0.8f, 0.7f), 0.3f, new Color(1f, 0.3f, 0.2f) * 0.25f);
+                Anvil = Lit(lit, "M_Anvil", new Color(0.22f, 0.23f, 0.27f), 0.6f, new Color(1f, 0.6f, 0.1f) * 0.35f);
+                DesyncSurface = Lit(lit, "M_DesyncSurface", new Color(0.35f, 0.5f, 0.3f), 0.35f, new Color(0.5f, 1f, 0.3f) * 0.35f);
+                Drone = Lit(lit, "M_Drone", new Color(0.25f, 0.27f, 0.32f), 0.8f, new Color(1f, 0.75f, 0.2f) * 0.8f);
                 AssetDatabase.SaveAssets();
                 return true;
             }

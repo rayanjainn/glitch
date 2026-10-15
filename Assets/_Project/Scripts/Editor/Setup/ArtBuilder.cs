@@ -209,6 +209,133 @@ namespace BugReport.EditorTools.Setup
             return root;
         }
 
+        // ---------------------------------------------------------------- kits (scenery)
+
+        public enum Kit { Nature, Space, Graveyard, Prototype }
+
+        public static string KitFolder(Kit kit)
+        {
+            switch (kit)
+            {
+                case Kit.Nature: return "Assets/ThirdParty/KayKit_MedievalHexagon/Models";
+                case Kit.Space: return "Assets/ThirdParty/KayKit_SpaceBase/Models";
+                case Kit.Graveyard: return "Assets/ThirdParty/KayKit_HalloweenBits/Models";
+                default: return "Assets/ThirdParty/KayKit_PrototypeBits/Models";
+            }
+        }
+
+        public static string KitTexture(Kit kit)
+        {
+            switch (kit)
+            {
+                case Kit.Nature: return "Assets/ThirdParty/KayKit_MedievalHexagon/hexagons_medieval.png";
+                case Kit.Space: return "Assets/ThirdParty/KayKit_SpaceBase/spacebits_texture.png";
+                case Kit.Graveyard: return "Assets/ThirdParty/KayKit_HalloweenBits/halloweenbits_texture.png";
+                default: return "Assets/ThirdParty/KayKit_PrototypeBits/prototypebits_texture.png";
+            }
+        }
+
+        public static bool KitAvailable(Kit kit) => File.Exists(KitTexture(kit)) && Directory.Exists(KitFolder(kit));
+
+        /// <summary>
+        /// A static, collider-free background model of the given height (hills, trees, cargo, graves …)
+        /// for the area around the playable hall. Returns null when the pack hasn't been fetched.
+        /// </summary>
+        internal static GameObject Scenery(Kit kit, string modelName, Transform parent, Vector3 position, float yaw, float height)
+        {
+            if (!KitAvailable(kit)) return null;
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(KitFolder(kit) + "/" + modelName + ".fbx");
+            if (source == null)
+            {
+                Debug.LogWarning("[BUG REPORT] Scenery model missing: " + kit + "/" + modelName);
+                return null;
+            }
+            var material = AtlasMaterial("M_Kit_" + kit, KitTexture(kit));
+            int layer = 0; // Default: scenery never takes part in gameplay queries (not World/Props)
+            var root = new GameObject("Scenery_" + modelName) { layer = layer, isStatic = true };
+            root.transform.SetParent(parent, false);
+            root.transform.SetPositionAndRotation(position, Quaternion.identity);
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(source, root.transform);
+            PrefabUtility.UnpackPrefabInstance(model, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            Prepare(model, material, layer);
+            FitHeight(model, height);
+            AlignBottom(model, position.y);
+            root.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            foreach (var t in root.GetComponentsInChildren<Transform>(true)) t.gameObject.isStatic = true;
+            return root;
+        }
+
+        // ---------------------------------------------------------------- skeleton guards
+
+        public const string SkeletonFolder = "Assets/ThirdParty/KayKit_Skeletons";
+        public const string SkeletonTexturePath = SkeletonFolder + "/skeleton_texture.png";
+        public const string GuardControllerPath = "Assets/_Project/Art/Animation/AC_Guard.controller";
+        public static string SkeletonModelPath(string name) => SkeletonFolder + "/" + name + ".fbx";
+        public static bool GuardAvailable => File.Exists(SkeletonTexturePath) && File.Exists(SkeletonModelPath("Skeleton_Warrior"));
+
+        /// <summary>
+        /// A skeleton under <paramref name="guard"/> (feet at its origin), scaled to <paramref name="height"/>, with an
+        /// Idle/Walk animator driven by GuardController's "State" int. Null (caller keeps the placeholder) when the
+        /// pack isn't fetched. Without the expected clips the model is still used, just not animated.
+        /// </summary>
+        internal static GameObject BuildGuardModel(Transform guard, string modelName, float height, int layer, out Animator animator)
+        {
+            animator = null;
+            if (!GuardAvailable) return null;
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(SkeletonModelPath(modelName));
+            if (source == null) return null;
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(source, guard);
+            model.name = "Body";
+            Prepare(model, AtlasMaterial("M_Skeleton", SkeletonTexturePath), layer);
+            FitHeight(model, height);
+            AlignBottom(model, guard.position.y);
+
+            animator = model.GetComponent<Animator>();
+            if (animator == null) animator = model.AddComponent<Animator>();
+            animator.applyRootMotion = false;
+            animator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+            var controller = GuardAnimator(modelName);
+            if (controller != null) animator.runtimeAnimatorController = controller;
+            return model;
+        }
+
+        /// <summary>State 0 = Idle, 1 = Walking. Null when the model lacks those clips.</summary>
+        private static AnimatorController GuardAnimator(string modelName)
+        {
+            var clips = AssetDatabase.LoadAllAssetsAtPath(SkeletonModelPath(modelName)).OfType<AnimationClip>()
+                .Where(c => !c.name.StartsWith("__preview__")).ToList();
+            AnimationClip Clip(string name) => clips.FirstOrDefault(c => ThirdPartyModelImport.BaseName(c.name) == name);
+            var idle = Clip("Idle");
+            var walk = Clip("Walking_A") ?? Clip("Walking_B");
+            if (idle == null || walk == null)
+            {
+                Debug.LogWarning("[BUG REPORT] " + modelName + ".fbx has no Idle/Walking_A clips; guards will not animate.");
+                return null;
+            }
+            var existing = AssetDatabase.LoadAssetAtPath<AnimatorController>(GuardControllerPath);
+            if (existing != null) AssetDatabase.DeleteAsset(GuardControllerPath);
+            EnsureFolderFor(GuardControllerPath);
+            var controller = AnimatorController.CreateAnimatorControllerAtPath(GuardControllerPath);
+            controller.AddParameter("State", AnimatorControllerParameterType.Int);
+            var machine = controller.layers[0].stateMachine;
+            var motions = new[] { idle, walk };
+            string[] names = { "Idle", "Walking" };
+            for (int i = 0; i < names.Length; i++)
+            {
+                var state = machine.AddState(names[i]);
+                state.motion = motions[i];
+                var transition = machine.AddAnyStateTransition(state);
+                transition.AddCondition(AnimatorConditionMode.Equals, i, "State");
+                transition.hasExitTime = false;
+                transition.duration = 0.15f;
+                transition.canTransitionToSelf = false;
+                if (i == 0) machine.defaultState = state;
+            }
+            EditorUtility.SetDirty(controller);
+            AssetDatabase.SaveAssets();
+            return controller;
+        }
+
         // ---------------------------------------------------------------- helpers
 
         private static void Prepare(GameObject model, Material material, int layer)

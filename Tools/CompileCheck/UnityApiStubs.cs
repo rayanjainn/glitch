@@ -246,6 +246,8 @@ namespace UnityEngine
     }
     public class Collider : Component { public bool enabled { get => throw null; set { } } public Bounds bounds => throw null; public Rigidbody attachedRigidbody => throw null; public bool isTrigger { get => throw null; set { } } }
     public class BoxCollider : Collider { public Vector3 center { get => throw null; set { } } public Vector3 size { get => throw null; set { } } }
+    public class SphereCollider : Collider { public float radius { get => throw null; set { } } public Vector3 center { get => throw null; set { } } }
+    public class CapsuleCollider : Collider { public float radius { get => throw null; set { } } public float height { get => throw null; set { } } public Vector3 center { get => throw null; set { } } }
     public class MeshCollider : Collider { }
     public class CharacterController : Collider
     {

@@ -94,6 +94,7 @@ namespace BugReport.EditorTools.Setup
             var presentation = PresentationBuilder.LoadOrCreateAssets(mats);
 
             BuildLighting();
+            ChapterTheme.Apply(1, RenderSettings.sun);
             var env = new GameObject("--- ENVIRONMENT ---").transform;
             BuildHall(env, mats);
             env.Find("Floor").GetComponent<MeshRenderer>().sharedMaterial = PresentationBuilder.GridFloor(HalfX * 2f, HalfZ * 2f);
@@ -334,7 +335,7 @@ namespace BugReport.EditorTools.Setup
             return shadow.GetComponent<GameEntity>();
         }
 
-        internal static PressurePlate Plate(Transform parent, MaterialSet mats, string name, Vector3 position)
+        internal static PressurePlate Plate(Transform parent, MaterialSet mats, string name, Vector3 position, float minMass = 5f)
         {
             int world = GameLayers.Index(GameLayers.World);
             var visual = Block(name, parent, position + new Vector3(0f, 0.05f, 0f), new Vector3(1f, 0.1f, 1f), mats.PlateIdle, world);
@@ -349,7 +350,7 @@ namespace BugReport.EditorTools.Setup
             box.size = new Vector3(0.9f, 0.8f, 0.9f);
             sensor.layer = GameLayers.IgnoreRaycastLayer;
             var plate = sensor.AddComponent<PressurePlate>();
-            plate.Configure(5f, visual.GetComponent<Renderer>(), mats.PlateIdle, mats.PlatePressed);
+            plate.Configure(minMass, visual.GetComponent<Renderer>(), mats.PlateIdle, mats.PlatePressed);
             return plate;
         }
 

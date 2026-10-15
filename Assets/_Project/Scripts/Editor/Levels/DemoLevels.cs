@@ -66,13 +66,24 @@ namespace BugReport.EditorTools.Levels
             Run("Level_07_StopThePlatform", () => (StopThePlatform(out var e), e));
             Run("Level_08_TwoPistons", () => (TwoPistons(out var e), e));
             Run("Level_09_TheBuild", () => (TheBuild(out var e), e));
+            Run("Level_10_HeavyLifting", () => (FullGameLevels.HeavyLifting(out var e), e));
+            Run("Level_11_TwinScales", () => (FullGameLevels.TwinScales(out var e), e));
+            Run("Level_12_WeighStation", () => (FullGameLevels.WeighStation(out var e), e));
+            Run("Level_13_NightWatch", () => (FullGameLevels.NightWatch(out var e), e));
+            Run("Level_14_DoubleShift", () => (FullGameLevels.DoubleShift(out var e), e));
+            Run("Level_15_FrozenStiff", () => (FullGameLevels.FrozenStiff(out var e), e));
+            Run("Level_16_FalseWall", () => (FullGameLevels.FalseWall(out var e), e));
+            Run("Level_17_FalseFloor", () => (FullGameLevels.FalseFloor(out var e), e));
+            Run("Level_18_Searchlight", () => (FullGameLevels.Searchlight(out var e), e));
+            Run("Level_19_PatchDay", () => (FullGameLevels.PatchDay(out var e), e));
+            Run("Level_20_ReportClosed", () => (FullGameLevels.ReportClosed(out var e), e));
             Run("MainMenu", () => (MenuBuilder.Build(out var e), e)); // last, so it opens when done
             report = lines.ToString();
             return failures;
         }
 
-        private static string PathOf(string id) => LevelCatalogBuilder.ScenePath(LevelCatalogBuilder.Entry(id));
-        private static string TitleOf(string id) => LevelCatalogBuilder.Entry(id).title;
+        internal static string PathOf(string id) => LevelCatalogBuilder.ScenePath(LevelCatalogBuilder.Entry(id));
+        internal static string TitleOf(string id) => LevelCatalogBuilder.Entry(id).title;
 
         // ================================================================ chapter 1: Collision Transfer
 
@@ -83,7 +94,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool BridgeOut(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 1);
             if (kit == null) return false;
             kit.Hall(18f, 6f, (-3f, 3f));
             kit.Barrier("OldBarrier", "OLD_BARRIER", new Vector3(-10f, 1f, 4.6f), new Vector3(3f, 2f, 0.4f),
@@ -109,7 +120,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TwoDoors(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 1);
             if (kit == null) return false;
             kit.Hall(20f, 6f);
             kit.Firewall("FirewallA", "FIREWALL_A", -7f);
@@ -137,7 +148,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TwoBirds(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 1);
             if (kit == null) return false;
             kit.Hall(20f, 6f, (2f, 6f));
             kit.Firewall("Firewall", "FIREWALL", -8f);
@@ -167,7 +178,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool ThreePlates(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 2);
             if (kit == null) return false;
             kit.Hall(18f, 6f);
             var plates = new[]
@@ -197,7 +208,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool CopyTheCopy(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 2);
             if (kit == null) return false;
             kit.Hall(18f, 6f);
             var plates = new[]
@@ -230,7 +241,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool StopThePlatform(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 3);
             if (kit == null) return false;
             kit.Hall(18f, 6f, (-2f, 2f));
             kit.MovingPlatform("Platform", "SHUTTLE_PLATFORM", -2f, 2f, 4f, 4f, 0f);
@@ -253,7 +264,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TwoPistons(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 3);
             if (kit == null) return false;
             kit.Hall(20f, 6f);
             kit.Piston("PistonA", "PISTON_A", -4f, 3f, 0f);
@@ -278,7 +289,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TheBuild(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 3);
             if (kit == null) return false;
             kit.Hall(24f, 6f, (-12f, -8f));
             kit.Firewall("Firewall", "FIREWALL", -16f);

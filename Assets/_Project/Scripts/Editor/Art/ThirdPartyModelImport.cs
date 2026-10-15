@@ -14,6 +14,7 @@ namespace BugReport.EditorTools.Art
     {
         private const string Root = "Assets/ThirdParty/";
         private const string Characters = Root + "KayKit_Adventurers/";
+        private const string Skeletons = Root + "KayKit_Skeletons/";
 
         private static readonly string[] LoopingClips =
         {
@@ -29,19 +30,23 @@ namespace BugReport.EditorTools.Art
             importer.importLights = false;
             importer.addCollider = false;
 
-            bool character = assetPath.StartsWith(Characters);
+            bool character = IsCharacter(assetPath);
             importer.animationType = character ? ModelImporterAnimationType.Generic : ModelImporterAnimationType.None;
             importer.importAnimation = character;
         }
 
         private void OnPreprocessAnimation()
         {
-            if (!assetPath.StartsWith(Characters)) return;
+            if (!IsCharacter(assetPath)) return;
             var importer = (ModelImporter)assetImporter;
             var clips = importer.defaultClipAnimations;
             for (int i = 0; i < clips.Length; i++) clips[i].loopTime = IsLooping(clips[i].name);
             importer.clipAnimations = clips;
         }
+
+        /// <summary>Adventurers and the skeleton characters (not the skeleton weapons) are rigged.</summary>
+        private static bool IsCharacter(string path)
+            => path.StartsWith(Characters) || (path.StartsWith(Skeletons) && !path.Contains("/Weapons/"));
 
         /// <summary>Clip names may carry an exporter prefix ("Rig|Idle").</summary>
         public static string BaseName(string clipName)
