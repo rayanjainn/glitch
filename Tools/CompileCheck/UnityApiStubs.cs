@@ -740,6 +740,7 @@ namespace UnityEngine.UIElements
     public abstract class Focusable : CallbackEventHandler { public virtual void Focus() { } public void Blur() { } }
     public class VisualElement : Focusable
     {
+        public string tooltip { get => throw null; set { } }
         public string name { get => throw null; set { } }
         public PickingMode pickingMode { get => throw null; set { } }
         public object userData { get => throw null; set { } }

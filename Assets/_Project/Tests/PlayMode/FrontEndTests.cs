@@ -62,7 +62,7 @@ namespace BugReport.Tests.PlayMode
                 Assert.That(menu.ContinueVisible, Is.True);
                 menu.ShowLevels();
                 Assert.That(menu.LevelList[1].enabledSelf, Is.True);
-                StringAssert.Contains("[DONE]", ((Button)menu.LevelList[0]).text);
+                StringAssert.Contains("\u2605", ((Button)menu.LevelList[0]).text, "a finished level shows its stars");
                 menu.ShowSettings();
                 Assert.That(menu.Showing, Is.EqualTo("settings"));
                 menu.ShowHome();

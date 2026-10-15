@@ -659,3 +659,15 @@
     border-left-color: #35C8FF;
 }
 .br-story__text { font-size: 22px; color: #D8F3FF; white-space: normal; min-height: 56px; letter-spacing: 1px; }
+
+/* ---- level select grid, one accent colour per chapter ---- */
+.br-menu .br-menu__levels { max-width: 1200px; }
+.br-levelgrid { width: 1130px; flex-direction: row; flex-wrap: wrap; }
+.br-levelgrid .br-button.unity-button { width: 360px; margin-right: 12px; border-left-width: 5px; }
+.br-chapter-1.unity-button { border-left-color: #35C8FF; }
+.br-chapter-2.unity-button { border-left-color: #FF4DD8; }
+.br-chapter-3.unity-button { border-left-color: #A8F0FF; }
+.br-chapter-4.unity-button { border-left-color: #FFB633; }
+.br-chapter-5.unity-button { border-left-color: #A56BFF; }
+.br-chapter-6.unity-button { border-left-color: #A6FF4D; }
+.br-chapter-7.unity-button { border-left-color: #FF5A5A; }
