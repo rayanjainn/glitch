@@ -308,3 +308,13 @@
 - **Error:** `CS0104 'Cursor' is ambiguous between UnityEngine.UIElements.Cursor and UnityEngine.Cursor` in `MainMenu.cs`. It is the same class of problem as `DebugOverlay`: a file that imports `UnityEngine.UIElements` gains that namespace's type names.
 - **Fix:** `UnityEngine.Cursor` is spelled out. The compile-check stubs now include `UIElements.Cursor`, so it reproduces offline (verified: the same 2 errors before the fix, 0 after).
 - **Docs:** TESTING.md says to run `Tools/Assets/fetch-cc0-assets.sh` only if `Assets/ThirdParty` is missing. The files are in the repo through LFS (`git lfs pull`).
+
+## 2026-10-15 — Milestone 11: the full game (untested in Unity)
+
+Request: "the full ready game, asset heavy, visually appealing, no demo, test it against a gamer agent".
+- **Honest status:** nothing from M11 has run in Unity. Verified offline only: 185 Core tests pass, the six-assembly stub compile has 0 errors, the filename check passes. Past milestones needed one to three fixes after the first Unity run; expect the same here.
+- **Gamer agent:** the fresh-player review is a stand-in (an agent reading the game's text, UI and levels as a newcomer would), not a human. Its findings drove: hint tiers instead of up-front solutions, bigger guide text, clearer reticle feedback, a containment explainer, hero personality, a real end-of-level card, chapter-coloured level select. A second pass is recorded below when done.
+- **New content:** Property Swap (mass), AI Override with skeleton guards, Desync, security drones; levels 10–20; 7 chapters with sky/fog/lighting, scenery kits, story lines, music themes.
+- **Cut:** bounciness/size swaps; Speed Swap has no level. Layouts are still straight halls.
+- **Assets:** art batch 2 (326 files, ~96 MB, CC0) is fetched by `Tools/Assets/fetch-cc0-assets-2.sh`; not in the repo until the owner commits it (LFS upload is not possible from the cloud session). The game degrades gracefully without it.
+- **Music** is original and procedural, so there is no third-party audio to credit or license.
