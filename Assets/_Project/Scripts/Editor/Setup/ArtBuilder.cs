@@ -35,8 +35,11 @@ namespace BugReport.EditorTools.Setup
         private static readonly string[] HiddenKnightParts =
             { "1H_Sword_Offhand", "2H_Sword", "Rectangle_Shield", "Round_Shield", "Spike_Shield" };
 
-        public static bool HeroAvailable => File.Exists(KnightPath) && File.Exists(KnightTexturePath);
-        public static bool DungeonAvailable => File.Exists(DungeonTexturePath) && Directory.Exists(DungeonFolder);
+        /// <summary>A real file, not a Git LFS pointer (pointers are ~130 bytes and import as nothing).</summary>
+        internal static bool IsRealFile(string path) => File.Exists(path) && new FileInfo(path).Length > 1024;
+
+        public static bool HeroAvailable => IsRealFile(KnightPath) && IsRealFile(KnightTexturePath);
+        public static bool DungeonAvailable => IsRealFile(DungeonTexturePath) && Directory.Exists(DungeonFolder);
         public static string DungeonModel(string name) => DungeonFolder + "/" + name + ".fbx";
 
         // ---------------------------------------------------------------- materials
@@ -235,7 +238,7 @@ namespace BugReport.EditorTools.Setup
             }
         }
 
-        public static bool KitAvailable(Kit kit) => File.Exists(KitTexture(kit)) && Directory.Exists(KitFolder(kit));
+        public static bool KitAvailable(Kit kit) => IsRealFile(KitTexture(kit)) && Directory.Exists(KitFolder(kit));
 
         /// <summary>
         /// A static, collider-free background model of the given height (hills, trees, cargo, graves …)
@@ -271,7 +274,7 @@ namespace BugReport.EditorTools.Setup
         public const string SkeletonTexturePath = SkeletonFolder + "/skeleton_texture.png";
         public const string GuardControllerPath = "Assets/_Project/Art/Animation/AC_Guard.controller";
         public static string SkeletonModelPath(string name) => SkeletonFolder + "/" + name + ".fbx";
-        public static bool GuardAvailable => File.Exists(SkeletonTexturePath) && File.Exists(SkeletonModelPath("Skeleton_Warrior"));
+        public static bool GuardAvailable => IsRealFile(SkeletonTexturePath) && IsRealFile(SkeletonModelPath("Skeleton_Warrior"));
 
         /// <summary>
         /// A skeleton under <paramref name="guard"/> (feet at its origin), scaled to <paramref name="height"/>, with an

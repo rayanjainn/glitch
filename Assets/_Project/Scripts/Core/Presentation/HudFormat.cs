@@ -93,8 +93,8 @@ namespace BugReport.Core.Presentation
         public static string ContainmentDetail(int stage, float nextPatchIn)
             => stage >= PatchStage && nextPatchIn > 0f ? "PATCH IN " + Seconds(nextPatchIn) : string.Empty;
 
-        /// <summary>"3/3 OBJECTIVES" style summary for the completion screen.</summary>
+        /// <summary>"3 of 3" for the completion card's objectives row.</summary>
         public static string CompletionSummary(int completed, int total)
-            => total > 0 ? completed + "/" + total + " OBJECTIVES  //  HERO REACHED THE EXIT" : "HERO REACHED THE EXIT";
+            => total > 0 ? completed + " of " + total : "Done";
     }
 }

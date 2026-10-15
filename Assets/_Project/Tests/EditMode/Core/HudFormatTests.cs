@@ -53,8 +53,8 @@ namespace BugReport.Core.Tests
         public void ObjectiveAndCompletionText()
         {
             Assert.That(HudFormat.ObjectiveHeader(0, 3), Is.EqualTo("Objective 1 of 3"));
-            StringAssert.StartsWith("3/3 OBJECTIVES", HudFormat.CompletionSummary(3, 3));
-            Assert.That(HudFormat.CompletionSummary(0, 0), Is.EqualTo("HERO REACHED THE EXIT"));
+            Assert.That(HudFormat.CompletionSummary(3, 3), Is.EqualTo("3 of 3"));
+            Assert.That(HudFormat.CompletionSummary(0, 0), Is.EqualTo("Done"));
         }
     }
 

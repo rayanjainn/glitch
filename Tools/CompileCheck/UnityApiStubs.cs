@@ -202,7 +202,7 @@ namespace UnityEngine
         public static bool GetIgnoreLayerCollision(int a, int b) => throw null;
     }
     public static class Mathf
-    {
+    { public const float Deg2Rad = 0.0174532924f; 
         public const float PI = 3.14159265f;
         public static float Max(float a, float b) => throw null; public static int Max(int a, int b) => throw null;
         public static float Clamp(float v, float a, float b) => throw null;
@@ -280,8 +280,10 @@ namespace UnityEngine
         public float minVertexDistance { get => throw null; set { } }
     }
     public class ParticleSystemRenderer : Renderer { }
+    public enum LineAlignment { View, TransformZ }
     public class LineRenderer : Renderer
     {
+        public LineAlignment alignment { get => throw null; set { } }
         public bool useWorldSpace { get => throw null; set { } } public bool loop { get => throw null; set { } }
         public int positionCount { get => throw null; set { } }
         public float startWidth { get => throw null; set { } } public float endWidth { get => throw null; set { } } public float widthMultiplier { get => throw null; set { } }

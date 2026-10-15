@@ -4,13 +4,14 @@ using UnityEngine.Rendering;
 namespace BugReport.Presentation
 {
     /// <summary>
-    /// Draws a world-space wireframe box with a single LineRenderer.
-    /// The 16-point path covers all 12 edges (three edges are traced twice).
+    /// The highlight under a targeted object: a glowing rounded-rectangle ring on the floor around its footprint
+    /// (one closed LineRenderer). It replaces the old wireframe box, which read as a debug view.
     /// </summary>
     [RequireComponent(typeof(LineRenderer))]
     public sealed class BoundsOutline : MonoBehaviour
     {
-        private const int PointCount = 16;
+        private const int ArcSteps = 7;
+        private const int PointCount = (ArcSteps + 1) * 4;
         private static readonly Vector3[] Scratch = new Vector3[PointCount];
 
         private LineRenderer line;
@@ -20,12 +21,13 @@ namespace BugReport.Presentation
             line = GetComponent<LineRenderer>();
             line.sharedMaterial = material;
             line.useWorldSpace = true;
-            line.loop = false;
+            line.loop = true;
             line.positionCount = PointCount;
-            line.startWidth = width;
-            line.endWidth = width;
-            line.numCornerVertices = 0;
-            line.numCapVertices = 0;
+            line.startWidth = width * 2.2f;
+            line.endWidth = width * 2.2f;
+            line.numCornerVertices = 2;
+            line.numCapVertices = 2;
+            line.alignment = LineAlignment.View;
             line.shadowCastingMode = ShadowCastingMode.Off;
             line.receiveShadows = false;
             line.allowOcclusionWhenDynamic = false;
@@ -35,27 +37,33 @@ namespace BugReport.Presentation
         public void Show(Bounds bounds, Color color)
         {
             if (line == null) return;
-            var min = bounds.min;
-            var max = bounds.max;
-            var p0 = new Vector3(min.x, min.y, min.z);
-            var p1 = new Vector3(max.x, min.y, min.z);
-            var p2 = new Vector3(max.x, min.y, max.z);
-            var p3 = new Vector3(min.x, min.y, max.z);
-            var p4 = new Vector3(min.x, max.y, min.z);
-            var p5 = new Vector3(max.x, max.y, min.z);
-            var p6 = new Vector3(max.x, max.y, max.z);
-            var p7 = new Vector3(min.x, max.y, max.z);
+            var c = bounds.center;
+            float hx = bounds.extents.x + 0.12f;
+            float hz = bounds.extents.z + 0.12f;
+            float y = bounds.min.y + 0.04f;
+            float r = Mathf.Min(0.6f, Mathf.Min(hx, hz));
 
-            // bottom loop, up, then zig-zag around the top covering the remaining verticals
-            Scratch[0] = p0; Scratch[1] = p1; Scratch[2] = p2; Scratch[3] = p3; Scratch[4] = p0;
-            Scratch[5] = p4; Scratch[6] = p5; Scratch[7] = p1; Scratch[8] = p5; Scratch[9] = p6;
-            Scratch[10] = p2; Scratch[11] = p6; Scratch[12] = p7; Scratch[13] = p3; Scratch[14] = p7;
-            Scratch[15] = p4;
+            int n = 0;
+            // Four quarter arcs, counter-clockwise from the +x/+z corner.
+            n = Arc(n, c.x + hx - r, c.z + hz - r, y, r, 0f);
+            n = Arc(n, c.x - hx + r, c.z + hz - r, y, r, 90f);
+            n = Arc(n, c.x - hx + r, c.z - hz + r, y, r, 180f);
+            n = Arc(n, c.x + hx - r, c.z - hz + r, y, r, 270f);
 
             line.SetPositions(Scratch);
             line.startColor = color;
             line.endColor = color;
             line.enabled = true;
+        }
+
+        private static int Arc(int index, float cx, float cz, float y, float r, float startDegrees)
+        {
+            for (int i = 0; i <= ArcSteps; i++)
+            {
+                float a = (startDegrees + 90f * i / ArcSteps) * Mathf.Deg2Rad;
+                Scratch[index++] = new Vector3(cx + Mathf.Cos(a) * r, y, cz + Mathf.Sin(a) * r);
+            }
+            return index;
         }
 
         public void Hide()

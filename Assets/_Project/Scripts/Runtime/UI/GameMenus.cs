@@ -51,6 +51,12 @@ namespace BugReport.UI
         private Label completeHint;
         private Label completeOutro;
         private Label completeStamp;
+        private VisualElement completeCard;
+        private VisualElement starsRow;
+        private VisualElement statRows;
+        private Label completeCaption, completeTitle, completeSubtitle;
+        private Label rowObjectives, rowTime, rowGlitches, rowAlert, rowFiled;
+        private readonly VisualElement[] starElements = new VisualElement[3];
         private GameState shownState = GameState.Boot;
 
         protected override string LayerName => "menus";
@@ -175,19 +181,35 @@ namespace BugReport.UI
             pauseScreen.Add(settings.Root);
 
             completeScreen = Ui.Add(layer, MakeScreen("complete"));
-            var completeCard = Ui.Add(completeScreen, Ui.Element("complete-card", "br-card", "br-card--success"));
-            completeCard.Add(Ui.Text("complete-caption", "REPORT CLOSED", "br-caption"));
-            completeCard.Add(Ui.Text("complete-title", levelTitle + " COMPLETE", "br-title", "br-display"));
-            completeStars = Ui.Add(completeCard, Ui.Text("complete-stars", string.Empty, "br-stars", "br-display"));
-            completeStats = Ui.Add(completeCard, Ui.Text("complete-stats", string.Empty, "br-card__body", "br-stats"));
-            completeHint = Ui.Add(completeCard, Ui.Text("complete-hint", string.Empty, "br-caption"));
-            completeOutro = Ui.Add(completeCard, Ui.Text("complete-outro", string.Empty, "br-card__body", "br-outro"));
-            completeStamp = Ui.Add(completeScreen, Ui.Text("complete-stamp", "CLOSED", "br-stamp", "br-display"));
-            completeSummary = Ui.Add(completeCard, Ui.Text("complete-summary", string.Empty, "br-card__body"));
-            var completeButtons = Ui.Add(completeCard, Ui.Element("complete-buttons", "br-card__buttons"));
-            nextButton = Ui.Add(completeButtons, MenuButton("next-level", "NEXT LEVEL", LoadNextLevel));
-            completeRestartButton = Ui.Add(completeButtons, MenuButton("complete-restart", "RESTART LEVEL", LevelFlow.RestartLevel));
-            completeButtons.Add(MenuButton("complete-main-menu", "MAIN MENU", LevelFlow.LoadMainMenu));
+            completeCard = Ui.Add(completeScreen, Ui.Element("complete-card", "br-complete"));
+            completeCaption = Ui.Add(completeCard, Ui.Text("complete-caption", "Bug report closed", "br-complete__eyebrow"));
+            completeTitle = Ui.Add(completeCard, Ui.Text("complete-title", HudFormat.TitleCase(levelTitle), "br-complete__title"));
+            completeSubtitle = Ui.Add(completeCard, Ui.Text("complete-subtitle", "Level complete", "br-complete__subtitle"));
+            starsRow = Ui.Add(completeCard, Ui.Element("complete-stars-row", "br-complete__stars"));
+            for (int i = 0; i < 3; i++)
+            {
+                var star = Ui.Add(starsRow, Ui.Element("star-" + i, "br-star"));
+                star.Add(Ui.Element("star-a", "br-star__a"));
+                star.Add(Ui.Element("star-b", "br-star__b"));
+                starElements[i] = star;
+            }
+            completeStars = Ui.Add(completeCard, Ui.Text("complete-stars", string.Empty, "br-complete__starcount"));
+            statRows = Ui.Add(completeCard, Ui.Element("complete-rows", "br-complete__rows"));
+            completeSummary = AddStatRow("Objectives", out rowObjectives);
+            AddStatRow("Time", out rowTime);
+            AddStatRow("Glitches used", out rowGlitches);
+            AddStatRow("Highest alert", out rowAlert);
+            AddStatRow("Filed under", out rowFiled);
+            completeHint = Ui.Add(completeCard, Ui.Text("complete-hint", string.Empty, "br-complete__hint"));
+            completeOutro = Ui.Add(completeCard, Ui.Text("complete-outro", string.Empty, "br-complete__outro"));
+            completeStamp = Ui.Add(completeCard, Ui.Text("complete-stamp", "Closed", "br-complete__stamp"));
+            var completeButtons = Ui.Add(completeCard, Ui.Element("complete-buttons", "br-complete__buttons"));
+            nextButton = Ui.Add(completeButtons, MenuButton("next-level", "Next level", LoadNextLevel));
+            nextButton.AddToClassList("br-button--primary");
+            completeRestartButton = Ui.Add(completeButtons, MenuButton("complete-restart", "Restart", LevelFlow.RestartLevel));
+            completeRestartButton.AddToClassList("br-button--secondary");
+            var menuButton = Ui.Add(completeButtons, MenuButton("complete-main-menu", "Main menu", LevelFlow.LoadMainMenu));
+            menuButton.AddToClassList("br-button--tertiary");
 
             Ui.Show(pauseScreen, false);
             Ui.Show(settings.Root, false);
@@ -195,27 +217,84 @@ namespace BugReport.UI
             shownState = GameState.Boot;
         }
 
-        /// <summary>Stars, time, uses and the story outro on the level-complete card.</summary>
+        private Label AddStatRow(string label, out Label value)
+        {
+            var row = Ui.Add(statRows, Ui.Element("row-" + label.ToLowerInvariant().Replace(' ', '-'), "br-statrow"));
+            row.Add(Ui.Text("row-label", label, "br-statrow__label"));
+            value = Ui.Add(row, Ui.Text("row-value", string.Empty, "br-statrow__value"));
+            return value;
+        }
+
+        private void Reveal(VisualElement element, int delayMs)
+        {
+            if (element == null) return;
+            element.AddToClassList("br-fade");
+            completeScreen.schedule.Execute(() => element.RemoveFromClassList("br-fade")).ExecuteLater(delayMs);
+        }
+
+        /// <summary>Fills the level-complete card and plays its reveal: title, stars one by one, stat rows, verdict stamp, buttons.</summary>
         private void FillRunCard()
         {
             var recorder = FindAnyObjectByType<LevelCompletionRecorder>();
-            if (recorder == null || recorder.CurrentIndex() < 0)
+            bool known = recorder != null && recorder.CurrentIndex() >= 0;
+            int stars = known ? recorder.Stars : 0;
+
+            Ui.Show(starsRow, known);
+            Ui.Show(completeStars, known);
+            Ui.Show(statRows, true);
+            Ui.Show(rowTime.parent, known);
+            Ui.Show(rowGlitches.parent, known);
+            Ui.Show(rowAlert.parent, known);
+            Ui.Show(rowFiled.parent, known);
+            Ui.Show(completeHint, known);
+            Ui.Show(completeOutro, known);
+            Ui.Show(completeStamp, known);
+
+            if (known)
             {
-                Ui.SetText(completeStars, string.Empty);
-                Ui.SetText(completeStats, string.Empty);
-                Ui.SetText(completeHint, string.Empty);
-                Ui.SetText(completeOutro, string.Empty);
-                return;
+                Ui.SetText(completeStars, stars + " of 3 stars");
+                Ui.SetText(rowTime, RunSummary.Time(recorder.Seconds));
+                Ui.SetText(rowGlitches, recorder.GlitchUses + "  (par " + recorder.ParUses + ")");
+                Ui.SetText(rowAlert, HudFormat.StageWord(recorder.MaxStage).Replace("!", string.Empty));
+                Ui.SetText(rowFiled, recorder.UsedSummary());
+                Ui.SetText(completeHint, RunSummary.NextStarHint(stars, recorder.ParUses));
+                Ui.Show(completeHint, !string.IsNullOrEmpty(completeHint.text));
+                int index = recorder.CurrentIndex();
+                Ui.SetText(completeOutro, catalog != null ? catalog.Get(index).outro ?? string.Empty : string.Empty);
+                Ui.Show(completeOutro, !string.IsNullOrEmpty(completeOutro.text));
+                string[] verdicts = { "Works as intended", "Won't fix", "Cannot reproduce", "Closed", "Duplicate of itself" };
+                Ui.SetText(completeStamp, verdicts[System.Math.Abs(index) % verdicts.Length]);
             }
-            Ui.SetText(completeStars, RunSummary.Stars(recorder.Stars));
-            string stats = "TIME " + RunSummary.Time(recorder.Seconds) + "   GLITCHES " + recorder.GlitchUses
-                + " (PAR " + recorder.ParUses + ")   PEAK ALERT " + recorder.MaxStage + "\nFILED UNDER: " + recorder.UsedSummary();
-            Ui.SetText(completeStats, stats);
-            Ui.SetText(completeHint, RunSummary.NextStarHint(recorder.Stars, recorder.ParUses));
-            string[] verdicts = { "WORKS AS INTENDED", "WON'T FIX", "CANNOT REPRODUCE", "CLOSED", "DUPLICATE OF ITSELF" };
-            Ui.SetText(completeStamp, verdicts[System.Math.Abs(recorder.CurrentIndex()) % verdicts.Length]);
-            int index = recorder.CurrentIndex();
-            Ui.SetText(completeOutro, index >= 0 && catalog != null ? catalog.Get(index).outro ?? string.Empty : string.Empty);
+
+            // Reveal sequence (the card is readable even if the timers are skipped: the end state is the default).
+            Reveal(completeCaption, 0);
+            Reveal(completeTitle, 120);
+            Reveal(completeSubtitle, 240);
+            for (int i = 0; i < starElements.Length; i++)
+            {
+                var star = starElements[i];
+                star.RemoveFromClassList("br-star--on");
+                star.AddToClassList("br-fade");
+                int delay = 500 + i * 300;
+                bool earned = i < stars;
+                completeScreen.schedule.Execute(() =>
+                {
+                    star.RemoveFromClassList("br-fade");
+                    if (earned) star.AddToClassList("br-star--on");
+                }).ExecuteLater(delay);
+            }
+            Reveal(completeStars, 1250);
+            var rows = new[] { rowObjectives, rowTime, rowGlitches, rowAlert, rowFiled };
+            for (int i = 0; i < rows.Length; i++) Reveal(rows[i].parent, 1450 + i * 120);
+            Reveal(completeHint, 2100);
+            Reveal(completeOutro, 2250);
+            completeStamp.RemoveFromClassList("br-stamp--on");
+            completeStamp.AddToClassList("br-fade");
+            completeScreen.schedule.Execute(() =>
+            {
+                completeStamp.RemoveFromClassList("br-fade");
+                completeStamp.AddToClassList("br-stamp--on");
+            }).ExecuteLater(2400);
         }
 
         private static VisualElement MakeScreen(string name)
@@ -286,6 +365,7 @@ namespace BugReport.UI
                 Ui.SetText(completeSummary, tracker != null
                     ? HudFormat.CompletionSummary(tracker.CompletedCount, objectives.Count)
                     : HudFormat.CompletionSummary(0, 0));
+                Ui.SetText(completeTitle, HudFormat.TitleCase(levelTitle));
                 FillRunCard();
                 bool hasNext = NextLevelScene() != null;
                 Ui.Show(nextButton, hasNext);
@@ -296,7 +376,7 @@ namespace BugReport.UI
                 {
                     foreach (var b in buttons) b.SetEnabled(true);
                     Ui.FocusSoon(hasNext ? nextButton : completeRestartButton);
-                }).ExecuteLater(800);
+                }).ExecuteLater(2600);
             }
         }
     }
