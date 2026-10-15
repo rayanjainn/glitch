@@ -26,6 +26,8 @@ namespace BugReport.Guards
             if (guard.Brain.State == GuardState.Disabled) return guardName + " IS DISABLED";
             if (!guard.OverrideChannel.CanAdd(request.PendingId)) return guardName + " IS ALREADY OVERRIDDEN";
             if (decoy is GameEntity e && e.GetComponent<GuardController>() != null) return "A GUARD CANNOT BE A DECOY";
+            var marker = (decoy as GameEntity) != null ? ((GameEntity)decoy).GetComponent<DecoyMarker>() : null;
+            if (marker != null && !marker.Channel.CanAdd(request.PendingId)) return "DECOY ALREADY IN USE";
             return null;
         }
 
@@ -43,6 +45,16 @@ namespace BugReport.Guards
                 return false;
             }
             operation.AddLease(lease);
+            var marker = (decoy as GameEntity) != null ? ((GameEntity)decoy).GetComponent<DecoyMarker>() : null;
+            if (marker != null)
+            {
+                if (!marker.Channel.TryAdd(operation.Id, true, out var decoyLease))
+                {
+                    failure = "DECOY ALREADY IN USE";
+                    return false;
+                }
+                operation.AddLease(decoyLease);
+            }
             var position = (decoy as GameEntity) != null ? ((GameEntity)decoy).transform.position : guard.transform.position;
             guard.Distract(position);
             return true;

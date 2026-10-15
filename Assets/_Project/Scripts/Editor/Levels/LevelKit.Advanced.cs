@@ -68,6 +68,7 @@ namespace BugReport.EditorTools.Levels
             var go = Block(name, Env, floorPosition + Vector3.up * 0.6f, new Vector3(0.9f, 1.2f, 0.9f), Mats.Crate, Props());
             AddEntity(go, displayName, EntityCategory.Prop, EntityCapabilities.Inspectable,
                 "Something shiny. Guards cannot resist investigating it.");
+            go.AddComponent<DecoyMarker>();
             ArtBuilder.SkinWithDungeonModel(go, "barrel_large", ArtBuilder.DungeonAvailable
                 ? ArtBuilder.AtlasMaterial("M_Dungeon", ArtBuilder.DungeonTexturePath) : null);
             return go.GetComponent<GameEntity>();
@@ -91,7 +92,7 @@ namespace BugReport.EditorTools.Levels
             var body = root.AddComponent<Rigidbody>();
             body.isKinematic = true;
             AddEntity(root, displayName, EntityCategory.Enemy,
-                EntityCapabilities.Inspectable | EntityCapabilities.AIControllable | EntityCapabilities.Freezable,
+                EntityCapabilities.Inspectable | EntityCapabilities.AIControllable,
                 "A security skeleton. It walks its beat, and it will not let a hero through.");
 
             Animator animator;
@@ -102,8 +103,6 @@ namespace BugReport.EditorTools.Levels
                     new Vector3(0.8f, 0.95f, 0.8f), Mats.GuardBody, Props(), keepCollider: false);
                 visual.transform.localRotation = Quaternion.identity;
             }
-            AddFreeze(root, Mats);
-
             var zone = new GameObject("DangerZone", typeof(BoxCollider));
             zone.transform.SetParent(root.transform, false);
             zone.transform.localPosition = new Vector3(0f, 1f, 0f);

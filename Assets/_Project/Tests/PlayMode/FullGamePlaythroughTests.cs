@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections;
+using BugReport.Core.Glitches;
 using BugReport.Glitches;
 using BugReport.Guards;
 using NUnit.Framework;
@@ -69,7 +70,16 @@ namespace BugReport.Tests.PlayMode
             yield return HeroBlocked("at the first guard");
             Apply<AiOverrideDefinition>(Named("GUARD_A"), Named("DECOY_BARREL"));
             yield return Objectives(1, "past the first guard");
+
+            // The decoy holds one lure at a time: a second one is refused until the first is undone.
             yield return HeroBlocked("at the second guard");
+            services.Selection.ClearSelection();
+            Assert.That(services.Selection.TrySelect(Named("GUARD_B").Id).IsValid, Is.True);
+            services.Selection.SetHovered(Named("DECOY_BARREL").Id);
+            controller.ApplyCurrent();
+            Assert.That(controller.LastFeedback.Kind, Is.Not.EqualTo(GlitchFeedbackKind.Applied), "decoy already in use");
+            controller.RevertLatest();
+            yield return GameSeconds(0.7f);
             Apply<AiOverrideDefinition>(Named("GUARD_B"), Named("DECOY_BARREL"));
             yield return Finished();
         }

@@ -118,8 +118,8 @@ namespace BugReport.EditorTools.Levels
         }
 
         /// <summary>
-        /// DOUBLE SHIFT. Two guards, one decoy. An override lasts 14 seconds. Solution: lure the first guard, let the
-        /// hero through, then lure the second. Lesson: overrides expire; spend them when the hero is ready.
+        /// DOUBLE SHIFT. Two guards, one decoy, and a decoy can hold only one lure at a time. Solution: lure the first guard,
+        /// let the hero through, undo with [R], then lure the second. Lesson: undo hands the decoy back.
         /// </summary>
         public static bool DoubleShift(out string error)
         {
@@ -132,15 +132,15 @@ namespace BugReport.EditorTools.Levels
             var guardB = kit.GuardPost("GuardB", "GUARD_B", 8f).GetComponent<GameEntity>();
             kit.Exit(21f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("first", "GET PAST THE FIRST GUARD", "One decoy, two guards, and a clock.", kit.ZoneBetween("Zone_Middle", -6.5f, 6.5f), guardA),
-                new ObjectiveDirector.Entry("second", "GET PAST THE SECOND GUARD", "Overrides run out. Don't spend it too early.", kit.ZoneAtExit(21f), guardB));
+                new ObjectiveDirector.Entry("first", "GET PAST THE FIRST GUARD", "One decoy holds one lure at a time. [R] hands it back.", kit.ZoneBetween("Zone_Middle", -6.5f, 6.5f), guardA),
+                new ObjectiveDirector.Entry("second", "GET PAST THE SECOND GUARD", "The decoy is free again once the first lure is undone.", kit.ZoneAtExit(21f), guardB));
             return kit.Finish(PathOf("double_shift"), TitleOf("double_shift"), new GlitchDefinition[] { kit.AiOverride },
                 objectives, new Vector3(-22f, 2.2f, -4f), out error);
         }
 
         /// <summary>
         /// FROZEN STIFF. A guard, then a piston corridor. Solution: AI Override for the guard, Freeze for the piston
-        /// (while it is pulled back). Lesson: match the glitch to the problem. (Freezing the guard also works.)
+        /// (while it is pulled back). Lesson: match the glitch to the problem; guards cannot be frozen.
         /// </summary>
         public static bool FrozenStiff(out string error)
         {
