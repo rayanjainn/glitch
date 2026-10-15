@@ -24,6 +24,8 @@ namespace BugReport.Presentation
         [SerializeField, OptionalReference] private Camera viewCamera;
         [SerializeField, Range(0f, 1f)] private float chromaticPeak = 0.8f;
         [SerializeField, Range(-1f, 0f)] private float warpPeak = -0.22f;
+        [SerializeField, Range(0f, 12f), Tooltip("Degrees the field of view narrows at the peak of a glitch burst (a punch-in).")]
+        private float fovPunch = 5f;
         [SerializeField, Range(0f, 1f)] private float patchVignettePeak = 0.5f;
         [SerializeField] private Color patchVignetteColor = new Color(0.6f, 0.02f, 0.05f);
 
@@ -36,6 +38,7 @@ namespace BugReport.Presentation
         private Vignette vignette;
         private float baseVignette;
         private Color baseVignetteColor = Color.black;
+        private float baseFov;
 
         public float CurrentChromatic => chromatic != null ? chromatic.intensity.value : 0f;
         public float CurrentVignette => vignette != null ? vignette.intensity.value : 0f;
@@ -43,6 +46,7 @@ namespace BugReport.Presentation
         private void Awake()
         {
             volume = GetComponent<Volume>();
+            if (viewCamera != null) baseFov = viewCamera.fieldOfView;
             bool post = VisualSettings.On(settings, s => s.postProcessing);
             volume.enabled = post;
             var cam = viewCamera != null ? viewCamera : Camera.main;
@@ -103,6 +107,8 @@ namespace BugReport.Presentation
             float g = glitchBurst.Evaluate(now);
             chromatic.intensity.Override(comfortable ? g * chromaticPeak : 0f);
             warp.intensity.Override(comfortable ? g * warpPeak : 0f);
+
+            if (viewCamera != null && baseFov > 0f) viewCamera.fieldOfView = baseFov - (comfortable ? g * fovPunch : 0f);
 
             float p = bursts ? patchBurst.Evaluate(now) : 0f;
             vignette.intensity.Override(Mathf.Lerp(baseVignette, patchVignettePeak, p));
