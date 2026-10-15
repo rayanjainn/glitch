@@ -671,3 +671,8 @@
 .br-chapter-5.unity-button { border-left-color: #A56BFF; }
 .br-chapter-6.unity-button { border-left-color: #A6FF4D; }
 .br-chapter-7.unity-button { border-left-color: #FF5A5A; }
+
+/* ---- readability pass (from fresh-player feedback): bigger guide, prompt and reticle feedback ---- */
+.br-guide__text { font-size: 24px; }
+.br-prompt { font-size: 17px; padding: 4px 12px; }
+.br-reticle--valid { scale: 1.45 1.45; }
