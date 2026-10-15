@@ -475,6 +475,11 @@ namespace BugReport.EditorTools.Setup
 
             systems.AddComponent<WorldBoundsGuard>();
 
+            var musicHost = new GameObject("Music");
+            musicHost.transform.SetParent(systems.transform, false);
+            var music = musicHost.AddComponent<Audio.MusicDirector>();
+            Wire(music, "catalog", LevelCatalogBuilder.LoadOrCreate());
+
             if (objectives != null)
             {
                 var recorder = systems.AddComponent<Progress.LevelCompletionRecorder>();

@@ -121,6 +121,7 @@ namespace BugReport.Core.Progress
         public const float MaxSensitivity = 3f;
 
         public float masterVolume = 0.8f;
+        public float musicVolume = 0.7f;
         public float mouseSensitivity = 1f;
         public bool invertY;
         public bool colourSplitEffects = true;
@@ -129,6 +130,7 @@ namespace BugReport.Core.Progress
         public void Sanitize()
         {
             masterVolume = Clamp(masterVolume, 0f, 1f, 0.8f);
+            musicVolume = Clamp(musicVolume, 0f, 1f, 0.7f);
             mouseSensitivity = Clamp(mouseSensitivity, MinSensitivity, MaxSensitivity, 1f);
         }
 

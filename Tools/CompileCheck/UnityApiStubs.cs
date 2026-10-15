@@ -297,6 +297,7 @@ namespace UnityEngine
         public static Camera main => throw null;
     }
     public enum CameraClearFlags { Skybox = 1, SolidColor = 2, Depth = 3, Nothing = 4 }
+    public static class AudioSettings { public static int outputSampleRate => throw null; }
     public class AudioListener : Behaviour { public static float volume { get => throw null; set { } } }
     public class Font : Object { }
     public sealed class AudioClip : Object

@@ -20,6 +20,7 @@ namespace BugReport.UI
         private InputActionRebindingExtensions.RebindingOperation rebinding;
 
         private readonly Slider volume;
+        private readonly Slider music;
         private readonly Slider sensitivity;
         private readonly Toggle invertY;
         private readonly Toggle colourSplit;
@@ -38,14 +39,16 @@ namespace BugReport.UI
             var general = Ui.Add(columns, Ui.Element("settings-general", "br-settings__column"));
 
             volume = Ui.Add(general, new Slider("MASTER VOLUME", 0f, 1f) { name = "setting-volume" });
+            music = Ui.Add(general, new Slider("MUSIC VOLUME", 0f, 1f) { name = "setting-music" });
             sensitivity = Ui.Add(general, new Slider("MOUSE SENSITIVITY", GameSettingsData.MinSensitivity, GameSettingsData.MaxSensitivity) { name = "setting-sensitivity" });
             invertY = Ui.Add(general, new Toggle("INVERT LOOK UP/DOWN") { name = "setting-invert" });
             colourSplit = Ui.Add(general, new Toggle("COLOUR-SPLIT EFFECTS") { name = "setting-colour-split" });
             fullscreen = Ui.Add(general, new Toggle("FULLSCREEN") { name = "setting-fullscreen" });
             Ui.Show(fullscreen, showFullscreen);
-            foreach (var field in new VisualElement[] { volume, sensitivity, invertY, colourSplit, fullscreen }) field.AddToClassList("br-setting");
+            foreach (var field in new VisualElement[] { volume, music, sensitivity, invertY, colourSplit, fullscreen }) field.AddToClassList("br-setting");
 
             volume.RegisterValueChangedCallback(e => SetMasterVolume(e.newValue));
+            music.RegisterValueChangedCallback(e => SetMusicVolume(e.newValue));
             sensitivity.RegisterValueChangedCallback(e => SetSensitivity(e.newValue));
             invertY.RegisterValueChangedCallback(e => SetInvertY(e.newValue));
             colourSplit.RegisterValueChangedCallback(e => SetColourSplit(e.newValue));
@@ -160,6 +163,7 @@ namespace BugReport.UI
             }
             var s = SaveStore.Settings;
             volume.SetValueWithoutNotify(s.masterVolume);
+            music.SetValueWithoutNotify(s.musicVolume);
             sensitivity.SetValueWithoutNotify(s.mouseSensitivity);
             invertY.SetValueWithoutNotify(s.invertY);
             colourSplit.SetValueWithoutNotify(s.colourSplitEffects);
@@ -170,6 +174,7 @@ namespace BugReport.UI
 
         // The handlers are public so tests can drive them without simulating UI events.
         public void SetMasterVolume(float value) => Change(s => s.masterVolume = value);
+        public void SetMusicVolume(float value) => Change(s => s.musicVolume = value);
         public void SetSensitivity(float value) => Change(s => s.mouseSensitivity = value);
         public void SetInvertY(bool value) => Change(s => s.invertY = value);
         public void SetColourSplit(bool value) => Change(s => s.colourSplitEffects = value);
