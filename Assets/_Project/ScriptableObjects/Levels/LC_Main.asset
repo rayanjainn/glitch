@@ -16,36 +16,168 @@ MonoBehaviour:
   - id: training_lab
     sceneName: Level_01_TrainingLab
     title: TRAINING LAB
-    chapter: TUTORIAL
+    chapter: '1: HELLO, WORLD'
+    parUses: 6
+    chapterIndex: 1
+    intro: 
+    outro: 'The knight reached the exit and has no idea anything happened. The system files a note: ANOMALY, LOW PRIORITY.'
   - id: bridge_out
     sceneName: Level_02_BridgeOut
     title: BRIDGE OUT
     chapter: '1: HELLO, WORLD'
+    parUses: 1
+    chapterIndex: 1
+    intro: The bridge is a hologram. The old barrier is solid. Solidity is just a setting.
+    outro: 'Cross-referencing: ''bridge'' now has collision. Cause unknown.'
   - id: two_doors
     sceneName: Level_03_TwoDoors
     title: TWO DOORS, ONE SHADOW
     chapter: '1: HELLO, WORLD'
+    parUses: 2
+    chapterIndex: 1
+    intro: Two firewalls, one shadow. If a power is in use, [R] undoes it and gives the object back.
+    outro: Firewall breach logged twice. Both marked 'resolved'. Neither was.
   - id: two_birds
     sceneName: Level_04_TwoBirds
     title: TWO BIRDS
     chapter: '1: HELLO, WORLD'
+    parUses: 1
+    chapterIndex: 1
+    intro: One transfer can fix two problems, if you think about where the solidity lands.
+    outro: The designers will notice that one. They won't understand it.
+  - id: fork_in_the_road
+    sceneName: Level_21_ForkInTheRoad
+    title: FORK IN THE ROAD
+    chapter: '1: HELLO, WORLD'
+    parUses: 1
+    chapterIndex: 1
+    intro: Two roads. The knight takes the shortest one that is open. You decide which one that is.
+    outro: He never noticed there was a choice.
   - id: three_plates
     sceneName: Level_05_ThreePlates
     title: THREE PLATES
     chapter: '2: DUPLICATE OBJECTIVE'
+    parUses: 2
+    chapterIndex: 2
+    intro: Three plates, one crate. The game never said you only get one.
+    outro: 'ITEM COUNT: +2. Nobody authorised that.'
   - id: copy_the_copy
     sceneName: Level_06_CopyTheCopy
     title: COPY THE COPY
     chapter: '2: DUPLICATE OBJECTIVE'
+    parUses: 2
+    chapterIndex: 2
+    intro: A copy is a crate like any other. It can be copied too.
+    outro: Duplicates of duplicates. The inventory system has stopped counting.
   - id: stop_the_platform
     sceneName: Level_07_StopThePlatform
     title: STOP THE PLATFORM
     chapter: '3: TIME DOES NOT APPLY'
+    parUses: 1
+    chapterIndex: 3
+    intro: Time is just another rule. Pause the platform; the knight will take it from there.
+    outro: Timer anomaly detected. Timer anomaly ignored.
   - id: two_pistons
     sceneName: Level_08_TwoPistons
     title: TWO PISTONS
     chapter: '3: TIME DOES NOT APPLY'
+    parUses: 2
+    chapterIndex: 3
+    intro: A freeze does not last forever. Spend them one at a time.
+    outro: The pistons were never meant to stop. Neither was he.
   - id: the_build
     sceneName: Level_09_TheBuild
     title: THE BUILD
-    chapter: FINALE
+    chapter: '3: TIME DOES NOT APPLY'
+    parUses: 3
+    chapterIndex: 3
+    intro: A bit of everything you have learned so far. A recap, and a rehearsal.
+    outro: Build 1.0 passed internal testing. Your fingerprints are all over it.
+  - id: heavy_lifting
+    sceneName: Level_10_HeavyLifting
+    title: HEAVY LIFTING
+    chapter: '4: DEAD WEIGHT'
+    parUses: 1
+    chapterIndex: 4
+    intro: The system is checking weights now. A number is just a number.
+    outro: 'MASS ERROR: crate = 60 kg. Cannot reproduce.'
+  - id: twin_scales
+    sceneName: Level_11_TwinScales
+    title: TWIN SCALES
+    chapter: '4: DEAD WEIGHT'
+    parUses: 3
+    chapterIndex: 4
+    intro: Two plates, two heavy demands. You have the tools to meet both.
+    outro: Scales calibrated. Probably.
+  - id: weigh_station
+    sceneName: Level_12_WeighStation
+    title: WEIGH STATION
+    chapter: '4: DEAD WEIGHT'
+    parUses: 2
+    chapterIndex: 4
+    intro: A gate that wants weight, a pit that wants floor. Different problems, different tools.
+    outro: Two systems failed on the same tick. Coincidence, says the log.
+  - id: night_watch
+    sceneName: Level_13_NightWatch
+    title: NIGHT WATCH
+    chapter: '5: NIGHT SHIFT'
+    parUses: 1
+    chapterIndex: 5
+    intro: Security has arrived. The guard is not stupid, only easily distracted.
+    outro: 'Guard reports: ''I was investigating a barrel.'''
+  - id: double_shift
+    sceneName: Level_14_DoubleShift
+    title: DOUBLE SHIFT
+    chapter: '5: NIGHT SHIFT'
+    parUses: 2
+    chapterIndex: 5
+    intro: Two guards, one decoy, fourteen seconds. Be patient.
+    outro: Both guards were later found near the same barrel.
+  - id: frozen_stiff
+    sceneName: Level_15_FrozenStiff
+    title: FROZEN STIFF
+    chapter: '5: NIGHT SHIFT'
+    parUses: 2
+    chapterIndex: 5
+    intro: A guard and a piston. Different problems; you know which glitch fits which.
+    outro: Staff morale is low. Maintenance is lower.
+  - id: false_wall
+    sceneName: Level_16_FalseWall
+    title: FALSE WALL
+    chapter: '6: FALSE FLOORS'
+    parUses: 1
+    chapterIndex: 6
+    intro: The system is losing track of what is where. A wall can be somewhere else than it looks.
+    outro: Collision and visuals disagree. Please do not tell anyone.
+  - id: false_floor
+    sceneName: Level_17_FalseFloor
+    title: FALSE FLOOR
+    chapter: '6: FALSE FLOORS'
+    parUses: 1
+    chapterIndex: 6
+    intro: The same trick builds as well as breaks. Slide a floor where it is needed.
+    outro: A floor has been found in a pit. Investigating.
+  - id: searchlight
+    sceneName: Level_18_Searchlight
+    title: SEARCHLIGHT
+    chapter: '6: FALSE FLOORS'
+    parUses: 2
+    chapterIndex: 6
+    intro: The system sends a drone. Anything in its light is reported. Mind your containment.
+    outro: 'Drone report: ''I saw nothing. I saw it very clearly.'''
+  - id: stack_the_order
+    sceneName: Level_19_StackTheOrder
+    title: STACK THE ORDER
+    chapter: '6: FALSE FLOORS'
+    parUses: 2
+    chapterIndex: 6
+    intro: The system is on edge today. Whatever you break first, it fixes first.
+    outro: 'Patch notes: ''Fixed a crate.'' The bridge was not mentioned.'
+  - id: report_closed
+    sceneName: Level_20_ReportClosed
+    title: REPORT CLOSED
+    chapter: '7: REPORT CLOSED'
+    parUses: 5
+    chapterIndex: 7
+    intro: The last room. Every rule you learned, in order. Close the report.
+    outro: 'BUG REPORT #1: CLOSED. Resolution: ''works as intended''. The knight walks home. You stay in the game.'

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6be4bcc28d3f3496bb77e65a145c5a1e, type: 3}
+  m_Name: GL_AiOverride
+  m_EditorClassIdentifier: BugReport.Runtime::BugReport.Guards.AiOverrideDefinition
+  id: ai_override
+  displayName: AI OVERRIDE
+  description: Point a guard at a decoy. It goes to investigate, forgets about its patrol for a while, then goes back.
+  icon: {fileID: 0}
+  color: {r: 0.72, g: 0.45, b: 1, a: 1}
+  duration: 14
+  cooldown: 0.5
+  maxActive: 2
+  containmentWeight: 1
+  slots:
+  - label: GUARD
+    requiredCapabilities: 33
+    excludedCategories: 0700000003000000i
+  - label: DECOY
+    requiredCapabilities: 1
+    excludedCategories: 070000000300000004000000i

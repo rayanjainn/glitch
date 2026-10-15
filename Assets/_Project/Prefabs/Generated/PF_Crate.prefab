@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4687471922290051042}
   - component: {fileID: 1759862473266599200}
   - component: {fileID: 6535915241808875724}
+  - component: {fileID: 4416596405114276756}
   - component: {fileID: 7227971871996596771}
   - component: {fileID: 4607869115407586702}
   - component: {fileID: 1211989365968981915}
@@ -103,6 +104,18 @@ MonoBehaviour:
   category: 0
   capabilities: 29
   description: Standard-issue crate.
+--- !u!114 &4416596405114276756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185707438611741546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29a94e8a614f0443ea38cad5c22a8965, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BugReport.Runtime::BugReport.Glitches.PropertyCapability
 --- !u!114 &7227971871996596771
 MonoBehaviour:
   m_ObjectHideFlags: 0
