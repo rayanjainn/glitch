@@ -88,6 +88,7 @@ namespace BugReport.EditorTools.Setup
             Wire(inspection, "heroAnimator", heroAnimator);
             Wire(inspection, "settings", assets.Settings);
             if (systems.Guide != null) Wire(inspection, "guide", systems.Guide);
+            if (systems.Hints != null) Wire(inspection, "hints", systems.Hints);
 
             var story = go.AddComponent<StoryOverlay>();
             Wire(story, "styleSheet", assets.Style);
@@ -101,6 +102,7 @@ namespace BugReport.EditorTools.Setup
             if (systems.Objectives != null) Wire(hud, "objectives", systems.Objectives);
             Wire(hud, "settings", assets.Settings);
             if (systems.Guide != null) Wire(hud, "guide", systems.Guide);
+            if (systems.Hints != null) Wire(hud, "hints", systems.Hints);
 
             var menus = go.AddComponent<GameMenus>();
             Wire(menus, "styleSheet", assets.Style);

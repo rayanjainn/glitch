@@ -436,6 +436,8 @@ namespace BugReport.EditorTools.Setup
             public string LevelTitle;
             /// <summary>Set by levels that teach (optional); wired into the UI by PresentationBuilder.</summary>
             public BugReport.Tutorial.GuideDirector Guide;
+            /// <summary>Escalating help for a stuck player; present whenever the level has objectives.</summary>
+            public BugReport.Tutorial.HintDirector Hints;
         }
 
         /// <summary>Bootstrap, state, selection, glitches, containment, presenters, audio, kill plane. The UI is added by PresentationBuilder.</summary>
@@ -480,8 +482,11 @@ namespace BugReport.EditorTools.Setup
             var music = musicHost.AddComponent<Audio.MusicDirector>();
             Wire(music, "catalog", LevelCatalogBuilder.LoadOrCreate());
 
+            BugReport.Tutorial.HintDirector hintDirector = null;
             if (objectives != null)
             {
+                hintDirector = systems.AddComponent<BugReport.Tutorial.HintDirector>();
+                Wire(hintDirector, "objectives", objectives);
                 var recorder = systems.AddComponent<Progress.LevelCompletionRecorder>();
                 Wire(recorder, "objectives", objectives);
                 Wire(recorder, "catalog", LevelCatalogBuilder.LoadOrCreate());
@@ -499,7 +504,7 @@ namespace BugReport.EditorTools.Setup
             return new Systems
             {
                 Root = systems, Selection = selection, Glitches = glitchController, Containment = containment,
-                Objectives = objectives, LevelTitle = levelTitle,
+                Objectives = objectives, LevelTitle = levelTitle, Hints = hintDirector,
             };
         }
 

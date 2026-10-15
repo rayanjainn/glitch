@@ -33,6 +33,7 @@ namespace BugReport.UI
         [SerializeField, OptionalReference] private HeroAnimator heroAnimator;
         [SerializeField, OptionalReference] private VisualSettings settings;
         [SerializeField, OptionalReference] private GuideDirector guide;
+        [SerializeField, OptionalReference] private HintDirector hints;
         [SerializeField, Min(1f)] private float maxDistance = 28f;
 
         private readonly List<IEntityDescriptor> buffer = new List<IEntityDescriptor>();
@@ -234,6 +235,7 @@ namespace BugReport.UI
         private void RefreshGuideMarker()
         {
             var target = guide != null ? guide.CurrentTarget : null;
+            if (target == null && hints != null) target = hints.FocusTarget;
             Vector2 position = default;
             bool on = false;
             if (target != null)

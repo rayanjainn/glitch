@@ -29,13 +29,13 @@ namespace BugReport.EditorTools.Levels
             kit.Hall(18f, 6f);
             var plate = kit.HeavyPlate("Plate", new Vector3(-1f, 0f, -3f), 25f);
             kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Light. The plate wants something heavier.");
-            kit.Weight("Anvil", "ANVIL", new Vector3(-10f, 0f, 4f), 60f, 1.2f, "Far too heavy to move. Its weight, though, is just a number.");
+            var anvil = kit.Weight("Anvil", "ANVIL", new Vector3(-10f, 0f, 4f), 60f, 1.2f, "Far too heavy to move. Its weight, though, is just a number.");
             kit.Gate("Gate", 4f, new[] { plate });
             kit.Exit(15f);
             kit.HeroOnRoute(V(-15f), false, V(2f), V(6f), V(15f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "The plate needs more weight than the crate has. Something else here has plenty.",
-                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f)),
+                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f), anvil),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Off you go.", kit.ZoneAtExit(15f)));
             return kit.Finish(PathOf("heavy_lifting"), TitleOf("heavy_lifting"), new GlitchDefinition[] { kit.MassSwap },
                 objectives, new Vector3(-16f, 2.2f, -4f), out error);
@@ -55,7 +55,7 @@ namespace BugReport.EditorTools.Levels
                 kit.HeavyPlate("Plate_1", new Vector3(-1f, 0f, -3f), 25f),
                 kit.HeavyPlate("Plate_2", new Vector3(0.1f, 0f, -3f), 25f),
             };
-            kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Light, and only one of it. For now.");
+            var crate = kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Light, and only one of it. For now.");
             kit.Weight("Anvil", "ANVIL", new Vector3(-12f, 0f, 4.2f), 60f, 1.2f, "The heaviest thing in the room.");
             kit.Weight("Boulder", "BOULDER", new Vector3(-8f, 0f, 4.2f), 40f, 1.4f, "Heavy enough for a plate.");
             kit.Gate("Gate", 4f, plates);
@@ -63,7 +63,7 @@ namespace BugReport.EditorTools.Levels
             kit.HeroOnRoute(V(-15f), false, V(2f), V(6f), V(15f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Two plates, both hungry. One crate, two heavy things.",
-                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f)),
+                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f), crate),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Off you go.", kit.ZoneAtExit(15f)));
             return kit.Finish(PathOf("twin_scales"), TitleOf("twin_scales"), new GlitchDefinition[] { kit.Duplication, kit.MassSwap },
                 objectives, new Vector3(-16f, 2.2f, -4f), out error);
@@ -80,15 +80,15 @@ namespace BugReport.EditorTools.Levels
             kit.Hall(20f, 6f, (8f, 12f));
             var plate = kit.HeavyPlate("Plate", new Vector3(-8f, 0f, -3f), 25f);
             kit.Crate("Crate", "CRATE", new Vector3(-8f, 0f, -3f), "Light. The plate wants more.");
-            kit.Weight("Anvil", "ANVIL", new Vector3(-15f, 0f, 4.2f), 60f, 1.2f, "Heavy. Obviously.");
+            var anvil = kit.Weight("Anvil", "ANVIL", new Vector3(-15f, 0f, 4.2f), 60f, 1.2f, "Heavy. Obviously.");
             kit.Gate("Gate", -3f, new[] { plate });
             kit.Barrier("OldBarrier", "OLD_BARRIER", new Vector3(2f, 1f, 4.6f), new Vector3(3f, 2f, 0.4f), "Solid, and in nobody's way.");
-            kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", 8f, 12f, 2.4f);
+            var bridge = kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", 8f, 12f, 2.4f);
             kit.Exit(17f);
             kit.HeroOnRoute(V(-17f), true, V(-5f), V(-1f), V(7f), V(13f), V(17f));
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "The plate is too demanding for the crate.", kit.ZoneBetween("Zone_Gate", -2.5f, 7.5f)),
-                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "A hologram bridge. Solidity is lying around.", kit.ZoneBetween("Zone_Far", 12.5f, 16f)),
+                new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "The plate is too demanding for the crate.", kit.ZoneBetween("Zone_Gate", -2.5f, 7.5f), anvil),
+                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "A hologram bridge. Solidity is lying around.", kit.ZoneBetween("Zone_Far", 12.5f, 16f), bridge),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Almost.", kit.ZoneAtExit(17f)));
             return kit.Finish(PathOf("weigh_station"), TitleOf("weigh_station"),
                 new GlitchDefinition[] { kit.CollisionTransfer, kit.MassSwap }, objectives, new Vector3(-18f, 2.2f, -4f), out error);
@@ -107,11 +107,11 @@ namespace BugReport.EditorTools.Levels
             kit.Hall(16f, 6f);
             kit.Decoy("Decoy", "DECOY_BARREL", new Vector3(-6f, 0f, 4.5f));
             kit.HeroOnRoute(V(-13f), false, V(-3f), V(3f), V(13f));
-            kit.GuardPost("Guard", "SKELETON_GUARD", 0f);
+            var guard = kit.GuardPost("Guard", "SKELETON_GUARD", 0f).GetComponent<GameEntity>();
             kit.Exit(13f);
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "It won't leave its post. Give it something to investigate.",
-                    kit.ZoneBetween("Zone_Beyond", 3.5f, 11.5f)),
+                    kit.ZoneBetween("Zone_Beyond", 3.5f, 11.5f), guard),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Quietly.", kit.ZoneAtExit(13f)));
             return kit.Finish(PathOf("night_watch"), TitleOf("night_watch"), new GlitchDefinition[] { kit.AiOverride },
                 objectives, new Vector3(-14f, 2.2f, -4f), out error);
@@ -128,12 +128,12 @@ namespace BugReport.EditorTools.Levels
             kit.Hall(24f, 6f);
             kit.Decoy("Decoy", "DECOY_BARREL", new Vector3(0f, 0f, 4.5f));
             kit.HeroOnRoute(V(-21f), false, V(-11f), V(-5f), V(5f), V(11f), V(21f));
-            kit.GuardPost("GuardA", "GUARD_A", -8f);
-            kit.GuardPost("GuardB", "GUARD_B", 8f);
+            var guardA = kit.GuardPost("GuardA", "GUARD_A", -8f).GetComponent<GameEntity>();
+            var guardB = kit.GuardPost("GuardB", "GUARD_B", 8f).GetComponent<GameEntity>();
             kit.Exit(21f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("first", "GET PAST THE FIRST GUARD", "One decoy, two guards, and a clock.", kit.ZoneBetween("Zone_Middle", -6.5f, 6.5f)),
-                new ObjectiveDirector.Entry("second", "GET PAST THE SECOND GUARD", "Overrides run out. Don't spend it too early.", kit.ZoneAtExit(21f)));
+                new ObjectiveDirector.Entry("first", "GET PAST THE FIRST GUARD", "One decoy, two guards, and a clock.", kit.ZoneBetween("Zone_Middle", -6.5f, 6.5f), guardA),
+                new ObjectiveDirector.Entry("second", "GET PAST THE SECOND GUARD", "Overrides run out. Don't spend it too early.", kit.ZoneAtExit(21f), guardB));
             return kit.Finish(PathOf("double_shift"), TitleOf("double_shift"), new GlitchDefinition[] { kit.AiOverride },
                 objectives, new Vector3(-22f, 2.2f, -4f), out error);
         }
@@ -149,12 +149,12 @@ namespace BugReport.EditorTools.Levels
             kit.Hall(20f, 6f);
             kit.Decoy("Decoy", "DECOY_BARREL", new Vector3(-12f, 0f, 4.5f));
             kit.HeroOnRoute(V(-17f), false, V(-9f), V(-3f), V(3f), V(9f), V(17f));
-            kit.GuardPost("Guard", "SKELETON_GUARD", -6f);
-            kit.Piston("Piston", "PISTON", 6f, 3f, 0f);
+            var guard = kit.GuardPost("Guard", "SKELETON_GUARD", -6f).GetComponent<GameEntity>();
+            var piston = kit.Piston("Piston", "PISTON", 6f, 3f, 0f);
             kit.Exit(17f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "A decoy would do nicely.", kit.ZoneBetween("Zone_Middle", -4.5f, 3.5f)),
-                new ObjectiveDirector.Entry("exit", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneAtExit(17f)));
+                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "A decoy would do nicely.", kit.ZoneBetween("Zone_Middle", -4.5f, 3.5f), guard),
+                new ObjectiveDirector.Entry("exit", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneAtExit(17f), piston));
             return kit.Finish(PathOf("frozen_stiff"), TitleOf("frozen_stiff"), new GlitchDefinition[] { kit.Freeze, kit.AiOverride },
                 objectives, new Vector3(-18f, 2.2f, -4f), out error);
         }
@@ -170,12 +170,12 @@ namespace BugReport.EditorTools.Levels
             var kit = LevelKit.Begin(out error, 6);
             if (kit == null) return false;
             kit.Hall(16f, 6f);
-            kit.FalseWall("FalseWall", "FALSE_WALL", 0f);
+            var wall = kit.FalseWall("FalseWall", "FALSE_WALL", 0f);
             kit.HeroOnRoute(V(-13f), false, V(-3f), V(3f), V(13f));
             kit.Exit(13f);
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("wall", "GET PAST THE WALL", "Its collision and its looks have come apart. Pull them further apart.",
-                    kit.ZoneBetween("Zone_Beyond", 1f, 11f)),
+                    kit.ZoneBetween("Zone_Beyond", 1f, 11f), wall),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Through the picture of a wall.", kit.ZoneAtExit(13f)));
             return kit.Finish(PathOf("false_wall"), TitleOf("false_wall"), new GlitchDefinition[] { kit.Desync },
                 objectives, new Vector3(-14f, 2.2f, -4f), out error);
@@ -190,12 +190,12 @@ namespace BugReport.EditorTools.Levels
             var kit = LevelKit.Begin(out error, 6);
             if (kit == null) return false;
             kit.Hall(18f, 6f, (-2f, 2f));
-            kit.FalseFloor("FalseFloor", "MAINTENANCE_PLATE", -8f, 4.4f, 8f);
+            var plate = kit.FalseFloor("FalseFloor", "MAINTENANCE_PLATE", -8f, 4.4f, 8f);
             kit.HeroOnRoute(V(-15f), true, V(-3f), V(3f), V(15f));
             kit.Exit(15f);
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("cross", "GET THE HERO ACROSS", "The plate over there is solid. It just isn't where it looks.",
-                    kit.ZoneBetween("Zone_Across", 2.5f, 13f)),
+                    kit.ZoneBetween("Zone_Across", 2.5f, 13f), plate),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Keep going.", kit.ZoneAtExit(15f)));
             return kit.Finish(PathOf("false_floor"), TitleOf("false_floor"), new GlitchDefinition[] { kit.Desync },
                 objectives, new Vector3(-16f, 2.2f, -4f), out error);
@@ -211,13 +211,13 @@ namespace BugReport.EditorTools.Levels
             var kit = LevelKit.Begin(out error, 6);
             if (kit == null) return false;
             kit.Hall(20f, 6f);
-            kit.FalseWall("FalseWall", "FALSE_WALL", -2f);
+            var wall = kit.FalseWall("FalseWall", "FALSE_WALL", -2f);
             kit.Drone("Drone", "SECURITY_DRONE", 4.5f, new Vector2(-9f, -3.5f), new Vector2(9f, -3.5f), new Vector2(9f, 3.5f), new Vector2(-9f, 3.5f));
             kit.HeroOnRoute(V(-17f), false, V(-6f), V(2f), V(17f));
             kit.Exit(17f);
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("wall", "GET PAST THE WALL", "The drone is watching. Freeze it if you want to stay quiet.",
-                    kit.ZoneBetween("Zone_Beyond", 0f, 14f)),
+                    kit.ZoneBetween("Zone_Beyond", 0f, 14f), wall),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Keep your containment low.", kit.ZoneAtExit(17f)));
             return kit.Finish(PathOf("searchlight"), TitleOf("searchlight"), new GlitchDefinition[] { kit.Desync, kit.Freeze },
                 objectives, new Vector3(-18f, 2.2f, -4f), out error);
@@ -232,17 +232,17 @@ namespace BugReport.EditorTools.Levels
             var kit = LevelKit.Begin(out error, 6);
             if (kit == null) return false;
             kit.Hall(30f, 6f, (-4f, 0f));
-            kit.FalseFloor("FalseFloor", "MAINTENANCE_PLATE", -12f, 4.4f, 10f);
+            var plate = kit.FalseFloor("FalseFloor", "MAINTENANCE_PLATE", -12f, 4.4f, 10f);
             kit.Decoy("Decoy", "DECOY_BARREL", new Vector3(5f, 0f, 4.5f));
-            kit.FalseWall("FalseWall", "FALSE_WALL", 18f);
+            var wall = kit.FalseWall("FalseWall", "FALSE_WALL", 18f);
             kit.Drone("Drone", "SECURITY_DRONE", 4.5f, new Vector2(-6f, -3.5f), new Vector2(14f, -3.5f));
             kit.HeroOnRoute(V(-27f), true, V(-6f), V(2f), V(6f), V(14f), V(22f), V(27f));
-            kit.GuardPost("Guard", "SKELETON_GUARD", 10f);
+            var guard = kit.GuardPost("Guard", "SKELETON_GUARD", 10f).GetComponent<GameEntity>();
             kit.Exit(27f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("pit", "CROSS THE PIT", "A plate is lying around, solid in the wrong place.", kit.ZoneBetween("Zone_Pit", 0.5f, 8f)),
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Decoy.", kit.ZoneBetween("Zone_Guard", 12f, 17f)),
-                new ObjectiveDirector.Entry("exit", "GET PAST THE WALL", "Last picture of a wall.", kit.ZoneAtExit(27f)));
+                new ObjectiveDirector.Entry("pit", "CROSS THE PIT", "A plate is lying around, solid in the wrong place.", kit.ZoneBetween("Zone_Pit", 0.5f, 8f), plate),
+                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Decoy.", kit.ZoneBetween("Zone_Guard", 12f, 17f), guard),
+                new ObjectiveDirector.Entry("exit", "GET PAST THE WALL", "Last picture of a wall.", kit.ZoneAtExit(27f), wall));
             return kit.Finish(PathOf("patch_day"), TitleOf("patch_day"), new GlitchDefinition[] { kit.Freeze, kit.AiOverride, kit.Desync },
                 objectives, new Vector3(-28f, 2.2f, -4f), out error);
         }
@@ -259,23 +259,23 @@ namespace BugReport.EditorTools.Levels
             if (kit == null) return false;
             kit.Hall(40f, 6f, (-28f, -24f));
             kit.Barrier("OldBarrier", "OLD_BARRIER", new Vector3(-32f, 1f, 4.6f), new Vector3(3f, 2f, 0.4f), "Solid, and in nobody's way.");
-            kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", -28f, -24f, 2.4f);
+            var bridge = kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", -28f, -24f, 2.4f);
             var plate = kit.HeavyPlate("Plate", new Vector3(-18f, 0f, -3f), 25f);
             kit.Crate("Crate", "CRATE", new Vector3(-18f, 0f, -3f), "Light. The plate wants more.");
-            kit.Weight("Anvil", "ANVIL", new Vector3(-22f, 0f, 4.2f), 60f, 1.2f, "Heavy. Obviously.");
+            var anvil = kit.Weight("Anvil", "ANVIL", new Vector3(-22f, 0f, 4.2f), 60f, 1.2f, "Heavy. Obviously.");
             kit.Gate("Gate", -13f, new[] { plate });
             kit.Decoy("Decoy", "DECOY_BARREL", new Vector3(-9f, 0f, 4.5f));
-            kit.Piston("Piston", "PISTON", 8f, 3f, 0f);
-            kit.FalseWall("FalseWall", "FALSE_WALL", 20f);
+            var piston = kit.Piston("Piston", "PISTON", 8f, 3f, 0f);
+            var wall = kit.FalseWall("FalseWall", "FALSE_WALL", 20f);
             kit.HeroOnRoute(V(-37f), true, V(-30f), V(-22f), V(-15f), V(-11f), V(-8f), V(-3f), V(3f), V(13f), V(18f), V(22f), V(37f));
-            kit.GuardPost("Guard", "SKELETON_GUARD", -5f);
+            var guard = kit.GuardPost("Guard", "SKELETON_GUARD", -5f).GetComponent<GameEntity>();
             kit.Exit(37f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "Start with the hologram.", kit.ZoneBetween("Zone_Gap", -23f, -19f)),
-                new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Heavy plate, light crate.", kit.ZoneBetween("Zone_Gate", -12f, -9f)),
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Decoy.", kit.ZoneBetween("Zone_Guard", -3f, 3f)),
-                new ObjectiveDirector.Entry("piston", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneBetween("Zone_Piston", 11f, 16f)),
-                new ObjectiveDirector.Entry("exit", "CLOSE THE REPORT", "One wall left, and it's only a picture.", kit.ZoneAtExit(37f)));
+                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "Start with the hologram.", kit.ZoneBetween("Zone_Gap", -23f, -19f), bridge),
+                new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Heavy plate, light crate.", kit.ZoneBetween("Zone_Gate", -12f, -9f), anvil),
+                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Decoy.", kit.ZoneBetween("Zone_Guard", -3f, 3f), guard),
+                new ObjectiveDirector.Entry("piston", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneBetween("Zone_Piston", 11f, 16f), piston),
+                new ObjectiveDirector.Entry("exit", "CLOSE THE REPORT", "One wall left, and it's only a picture.", kit.ZoneAtExit(37f), wall));
             return kit.Finish(PathOf("report_closed"), TitleOf("report_closed"),
                 new GlitchDefinition[] { kit.CollisionTransfer, kit.MassSwap, kit.AiOverride, kit.Freeze, kit.Desync },
                 objectives, new Vector3(-38f, 2.2f, -4f), out error);

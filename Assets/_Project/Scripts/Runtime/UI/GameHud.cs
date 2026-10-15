@@ -27,6 +27,7 @@ namespace BugReport.UI
         [SerializeField, OptionalReference] private ObjectiveDirector objectives;
         [SerializeField, OptionalReference] private VisualSettings settings;
         [SerializeField, OptionalReference] private GuideDirector guide;
+        [SerializeField, OptionalReference, Tooltip("Without it the objective hint text is always shown.")] private HintDirector hints;
         [SerializeField, Min(0.5f)] private float objectiveBannerSeconds = 2.5f;
         [SerializeField, Min(0.1f)] private float stageFlashSeconds = 1.2f;
 
@@ -238,7 +239,8 @@ namespace BugReport.UI
             Ui.SetText(objectiveTitle, entry.title);
             Ui.SetText(objectiveHint, entry.hint);
             // While the guide is talking, the objective panel shows only the goal.
-            Ui.Show(objectiveHint, !string.IsNullOrEmpty(entry.hint) && !Ui.IsShown(guideCard));
+            bool hintAllowed = hints == null || hints.ShowHintText;
+            Ui.Show(objectiveHint, hintAllowed && !string.IsNullOrEmpty(entry.hint) && !Ui.IsShown(guideCard));
         }
 
         private void RefreshGuide(float now)

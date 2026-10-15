@@ -22,13 +22,16 @@ namespace BugReport.Level
             public string title;
             [TextArea(1, 3)] public string hint;
             public ObjectiveCondition condition;
+            [OptionalReference, Tooltip("The key object of the solution. Marked in the world only when the player has been stuck for a long time.")]
+            public GameEntity focus;
 
-            public Entry(string id, string title, string hint, ObjectiveCondition condition)
+            public Entry(string id, string title, string hint, ObjectiveCondition condition, GameEntity focus = null)
             {
                 this.id = id;
                 this.title = title;
                 this.hint = hint;
                 this.condition = condition;
+                this.focus = focus;
             }
         }
 
