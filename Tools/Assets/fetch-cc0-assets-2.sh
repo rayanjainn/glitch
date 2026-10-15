@@ -18,16 +18,14 @@ trap 'rm -rf "$TMP"' EXIT
 
 sha_check() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi; }
 
-declare -A fetched
 n=0
 while IFS=$'\t' read -r repo commit src dst sum; do
   key="${repo##*/}"
-  if [ -z "${fetched[$key]:-}" ]; then
+  if [ ! -d "$TMP/$key/.git" ]; then
     echo "Fetching $key @ ${commit:0:10} (progress below)"
     git init -q "$TMP/$key"
     git -C "$TMP/$key" fetch --depth 1 "$repo" "$commit" 2>&1 | tail -1 || true
     git -C "$TMP/$key" -c advice.detachedHead=false checkout -q FETCH_HEAD
-    fetched[$key]=1
   fi
   mkdir -p "$(dirname "$DEST/$dst")"
   cp "$TMP/$key/$src" "$DEST/$dst"
