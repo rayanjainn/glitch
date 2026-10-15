@@ -145,7 +145,7 @@ namespace BugReport.Tests.PlayMode
             hud.RefreshNow();
             Assert.That(Ui.IsShown(alert), Is.True);
             Assert.That(alert.ClassListContains("br-alert--stage1"), Is.True);
-            StringAssert.Contains("ANOMALY DETECTED", hud.Find<Label>("alert-stage").text);
+            StringAssert.Contains("System noticed", hud.Find<Label>("alert-stage").text);
         }
 
         [Test]

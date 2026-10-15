@@ -52,7 +52,7 @@ namespace BugReport.Core.Tests
         [Test]
         public void ObjectiveAndCompletionText()
         {
-            Assert.That(HudFormat.ObjectiveHeader(0, 3), Is.EqualTo("OBJECTIVE 1/3"));
+            Assert.That(HudFormat.ObjectiveHeader(0, 3), Is.EqualTo("Objective 1 of 3"));
             StringAssert.StartsWith("3/3 OBJECTIVES", HudFormat.CompletionSummary(3, 3));
             Assert.That(HudFormat.CompletionSummary(0, 0), Is.EqualTo("HERO REACHED THE EXIT"));
         }
@@ -107,6 +107,25 @@ namespace BugReport.Core.Tests
             Assert.That(visible, Is.Empty);
             Assert.Throws<System.ArgumentOutOfRangeException>(() => new ToastQueue(0));
             Assert.Throws<System.ArgumentOutOfRangeException>(() => new ToastQueue(2, 1f, 2f));
+        }
+
+        [Test]
+        public void PlayerFacingStageText_IsReadable()
+        {
+            Assert.That(HudFormat.StageWord(1), Is.EqualTo("System noticed"));
+            Assert.That(HudFormat.StageWord(99), Is.EqualTo("Emergency!"));
+            Assert.That(HudFormat.AlertLine(3, 4.2f), Is.EqualTo("Patch in 4.2s: your last glitch gets undone"));
+            Assert.That(HudFormat.AlertLine(3, 0f), Is.EqualTo(HudFormat.StageHint(3)));
+            Assert.That(HudFormat.AlertLine(1, 9f), Is.EqualTo(HudFormat.StageHint(1)));
+        }
+
+        [Test]
+        public void Casing_Helpers()
+        {
+            Assert.That(HudFormat.SentenceCase("GET THE HERO ACROSS. NOW!"), Is.EqualTo("Get the hero across. Now!"));
+            Assert.That(HudFormat.SentenceCase(""), Is.Empty);
+            Assert.That(HudFormat.TitleCase("TRAINING LAB"), Is.EqualTo("Training Lab"));
+            Assert.That(HudFormat.TitleCase("TWO DOORS, ONE SHADOW"), Is.EqualTo("Two Doors, One Shadow"));
         }
     }
 }

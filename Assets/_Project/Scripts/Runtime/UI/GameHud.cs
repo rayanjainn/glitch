@@ -38,11 +38,15 @@ namespace BugReport.UI
 
         private VisualElement alert;
         private Label stageLabel;
+        private Label stagePercent;
+        private Label alertIcon;
+        private VisualElement banner;
+        private Label bannerSub;
+        private float bumpUntil;
         private VisualElement pressureFill;
         private Label alertDetail;
         private VisualElement reticle;
         private VisualElement toastStack;
-        private Label banner;
         private VisualElement objectivePanel;
         private Label objectiveHeader;
         private Label objectiveTitle;
@@ -110,9 +114,17 @@ namespace BugReport.UI
         protected override void Build(VisualElement layer)
         {
             alert = Ui.Add(layer, Ui.Element("alert", "br-alert"));
-            stageLabel = Ui.Add(alert, Ui.Text("alert-stage", string.Empty, "br-alert__stage"));
+            var alertRow = Ui.Add(alert, Ui.Element("alert-row", "br-alert__row"));
+            alertIcon = Ui.Add(alertRow, Ui.Text("alert-icon", "!", "br-alert__icon"));
+            stageLabel = Ui.Add(alertRow, Ui.Text("alert-stage", string.Empty, "br-alert__stage"));
+            stagePercent = Ui.Add(alertRow, Ui.Text("alert-percent", string.Empty, "br-alert__percent"));
             var track = Ui.Add(alert, Ui.Element("alert-track", "br-alert__track"));
             pressureFill = Ui.Add(track, Ui.Element("alert-fill", "br-alert__fill"));
+            foreach (var tick in new[] { 20, 45, 70, 90 })
+            {
+                var mark = Ui.Add(track, Ui.Element("alert-tick-" + tick, "br-alert__tick"));
+                mark.style.left = Length.Percent(tick);
+            }
             alertDetail = Ui.Add(alert, Ui.Text("alert-detail", string.Empty, "br-alert__detail"));
 
             reticle = Ui.Add(layer, Ui.Element("reticle", "br-reticle"));
@@ -121,7 +133,11 @@ namespace BugReport.UI
             reticle.Add(Ui.Element("reticle-dot", "br-reticle__dot"));
 
             toastStack = Ui.Add(layer, Ui.Element("toasts", "br-toasts"));
-            banner = Ui.Add(layer, Ui.Text("banner", string.Empty, "br-banner", "br-display"));
+            banner = Ui.Add(layer, Ui.Element("banner", "br-banner"));
+            banner.Add(Ui.Text("banner-check", "\u2713", "br-banner__check"));
+            var bannerText2 = Ui.Add(banner, Ui.Element("banner-text", "br-banner__text"));
+            bannerText2.Add(Ui.Text("banner-title", "Objective complete", "br-banner__title"));
+            bannerSub = Ui.Add(bannerText2, Ui.Text("banner-sub", string.Empty, "br-banner__sub"));
 
             objectivePanel = Ui.Add(layer, Ui.Element("objective", "br-panel", "br-objective"));
             objectiveHeader = Ui.Add(objectivePanel, Ui.Text("objective-header", string.Empty, "br-caption"));
@@ -173,28 +189,21 @@ namespace BugReport.UI
                 return;
             }
 
-            if (model.Stage > shownStage) stageFlashUntil = now + stageFlashSeconds;
-            if (model.Stage >= 1 && !explainedContainment)
-            {
-                explainedContainment = true;
-                toasts.Push("SYSTEM ALERTED. EACH ACTIVE GLITCH RAISES IT. UNDO ONE WITH [R] BEFORE IT PATCHES THEM FOR YOU.", ToastTone.Negative, Ui.Pack(new Color(1f, 0.75f, 0.3f)), now);
-            }
-            Ui.SetText(stageLabel, model.Stage > 0
-                ? "// " + HudFormat.StageName(model.Stage) + " //"
-                : "ALERT " + Mathf.RoundToInt(Mathf.Clamp01(model.Pressure01) * 100f) + "%");
+            if (model.Stage != shownStage && !ComfortSettings.ReducedFlashes) bumpUntil = now + 0.28f;
+            alert.EnableInClassList("br-alert--bump", now < bumpUntil);
+            Ui.SetText(stageLabel, HudFormat.StageWord(model.Stage));
+            Ui.SetText(stagePercent, Mathf.RoundToInt(Mathf.Clamp01(model.Pressure01) * 100f) + "%");
             shownStage = model.Stage;
 
-            Ui.Show(alert, model.Pressure > 0f || model.Stage > 0);
+            Ui.Show(alert, model.Pressure01 > 0.04f || model.Stage > 0);
             pressureFill.style.width = Length.Percent(Mathf.Clamp01(model.Pressure01) * 100f);
             for (int i = 0; i < HudFormat.StageCount; i++) alert.EnableInClassList("br-alert--stage" + i, model.Stage == i);
 
-            Ui.Show(stageLabel, model.Stage > 0 || model.Pressure01 > 0.04f);
-            bool flashing = !ComfortSettings.ReducedFlashes && now < stageFlashUntil && Mathf.Repeat(now * 2.5f, 1f) < 0.5f;
-            alert.EnableInClassList("br-alert--flash", flashing);
+            // Under reduced flashing the warning icon stays still; otherwise it pulses once a second at stage 3+.
+            alertIcon.EnableInClassList("br-alert__icon--pulse", model.Stage >= HudFormat.PatchStage && !ComfortSettings.ReducedFlashes
+                && Mathf.Repeat(now, 1f) < 0.5f);
 
-            string detail = HudFormat.ContainmentDetail(model.Stage, containment.NextPatchIn);
-            if (detail.Length == 0 && model.Stage >= 1) detail = "EACH ACTIVE GLITCH RAISES THE ALERT. AT PATCH THE SYSTEM UNDOES THEM.";
-            else if (detail.Length > 0) detail += ": YOUR LATEST GLITCH IS UNDONE";
+            string detail = HudFormat.AlertLine(model.Stage, containment.NextPatchIn);
             Ui.Show(alertDetail, detail.Length > 0);
             Ui.SetText(alertDetail, detail);
         }
@@ -236,7 +245,7 @@ namespace BugReport.UI
         private void RefreshObjective(float now)
         {
             Ui.Show(banner, now < bannerUntil);
-            Ui.SetText(banner, bannerText);
+            Ui.SetText(bannerSub, bannerText);
 
             var tracker = objectives != null ? objectives.Tracker : null;
             bool show = tracker != null && !tracker.AllComplete && objectives.Count > 0;
@@ -245,7 +254,7 @@ namespace BugReport.UI
             int i = tracker.CurrentIndex;
             var entry = objectives.Get(i);
             Ui.SetText(objectiveHeader, HudFormat.ObjectiveHeader(i, objectives.Count));
-            Ui.SetText(objectiveTitle, entry.title);
+            Ui.SetText(objectiveTitle, HudFormat.SentenceCase(entry.title));
             Ui.SetText(objectiveHint, entry.hint);
             // While the guide is talking, the objective panel shows only the goal.
             bool hintAllowed = hints == null || hints.ShowHintText;
@@ -356,7 +365,7 @@ namespace BugReport.UI
 
         private void OnObjectiveCompleted(int index)
         {
-            bannerText = "OBJECTIVE COMPLETE: " + objectives.Get(index).title;
+            bannerText = HudFormat.SentenceCase(objectives.Get(index).title);
             bannerUntil = Time.unscaledTime + objectiveBannerSeconds;
         }
 

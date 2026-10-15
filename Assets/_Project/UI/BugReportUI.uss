@@ -697,3 +697,80 @@
 .br-shape-3 { width: 18px; height: 8px; border-radius: 4px; }
 .br-shape-4 { width: 8px; height: 18px; border-radius: 4px; }
 .br-shape-5 { border-radius: 1px; border-width: 2px; border-color: #FFFFFF; }
+
+/* =====================================================================================
+   LOOK v2 (typography, top-centre alert pill, objective card). Later rules win on purpose.
+   One display face (Lilita One) everywhere; sentence case; no faux bold; no '//' decoration.
+   ===================================================================================== */
+.br-root { -unity-font: url("project://database/Assets/ThirdParty/Fonts/LilitaOne/LilitaOne-Regular.ttf"); }
+.br-root Label, .br-root Button, .br-root Toggle, .br-root Slider { -unity-font-style: normal; letter-spacing: 0.5px; }
+
+.br-caption { font-size: 15px; letter-spacing: 1px; color: #9FC3D4; }
+.br-title { font-size: 48px; letter-spacing: 1px; }
+
+/* ---- top-centre alert pill ---- */
+.br-alert {
+    top: 20px;
+    width: 520px;
+    padding: 10px 18px 12px 18px;
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(8, 18, 28, 0.92);
+    transition-property: scale;
+    transition-duration: 0.28s;
+    transition-timing-function: ease-out-back;
+}
+.br-alert--bump { scale: 1.08 1.08; }
+.br-alert__row { flex-direction: row; align-items: center; width: 100%; }
+.br-alert__icon {
+    width: 26px; height: 26px; margin-right: 12px;
+    border-width: 3px; border-radius: 13px; border-color: #40F2FF;
+    font-size: 18px; color: #40F2FF; -unity-text-align: middle-center;
+    transition-property: scale; transition-duration: 0.5s; transition-timing-function: ease-in-out;
+}
+.br-alert__icon--pulse { scale: 1.15 1.15; }
+.br-alert__stage { flex-grow: 1; font-size: 28px; color: #40F2FF; letter-spacing: 0.5px; -unity-text-outline-width: 0; }
+.br-alert__percent { min-width: 64px; font-size: 28px; color: #FFFFFF; -unity-text-align: middle-right; }
+.br-alert__track {
+    height: 14px; margin-top: 8px; border-radius: 7px;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+.br-alert__fill { transition-property: width; transition-duration: 0.25s; transition-timing-function: ease-out; background-color: #40F2FF; }
+.br-alert__tick { position: absolute; top: 0; bottom: 0; width: 2px; background-color: rgba(8, 18, 28, 0.9); }
+.br-alert__detail { margin-top: 8px; min-height: 24px; font-size: 18px; color: #DFF7FF; white-space: normal; -unity-font-style: normal; }
+.br-alert--stage0 .br-alert__stage, .br-alert--stage0 .br-alert__icon { color: #40F2FF; border-color: #40F2FF; }
+.br-alert--stage1 .br-alert__stage, .br-alert--stage1 .br-alert__icon { color: #FFD24A; border-color: #FFD24A; }
+.br-alert--stage2 .br-alert__stage, .br-alert--stage2 .br-alert__icon { color: #FF9A3D; border-color: #FF9A3D; }
+.br-alert--stage3 .br-alert__stage, .br-alert--stage3 .br-alert__icon { color: #FF4057; border-color: #FF4057; }
+.br-alert--stage4 .br-alert__stage, .br-alert--stage4 .br-alert__icon { color: #FF5C73; border-color: #FF5C73; }
+.br-alert--stage0 .br-alert__fill { background-color: #40F2FF; }
+
+/* ---- objective-complete card (below the pill) ---- */
+.br-banner {
+    left: 50%; right: auto; top: 140px; translate: -50% 0;
+    flex-direction: row; align-items: center;
+    max-width: 640px; padding: 12px 24px 12px 16px; border-radius: 10px;
+    background-color: rgba(8, 18, 28, 0.94);
+    font-size: 20px; letter-spacing: 0; -unity-text-outline-width: 0;
+}
+.br-banner__check {
+    width: 32px; height: 32px; margin-right: 14px; border-radius: 16px;
+    background-color: #7CFFB2; color: #06141C; font-size: 20px; -unity-text-align: middle-center;
+}
+.br-banner__title { font-size: 26px; color: #7CFFB2; }
+.br-banner__sub { font-size: 20px; color: #DFF7FF; white-space: normal; }
+
+/* ---- objective panel (bottom-left) ---- */
+.br-objective { width: 420px; }
+.br-objective__title { font-size: 26px; letter-spacing: 0.5px; }
+.br-objective__hint { font-size: 17px; color: #CDEAF5; }
+
+/* ---- text sizes: nothing below 14px ---- */
+.br-key { font-size: 14px; }
+.br-chip { font-size: 14px; }
+.br-slot__name { font-size: 16px; letter-spacing: 0.5px; }
+.br-guide__text { font-size: 24px; }
+.br-prompt { font-size: 18px; letter-spacing: 0.5px; }
+.br-menu__tagline { font-size: 24px; letter-spacing: 0; }
+.br-button.unity-button { font-size: 20px; letter-spacing: 0.5px; }
