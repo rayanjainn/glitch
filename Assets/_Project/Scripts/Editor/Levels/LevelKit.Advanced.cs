@@ -5,6 +5,7 @@ using BugReport.Core.Entities;
 using BugReport.EditorTools.Setup;
 using BugReport.Glitches;
 using BugReport.Guards;
+using BugReport.Hero;
 using BugReport.Level;
 using UnityEditor;
 using UnityEngine;
@@ -39,6 +40,44 @@ namespace BugReport.EditorTools.Levels
             : desync = LoadOrCreate<DesyncDefinition>(DesyncPath, d => d.ApplyDefaults());
 
         private readonly List<Action<Transform, ContainmentDirector>> deferred = new List<Action<Transform, ContainmentDirector>>();
+
+        // ---------------------------------------------------------------- branching routes
+
+        /// <summary>A static wall along x at <paramref name="z"/> between two x positions (splits the hall into lanes).</summary>
+        public void LaneDivider(string name, float fromX, float toX, float z)
+            => Block(name, Env, new Vector3((fromX + toX) * 0.5f, WallHeight * 0.5f, z), new Vector3(toX - fromX, WallHeight, Thickness), Mats.Wall, World);
+
+        /// <summary>A solid, collision-transferable wall closing one lane (centre z, half width).</summary>
+        public GameEntity LaneWall(string name, string displayName, float x, float z, float halfWidth)
+        {
+            var go = Block(name, Env, new Vector3(x, 1.5f, z), new Vector3(0.5f, 3f, halfWidth * 2f), Mats.Firewall, World);
+            AddEntity(go, displayName, EntityCategory.Structure, EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
+                "Closes this lane. Its collision looks negotiable.");
+            AddCollision(go, CollisionMode.Solid, Mats);
+            return go.GetComponent<GameEntity>();
+        }
+
+        /// <summary>
+        /// The hero on a branching route graph: node 0 is the start, <paramref name="links"/> are undirected index pairs,
+        /// the last point is the exit. The hero takes the shortest road that is open right now and re-plans when that changes.
+        /// </summary>
+        public HeroController HeroOnGraph(bool requireGround, Vector3[] points, (int a, int b)[] links)
+        {
+            var heroGo = CreateHeroBody(Mats, points[0] + Vector3.up * 1.05f, 90f, out var cc);
+            var graphRoot = new GameObject("HeroNavGraph");
+            var graphNodes = new HeroNavNode[points.Length];
+            for (int i = 0; i < points.Length; i++) graphNodes[i] = NavNode(graphRoot.transform, i == 0 ? "N_Start" : "N_" + i, points[i]);
+            var adjacency = new List<HeroNavNode>[points.Length];
+            for (int i = 0; i < adjacency.Length; i++) adjacency[i] = new List<HeroNavNode>();
+            foreach (var (a, b) in links) adjacency[a].Add(graphNodes[b]);
+            for (int i = 0; i < graphNodes.Length; i++) graphNodes[i].Configure(adjacency[i].ToArray());
+            var graph = graphRoot.AddComponent<HeroNavGraph>();
+            graph.Configure(graphNodes, cc.radius, cc.height, requireGround);
+            Goal = graphNodes[graphNodes.Length - 1];
+            Hero = heroGo.AddComponent<HeroController>();
+            Hero.Configure(graph, Goal, newStartDelay: 2f);
+            return Hero;
+        }
 
         // ---------------------------------------------------------------- Property Swap
 

@@ -35,6 +35,9 @@ namespace BugReport.EditorTools.Setup
             L("two_birds", "Level_04_TwoBirds", "TWO BIRDS", "1: HELLO, WORLD", 1, 1,
                 "One transfer can fix two problems, if you think about where the solidity lands.",
                 "The designers will notice that one. They won't understand it."),
+            L("fork_in_the_road", "Level_21_ForkInTheRoad", "FORK IN THE ROAD", "1: HELLO, WORLD", 1, 1,
+                "Two roads. The knight takes the shortest one that is open. You decide which one that is.",
+                "He never noticed there was a choice."),
             L("three_plates", "Level_05_ThreePlates", "THREE PLATES", "2: DUPLICATE OBJECTIVE", 2, 2,
                 "Three plates, one crate. The game never said you only get one.",
                 "ITEM COUNT: +2. Nobody authorised that."),
@@ -77,9 +80,9 @@ namespace BugReport.EditorTools.Setup
             L("searchlight", "Level_18_Searchlight", "SEARCHLIGHT", "6: FALSE FLOORS", 6, 2,
                 "The system sends a drone. Anything in its light is reported. Mind your containment.",
                 "Drone report: 'I saw nothing. I saw it very clearly.'"),
-            L("patch_day", "Level_19_PatchDay", "PATCH DAY", "6: FALSE FLOORS", 6, 3,
-                "The last room before the end of the world, with every system watching. Mind the alarm.",
-                "Patch notes: 'Fixed a few things.' Several more were not fixed."),
+            L("stack_the_order", "Level_19_StackTheOrder", "STACK THE ORDER", "6: FALSE FLOORS", 6, 2,
+                "The system is on edge today. Whatever you break first, it fixes first.",
+                "Patch notes: 'Fixed a crate.' The bridge was not mentioned."),
             L("report_closed", "Level_20_ReportClosed", "REPORT CLOSED", "7: REPORT CLOSED", 7, 5,
                 "The last room. Every rule you learned, in order. Close the report.",
                 "BUG REPORT #1: CLOSED. Resolution: 'works as intended'. The knight walks home. You stay in the game."),
@@ -101,6 +104,21 @@ namespace BugReport.EditorTools.Setup
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssetIfDirty(catalog);
             return catalog;
+        }
+
+        /// <summary>Deletes level scenes that are no longer in the catalog (renamed or replaced levels).</summary>
+        public static int DeleteStaleScenes()
+        {
+            var known = new HashSet<string>();
+            foreach (var level in Levels) known.Add(ScenePath(level));
+            int deleted = 0;
+            foreach (var guid in AssetDatabase.FindAssets("t:Scene Level_", new[] { ScenesFolder }))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!Path.GetFileName(path).StartsWith("Level_") || known.Contains(path)) continue;
+                if (AssetDatabase.DeleteAsset(path)) deleted++;
+            }
+            return deleted;
         }
 
         /// <summary>Main menu, then levels in catalog order, then any other scenes (TestRoom) at the end.</summary>

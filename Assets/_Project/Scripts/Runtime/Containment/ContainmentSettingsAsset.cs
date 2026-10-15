@@ -55,6 +55,13 @@ namespace BugReport.Containment
             return null;
         }
 
+        /// <summary>Authoring helper: stage thresholds (4 values each; exit values below the matching enter value).</summary>
+        public void ConfigureStages(float[] newEnter, float[] newExit)
+        {
+            enterThresholds = newEnter;
+            exitThresholds = newExit;
+        }
+
         /// <summary>Authoring helper for tests and tooling.</summary>
         public void ConfigureResponses(float[] newPatchInterval, float[] newCooldownScale)
         {

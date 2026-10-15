@@ -127,17 +127,34 @@ namespace BugReport.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Level19_PatchDay()
+        public IEnumerator Level19_StackTheOrder()
         {
-            yield return Load("Level_19_PatchDay");
+            yield return Load("Level_19_StackTheOrder");
             yield return HeroBlocked("at the pit");
-            Apply<DesyncDefinition>(null, Named("MAINTENANCE_PLATE"));
-            yield return Objectives(1, "across the pit");
-            yield return HeroBlocked("at the guard");
-            Apply<AiOverrideDefinition>(Named("SKELETON_GUARD"), Named("DECOY_BARREL"));
-            yield return Objectives(2, "past the guard");
-            yield return HeroBlocked("at the wall");
-            Apply<DesyncDefinition>(null, Named("FALSE_WALL"));
+            // The sacrifice first: the system patches the oldest glitch, so the bridge must not be it.
+            Apply<FreezeDefinition>(null, Named("CRATE"));
+            yield return GameSeconds(0.7f);
+            Apply<CollisionTransferDefinition>(Named("OLD_BARRIER"), Named("HOLO_BRIDGE"));
+            yield return Finished();
+        }
+
+        [UnityTest]
+        public IEnumerator Level19_StackTheOrder_WrongOrderDropsTheHero()
+        {
+            yield return Load("Level_19_StackTheOrder");
+            yield return HeroBlocked("at the pit");
+            Apply<CollisionTransferDefinition>(Named("OLD_BARRIER"), Named("HOLO_BRIDGE"));
+            yield return GameSeconds(0.7f);
+            Apply<FreezeDefinition>(null, Named("CRATE"));
+            yield return WaitFor(() => hero.RespawnCount >= 1, 30f, "the system patching the bridge under the hero");
+        }
+
+        [UnityTest]
+        public IEnumerator Level21_ForkInTheRoad()
+        {
+            yield return Load("Level_21_ForkInTheRoad");
+            yield return HeroBlocked("at the first firewall");
+            Apply<CollisionTransferDefinition>(Named("FIREWALL_SOUTH"), Named("SHADOW_DECAL"));
             yield return Finished();
         }
 

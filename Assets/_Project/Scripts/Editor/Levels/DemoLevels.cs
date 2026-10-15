@@ -75,9 +75,13 @@ namespace BugReport.EditorTools.Levels
             Run("Level_16_FalseWall", () => (FullGameLevels.FalseWall(out var e), e));
             Run("Level_17_FalseFloor", () => (FullGameLevels.FalseFloor(out var e), e));
             Run("Level_18_Searchlight", () => (FullGameLevels.Searchlight(out var e), e));
-            Run("Level_19_PatchDay", () => (FullGameLevels.PatchDay(out var e), e));
+            Run("Level_19_StackTheOrder", () => (FullGameLevels.StackTheOrder(out var e), e));
+            Run("Level_21_ForkInTheRoad", () => (FullGameLevels.ForkInTheRoad(out var e), e));
             Run("Level_20_ReportClosed", () => (FullGameLevels.ReportClosed(out var e), e));
             Run("MainMenu", () => (MenuBuilder.Build(out var e), e)); // last, so it opens when done
+            int stale = LevelCatalogBuilder.DeleteStaleScenes();
+            if (stale > 0) lines.Append("  removed ").Append(stale).Append(" scene(s) no longer in the catalog\n");
+            LevelCatalogBuilder.SyncBuildSettings();
             report = lines.ToString();
             return failures;
         }

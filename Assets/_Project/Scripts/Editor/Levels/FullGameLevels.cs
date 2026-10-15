@@ -224,27 +224,65 @@ namespace BugReport.EditorTools.Levels
         }
 
         /// <summary>
-        /// PATCH DAY. False floor, a guard, a false wall, with a drone overhead. Solution: Desync the plate, AI Override
-        /// the guard, Desync the wall. Lesson: it all adds up; the system patches the oldest glitch when it has had enough.
+        /// STACK THE ORDER. A long hologram bridge, and a system on edge: it undoes your OLDEST glitch a few seconds
+        /// after you have two running. Solution: Freeze a crate first (a sacrifice), then Collision Transfer
+        /// OLD_BARRIER → HOLO_BRIDGE; the patch eats the freeze, not the bridge. The wrong order drops the hero
+        /// into the pit mid-bridge. Lesson: the system patches the oldest glitch, so order is a resource.
         /// </summary>
-        public static bool PatchDay(out string error)
+        public static bool StackTheOrder(out string error)
         {
             var kit = LevelKit.Begin(out error, 6);
             if (kit == null) return false;
-            kit.Hall(30f, 6f, (-4f, 0f));
-            var plate = kit.FalseFloor("FalseFloor", "MAINTENANCE_PLATE", -12f, 4.4f, 10f);
-            kit.Decoy("Decoy", "DECOY_BARREL", new Vector3(5f, 0f, 4.5f));
-            var wall = kit.FalseWall("FalseWall", "FALSE_WALL", 18f);
-            kit.Drone("Drone", "SECURITY_DRONE", 4.5f, new Vector2(-6f, -3.5f), new Vector2(14f, -3.5f));
-            kit.HeroOnRoute(V(-27f), true, V(-6f), V(2f), V(6f), V(14f), V(22f), V(27f));
-            var guard = kit.GuardPost("Guard", "SKELETON_GUARD", 10f).GetComponent<GameEntity>();
-            kit.Exit(27f);
+            kit.Containment = TestRoomBuilder.LoadOrCreate<BugReport.Containment.ContainmentSettingsAsset>(
+                "Assets/_Project/ScriptableObjects/Containment/CS_StackTheOrder.asset", a =>
+                {
+                    a.ConfigureStages(new[] { 4f, 8f, 12f, 90f }, new[] { 2f, 5f, 8f, 80f });
+                    a.ConfigureResponses(new[] { 0f, 0f, 0f, 5f, 3f }, new[] { 1f, 1f, 1f, 1f, 1f });
+                });
+            kit.Hall(26f, 6f, (-6f, 8f));
+            var barrier = kit.Barrier("OldBarrier", "OLD_BARRIER", new Vector3(-12f, 1f, 4.6f), new Vector3(3f, 2f, 0.4f), "Solid, and in nobody's way.");
+            var bridge = kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", -6f, 8f, 2.4f);
+            kit.Crate("Crate", "CRATE", new Vector3(-16f, 0f, -3.5f), "Just a crate. Nobody will miss it.");
+            kit.Exit(22f);
+            kit.HeroOnRoute(V(-22f), true, V(-8f), V(10f), V(22f));
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("pit", "CROSS THE PIT", "A plate is lying around, solid in the wrong place.", kit.ZoneBetween("Zone_Pit", 0.5f, 8f), plate),
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Something in the room can draw the guard away.", kit.ZoneBetween("Zone_Guard", 12f, 17f), guard),
-                new ObjectiveDirector.Entry("exit", "GET PAST THE WALL", "Last picture of a wall.", kit.ZoneAtExit(27f), wall));
-            return kit.Finish(PathOf("patch_day"), TitleOf("patch_day"), new GlitchDefinition[] { kit.Freeze, kit.AiOverride, kit.Desync },
-                objectives, new Vector3(-28f, 2.2f, -4f), out error);
+                new ObjectiveDirector.Entry("bridge", "CROSS THE LONG BRIDGE",
+                    "The system is on edge: with two glitches running it undoes the oldest one a few seconds later.",
+                    kit.ZoneBetween("Zone_Across", 8.5f, 12f), bridge),
+                new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Almost.", kit.ZoneAtExit(22f)));
+            return kit.Finish(PathOf("stack_the_order"), TitleOf("stack_the_order"), new GlitchDefinition[] { kit.CollisionTransfer, kit.Freeze },
+                objectives, new Vector3(-23f, 2.2f, -4f), out error);
+        }
+
+        // ================================================================ chapter 1: a fork
+
+        /// <summary>
+        /// FORK IN THE ROAD. Two lanes round a long wall; the hero takes the shortest road that is open. The south lane has
+        /// one firewall, the north lane two, and there is one shadow. Solution: Collision Transfer FIREWALL_SOUTH → SHADOW_DECAL.
+        /// Opening the north lane's first wall only sends the hero to the second; opening the south lane later makes him turn back.
+        /// Lesson: you steer the hero by choosing which road you open.
+        /// </summary>
+        public static bool ForkInTheRoad(out string error)
+        {
+            var kit = LevelKit.Begin(out error, 1);
+            if (kit == null) return false;
+            kit.Hall(22f, 8f);
+            kit.LaneDivider("LaneDivider", -6f, 6f, 0f);
+            var south = kit.LaneWall("FirewallSouth", "FIREWALL_SOUTH", 0f, -4.1f, 3.9f);
+            kit.LaneWall("FirewallNorthA", "FIREWALL_NORTH_A", -3f, 4.1f, 3.9f);
+            kit.LaneWall("FirewallNorthB", "FIREWALL_NORTH_B", 3f, 4.1f, 3.9f);
+            kit.Shadow("Shadow", "SHADOW_DECAL", new Vector3(-14f, 0.02f, 5f));
+            kit.Exit(19f);
+            kit.HeroOnGraph(false,
+                new[] { new Vector3(-18f, 0f, 0f), new Vector3(-9f, 0f, 0f), new Vector3(-7f, 0f, -4f), new Vector3(7f, 0f, -4f),
+                        new Vector3(9f, 0f, 0f), new Vector3(-7f, 0f, 4f), new Vector3(7f, 0f, 4f), new Vector3(19f, 0f, 0f) },
+                new[] { (0, 1), (1, 2), (2, 3), (3, 4), (1, 5), (5, 6), (6, 4), (4, 7) });
+            var objectives = kit.Objectives(
+                new ObjectiveDirector.Entry("fork", "GET THE HERO ROUND THE WALL", "The road is the shortest one that is open. One shadow to spend.",
+                    kit.ZoneBetween("Zone_Round", 4f, 8f), south),
+                new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Off you go.", kit.ZoneAtExit(19f)));
+            return kit.Finish(PathOf("fork_in_the_road"), TitleOf("fork_in_the_road"), new GlitchDefinition[] { kit.CollisionTransfer },
+                objectives, new Vector3(-19f, 2.2f, -5f), out error);
         }
 
         // ================================================================ chapter 7: finale

@@ -612,9 +612,10 @@ namespace UnityEditor
         public static string CreateFolder(string parent, string name) => throw null;
         public static void CreateAsset(Object o, string p) { }
         public static string[] FindAssets(string filter) => throw null;
+        public static string[] FindAssets(string filter, string[] searchInFolders) => throw null;
+        public static string GUIDToAssetPath(string guid) => throw null;
         public static void ImportAsset(string path) { }
         public static void AddObjectToAsset(Object o, Object asset) { }
-        public static string GUIDToAssetPath(string guid) => throw null;
         public static string GetAssetPath(Object o) => throw null;
     }
     public static class EditorUtility
