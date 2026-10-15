@@ -28,7 +28,7 @@ namespace UnityEngine
     public class ScriptableObject : Object { public static T CreateInstance<T>() where T : ScriptableObject => throw null; }
     public class Sprite : Object { }
     [AttributeUsage(AttributeTargets.Class)] public class CreateAssetMenuAttribute : Attribute { public string menuName; public string fileName; public int order; }
-    public static class ColorUtility { public static string ToHtmlStringRGB(Color c) => throw null; }
+    public static class ColorUtility { public static string ToHtmlStringRGB(Color c) => throw null; public static bool TryParseHtmlString(string s, out Color c) { c = default; return false; } }
 
     // Unity 6.x engine type. Present so a project type with the same simple name
     // produces the same CS0104 ambiguity here that it does in Unity.
@@ -316,6 +316,7 @@ namespace UnityEngine
         public AudioClip clip { get => throw null; set { } } public float volume { get => throw null; set { } }
         public void Play() { } public void Stop() { }
     }
+    public enum FogMode { Linear = 1, Exponential = 2, ExponentialSquared = 3 }
     public enum LightType { Spot, Directional, Point }
     public enum LightShadows { None, Hard, Soft }
     public class Light : Behaviour
@@ -367,6 +368,9 @@ namespace UnityEngine
         public static Rendering.AmbientMode ambientMode { get => throw null; set { } }
         public static Color ambientSkyColor { get => throw null; set { } } public static Color ambientEquatorColor { get => throw null; set { } }
         public static Color ambientGroundColor { get => throw null; set { } } public static Light sun { get => throw null; set { } }
+        public static Material skybox { get => throw null; set { } } public static bool fog { get => throw null; set { } }
+        public static Color fogColor { get => throw null; set { } } public static FogMode fogMode { get => throw null; set { } }
+        public static float fogDensity { get => throw null; set { } }
     }
     public enum EventType { MouseDown = 0, Repaint = 7, Layout = 8 }
     public class Event { public static Event current => throw null; public EventType type => throw null; }
@@ -592,6 +596,7 @@ namespace UnityEditor
         public SerializedProperty GetIterator() => throw null;
         public bool ApplyModifiedPropertiesWithoutUndo() => throw null; public void Update() { }
     }
+    public static class ShaderUtil { public static bool ShaderHasError(Shader s) => throw null; }
     public static class AssetDatabase
     {
         public static T LoadAssetAtPath<T>(string p) where T : Object => throw null;

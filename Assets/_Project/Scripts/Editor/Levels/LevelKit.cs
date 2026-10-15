@@ -48,7 +48,7 @@ namespace BugReport.EditorTools.Levels
         // ---------------------------------------------------------------- start / finish
 
         /// <summary>New empty scene with every shared asset loaded (after NewScene, see TestRoomBuilder).</summary>
-        public static LevelKit Begin(out string error)
+        public static LevelKit Begin(out string error, int chapter = 1)
         {
             error = null;
             EnsureFolder(LevelCatalogBuilder.ScenesFolder);
@@ -76,6 +76,7 @@ namespace BugReport.EditorTools.Levels
             kit.World = GameLayers.Index(GameLayers.World);
             kit.Intangible = GameLayers.Index(GameLayers.Intangible);
             BuildLighting();
+            ChapterTheme.Apply(chapter, RenderSettings.sun);
             kit.Env = new GameObject("--- ENVIRONMENT ---").transform;
             return kit;
         }
