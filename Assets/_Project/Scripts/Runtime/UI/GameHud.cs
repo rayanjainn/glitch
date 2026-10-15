@@ -57,6 +57,7 @@ namespace BugReport.UI
         private Label prompt;
 
         private int shownStage;
+        private bool explainedContainment;
         private float stageFlashUntil;
         private float bannerUntil;
         private string bannerText = string.Empty;
@@ -173,6 +174,11 @@ namespace BugReport.UI
             }
 
             if (model.Stage > shownStage) stageFlashUntil = now + stageFlashSeconds;
+            if (model.Stage >= 1 && !explainedContainment)
+            {
+                explainedContainment = true;
+                toasts.Push("THE SYSTEM NOTICED YOU. FEWER GLITCHES AT ONCE KEEPS IT CALM.", ToastTone.Negative, Ui.Pack(new Color(1f, 0.75f, 0.3f)), now);
+            }
             if (model.Stage != shownStage || stageLabel.text.Length == 0)
                 Ui.SetText(stageLabel, "// " + HudFormat.StageName(model.Stage) + " //");
             shownStage = model.Stage;
