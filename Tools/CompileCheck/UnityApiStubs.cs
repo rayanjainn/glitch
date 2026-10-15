@@ -9,7 +9,6 @@ using System.Collections.Generic;
 
 namespace UnityEngine
 {
-    public enum FindObjectsSortMode { None, InstanceID }
     public class Object
     {
         public string name { get => throw null; set { } }
@@ -20,9 +19,8 @@ namespace UnityEngine
         public static void DestroyImmediate(Object o) { }
         public static T Instantiate<T>(T original) where T : Object => throw null;
         public static T FindAnyObjectByType<T>() where T : Object => throw null;
-        public static T[] FindObjectsByType<T>(FindObjectsSortMode sortMode) where T : Object => throw null;
+        public static T[] FindObjectsByType<T>() where T : Object => throw null;
         public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent) where T : Object => throw null;
-        public int GetInstanceID() => throw null;
     }
     public enum KeyCode { None = 0, Escape = 27 }
     public class YieldInstruction { }
@@ -221,7 +219,7 @@ namespace UnityEngine
         public static float Lerp(float a, float b, float t) => throw null;
         public static int RoundToInt(float v) => throw null; public static float Round(float v) => throw null; public static int CeilToInt(float v) => throw null;
     }
-    public static class Time { public static float fixedDeltaTime => throw null; public static float deltaTime => throw null; public static float unscaledDeltaTime => throw null; public static float time => throw null; public static float unscaledTime => throw null; public static float timeScale { get => throw null; set { } } }
+    public static class Time { public static float fixedDeltaTime => throw null; public static float deltaTime => throw null; public static float unscaledDeltaTime => throw null; public static float time => throw null; public static float realtimeSinceStartup => throw null; public static float unscaledTime => throw null; public static float timeScale { get => throw null; set { } } }
     public enum CursorLockMode { None, Locked, Confined }
     public static class Cursor { public static CursorLockMode lockState { get => throw null; set { } } public static bool visible { get => throw null; set { } } }
     public static class Screen { public static int width => throw null; public static int height => throw null; public static bool fullScreen { get => throw null; set { } } }

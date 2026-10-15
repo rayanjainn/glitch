@@ -36,7 +36,7 @@ namespace BugReport.Progress
         private void ApplyUiScale(float scale)
         {
             documents.Clear();
-            documents.AddRange(FindObjectsByType<UnityEngine.UIElements.UIDocument>(FindObjectsSortMode.None));
+            documents.AddRange(FindObjectsByType<UnityEngine.UIElements.UIDocument>());
             foreach (var document in documents)
             {
                 var panel = document.panelSettings;

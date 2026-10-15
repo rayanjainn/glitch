@@ -201,7 +201,7 @@ namespace BugReport.UI
             {
                 heroController = heroAnimator.GetComponent<HeroController>();
                 if (heroController == null) return;
-                barks = new HeroBarks(heroController.GetInstanceID());
+                barks = new HeroBarks(Mathf.RoundToInt(Time.realtimeSinceStartup * 1000f));
                 lastHeroState = heroController.State;
                 lastRespawnCount = heroController.RespawnCount;
             }
