@@ -358,5 +358,18 @@ namespace BugReport.Core.Tests
                 previous = line;
             }
         }
+    
+    public class GuardLureMovementTests
+    {
+        [Test]
+        public void LuredGuard_MovesImmediately_EvenMidPatrolPause()
+        {
+            var brain = new GuardBrain(2, patrolPauseSeconds: 5f, lingerSeconds: 3f);
+            Assert.That(brain.ShouldMove, Is.False, "paused at the start of the route");
+            brain.Distract();
+            Assert.That(brain.State, Is.EqualTo(GuardState.Investigate));
+            Assert.That(brain.ShouldMove, Is.True, "a lured guard walks to the decoy at once");
+        }
     }
+}
 }

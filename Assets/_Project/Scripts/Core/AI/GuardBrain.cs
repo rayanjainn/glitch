@@ -41,7 +41,7 @@ namespace BugReport.Core.AI
         /// <summary>The patrol point being walked to (Patrol, Return).</summary>
         public int PatrolIndex { get; private set; }
         /// <summary>True when the adapter should be moving the guard this frame.</summary>
-        public bool ShouldMove => State != GuardState.Disabled && wait <= 0f;
+        public bool ShouldMove => State != GuardState.Disabled && (State == GuardState.Investigate || wait <= 0f);
         public bool IsNeutralized => State == GuardState.Disabled || State == GuardState.Investigate;
 
         public event Action<GuardState, GuardState> StateChanged;

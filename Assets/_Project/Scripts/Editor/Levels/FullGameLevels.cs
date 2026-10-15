@@ -212,7 +212,7 @@ namespace BugReport.EditorTools.Levels
             if (kit == null) return false;
             kit.Hall(20f, 6f);
             var wall = kit.FalseWall("FalseWall", "FALSE_WALL", -2f);
-            kit.Drone("Drone", "SECURITY_DRONE", 4.5f, new Vector2(-9f, -3.5f), new Vector2(9f, -3.5f), new Vector2(9f, 3.5f), new Vector2(-9f, 3.5f));
+            kit.Drone("Drone", "SECURITY_DRONE", 4.5f, new Vector2(2f, -3.5f), new Vector2(10f, -3.5f), new Vector2(10f, 3.5f), new Vector2(2f, 3.5f));
             kit.HeroOnRoute(V(-17f), false, V(-6f), V(2f), V(17f));
             kit.Exit(17f);
             var objectives = kit.Objectives(
@@ -267,7 +267,7 @@ namespace BugReport.EditorTools.Levels
             kit.Decoy("Decoy", "DECOY_BARREL", new Vector3(-9f, 0f, 4.5f));
             var piston = kit.Piston("Piston", "PISTON", 8f, 3f, 0f);
             var wall = kit.FalseWall("FalseWall", "FALSE_WALL", 20f);
-            kit.HeroOnRoute(V(-37f), true, V(-30f), V(-22f), V(-15f), V(-11f), V(-8f), V(-3f), V(3f), V(13f), V(18f), V(22f), V(37f));
+            kit.HeroOnRoute(V(-37f), true, V(-30f), V(-22f), V(-15f), V(-11f), V(-8f), V(-2.5f), V(3f), V(13f), V(18f), V(22f), V(37f));
             var guard = kit.GuardPost("Guard", "SKELETON_GUARD", -5f).GetComponent<GameEntity>();
             kit.Exit(37f);
             var objectives = kit.Objectives(
