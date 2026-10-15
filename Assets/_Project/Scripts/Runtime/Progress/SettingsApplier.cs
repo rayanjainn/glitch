@@ -20,10 +20,34 @@ namespace BugReport.Progress
             Apply();
         }
 
+        private void Start() => Apply(); // UI documents may not exist yet in OnEnable
+
         private void OnDisable()
         {
             SaveStore.SettingsChanged -= Apply;
             SaveStore.Flush();
+        }
+
+        private readonly System.Collections.Generic.List<UnityEngine.UIElements.UIDocument> documents = new System.Collections.Generic.List<UnityEngine.UIElements.UIDocument>();
+        private readonly System.Collections.Generic.HashSet<UnityEngine.UIElements.PanelSettings> clones = new System.Collections.Generic.HashSet<UnityEngine.UIElements.PanelSettings>();
+
+        /// <summary>UI size: a smaller reference resolution makes every panel larger. Works on a runtime copy of the panel settings.</summary>
+        private void ApplyUiScale(float scale)
+        {
+            documents.Clear();
+            documents.AddRange(FindObjectsByType<UnityEngine.UIElements.UIDocument>(FindObjectsSortMode.None));
+            foreach (var document in documents)
+            {
+                var panel = document.panelSettings;
+                if (panel == null) continue;
+                if (!clones.Contains(panel))
+                {
+                    panel = Instantiate(panel); // never edit the project asset
+                    clones.Add(panel);
+                    document.panelSettings = panel;
+                }
+                panel.referenceResolution = new Vector2Int(Mathf.RoundToInt(1920f / scale), Mathf.RoundToInt(1080f / scale));
+            }
         }
 
         private void OnApplicationQuit() => SaveStore.Flush();
@@ -37,6 +61,7 @@ namespace BugReport.Progress
                 cameraRig.SensitivityScale = s.mouseSensitivity;
                 cameraRig.InvertY = s.invertY;
             }
+            ApplyUiScale(s.uiScale);
 #if !UNITY_EDITOR
             if (Screen.fullScreen != s.fullscreen) Screen.fullScreen = s.fullscreen;
 #endif

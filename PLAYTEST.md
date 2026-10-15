@@ -14,49 +14,51 @@ You don't need to know how the game works inside. Just play, and write down anyt
 | Shift | fly faster |
 | E | pick the thing you are looking at |
 | Left mouse button | use your power on what you are looking at |
-| R | undo your last power |
+| R | undo your last power (or, if you are aiming at something one of your powers is acting on, undo that one) |
 | Q | switch power |
 | Tab | x-ray view (shows what you can affect) |
+| 1 to 6 | pick a power directly |
 | Esc | pause menu |
 
 You are the small glowing thing. The knight is "the hero": it walks to the exit by itself. Your job is to clear its way.
 
 ## What to play
-Press **NEW GAME**. Each level unlocks the next one. There are 20 levels in 7 chapters; the level select shows your stars (1 = finished, 2 = finished using few powers, 3 = also barely set off the alarm).
+Press **NEW GAME**. Each level unlocks the next one. There are 21 levels in 7 chapters; the level select shows your stars (1 = finished, 2 = finished using few powers, 3 = also barely set off the alarm).
 
 **Chapter 1: Hello, world** (the wall powers)
 1. **TRAINING LAB**: the game teaches you step by step. Try it **without** reading anything else.
 2. **BRIDGE OUT**: the bridge is only a hologram.
 3. **TWO DOORS, ONE SHADOW**: two walls, one shadow. (If stuck: [R] gives the shadow back.)
 4. **TWO BIRDS**: one power use should fix two problems.
+5. **FORK IN THE ROAD**: two lanes round a wall. The knight takes the shortest road that is open, and turns back if a shorter one opens later.
 
 **Chapter 2: Duplicate objective**
-5. **THREE PLATES**: three plates, one crate.
-6. **COPY THE COPY**: copies are real crates too.
+6. **THREE PLATES**: three plates, one crate.
+7. **COPY THE COPY**: copies are real crates too.
 
 **Chapter 3: Time does not apply**
-7. **STOP THE PLATFORM**: the hero won't step onto something moving.
-8. **TWO PISTONS**: one at a time.
-9. **THE BUILD**: everything so far.
+8. **STOP THE PLATFORM**: the hero won't step onto something moving.
+9. **TWO PISTONS**: one at a time.
+10. **THE BUILD**: everything so far.
 
 **Chapter 4: Dead weight** (new power: MASS SWAP, two objects trade weight)
-10. **HEAVY LIFTING**: the plate needs something heavy. There is something heavy in the room.
-11. **TWIN SCALES**: two plates. Combine copying with swapping.
-12. **WEIGH STATION**: a heavy gate and a hologram bridge, two different problems.
+11. **HEAVY LIFTING**: the plate needs something heavy. There is something heavy in the room.
+12. **TWIN SCALES**: two plates. Combine copying with swapping.
+13. **WEIGH STATION**: a heavy gate and a hologram bridge, two different problems.
 
 **Chapter 5: Night shift** (new power: AI OVERRIDE, send a guard to look at something else)
-13. **NIGHT WATCH**: a skeleton guard stands in the doorway. The hero waits until it is safe.
-14. **DOUBLE SHIFT**: two guards, one decoy. A lure only lasts 14 seconds, so timing matters.
-15. **FROZEN STIFF**: a guard and a piston, different answers.
+14. **NIGHT WATCH**: a skeleton guard stands in the doorway. The hero waits until it is safe.
+15. **DOUBLE SHIFT**: two guards, one decoy, and a decoy can hold only one lure. Undo with [R] to hand it back.
+16. **FROZEN STIFF**: a guard and a piston, different answers.
 
 **Chapter 6: False floors** (new power: DESYNC, move what is solid away from what you see)
-16. **FALSE WALL**: a wall the hero cannot pass, but its solid part can be lifted out of the way.
-17. **FALSE FLOOR**: a floor plate whose solid part can be slid across a pit.
-18. **SEARCHLIGHT**: a drone sweeps the room; anything in its light raises the alarm.
-19. **PATCH DAY**: everything in chapter 6 together.
+17. **FALSE WALL**: a wall the hero cannot pass, but its solid part can be lifted out of the way.
+18. **FALSE FLOOR**: a floor plate whose solid part can be slid across a pit.
+19. **SEARCHLIGHT**: a drone sweeps the room; anything in its light raises the alarm.
+20. **STACK THE ORDER**: a long bridge and a jumpy system. The system undoes your OLDEST glitch a few seconds after you have two running. Order matters.
 
 **Chapter 7**
-20. **REPORT CLOSED**: every power, one long hall.
+21. **REPORT CLOSED**: every power, one long hall.
 
 Stuck for more than two minutes? That's useful information. Write down which level and what you tried, then use **Esc ▸ MAIN MENU ▸ LEVEL SELECT** to skip ahead (only levels you've unlocked).
 

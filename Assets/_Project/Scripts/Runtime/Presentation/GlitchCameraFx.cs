@@ -112,7 +112,7 @@ namespace BugReport.Presentation
 
             if (viewCamera != null && baseFov > 0f) viewCamera.fieldOfView = baseFov - (comfortable ? g * fovPunch : 0f);
 
-            float p = bursts ? patchBurst.Evaluate(now) : 0f;
+            float p = bursts && !ComfortSettings.ReducedFlashes ? patchBurst.Evaluate(now) : 0f;
             vignette.intensity.Override(Mathf.Lerp(baseVignette, patchVignettePeak, p));
             vignette.color.Override(Color.Lerp(baseVignetteColor, patchVignetteColor, p));
         }

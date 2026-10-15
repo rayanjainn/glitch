@@ -114,6 +114,38 @@ namespace BugReport.InputHandling
             return -1;
         }
 
+        /// <summary>
+        /// After <paramref name="changed"/> was rebound from <paramref name="oldPath"/>: if another rebindable now uses the
+        /// same key, it gets the old key instead (the two swap), so no key ever does two things.
+        /// </summary>
+        public static void ResolveConflict(InputActionAsset asset, int changedIndex, string oldPath)
+        {
+            if (asset == null || string.IsNullOrEmpty(oldPath)) return;
+            var changed = Rebindables[changedIndex];
+            var changedAction = FindAction(asset, changed);
+            int changedBinding = BindingIndex(changedAction, changed);
+            if (changedBinding < 0) return;
+            string newPath = changedAction.bindings[changedBinding].effectivePath;
+            for (int i = 0; i < Rebindables.Length; i++)
+            {
+                if (i == changedIndex) continue;
+                var other = Rebindables[i];
+                var action = FindAction(asset, other);
+                int index = BindingIndex(action, other);
+                if (index < 0 || action.bindings[index].effectivePath != newPath) continue;
+                action.ApplyBindingOverride(index, oldPath);
+            }
+        }
+
+        /// <summary>The current effective path of a rebindable ("" if missing).</summary>
+        public static string PathOf(InputActionAsset asset, int index)
+        {
+            var r = Rebindables[index];
+            var action = FindAction(asset, r);
+            int binding = BindingIndex(action, r);
+            return binding < 0 ? string.Empty : action.bindings[binding].effectivePath;
+        }
+
         /// <summary>Short, upper-case label of the current key ("E", "LEFT BUTTON").</summary>
         public static string KeyLabel(InputActionAsset asset, Rebindable r)
         {

@@ -24,6 +24,8 @@ namespace BugReport.UI
         private readonly Slider sensitivity;
         private readonly Toggle invertY;
         private readonly Toggle colourSplit;
+        private readonly Toggle reducedFlashes;
+        private readonly Slider uiScale;
         private readonly Toggle fullscreen;
         private readonly Button back;
 
@@ -43,15 +45,19 @@ namespace BugReport.UI
             sensitivity = Ui.Add(general, new Slider("MOUSE SENSITIVITY", GameSettingsData.MinSensitivity, GameSettingsData.MaxSensitivity) { name = "setting-sensitivity" });
             invertY = Ui.Add(general, new Toggle("INVERT LOOK UP/DOWN") { name = "setting-invert" });
             colourSplit = Ui.Add(general, new Toggle("SCREEN-WARP BURSTS (COLOUR SPLIT, LENS WARP, ZOOM PUNCH)") { name = "setting-colour-split" });
+            reducedFlashes = Ui.Add(general, new Toggle("REDUCED FLASHING (ALERT FLASH, PATCH PULSE)") { name = "setting-reduced-flashes" });
+            uiScale = Ui.Add(general, new Slider("UI SIZE", GameSettingsData.MinUiScale, GameSettingsData.MaxUiScale) { name = "setting-ui-scale" });
             fullscreen = Ui.Add(general, new Toggle("FULLSCREEN") { name = "setting-fullscreen" });
             Ui.Show(fullscreen, showFullscreen);
-            foreach (var field in new VisualElement[] { volume, music, sensitivity, invertY, colourSplit, fullscreen }) field.AddToClassList("br-setting");
+            foreach (var field in new VisualElement[] { volume, music, sensitivity, invertY, colourSplit, reducedFlashes, uiScale, fullscreen }) field.AddToClassList("br-setting");
 
             volume.RegisterValueChangedCallback(e => SetMasterVolume(e.newValue));
             music.RegisterValueChangedCallback(e => SetMusicVolume(e.newValue));
             sensitivity.RegisterValueChangedCallback(e => SetSensitivity(e.newValue));
             invertY.RegisterValueChangedCallback(e => SetInvertY(e.newValue));
             colourSplit.RegisterValueChangedCallback(e => SetColourSplit(e.newValue));
+            reducedFlashes.RegisterValueChangedCallback(e => SetReducedFlashes(e.newValue));
+            uiScale.RegisterValueChangedCallback(e => SetUiScale(e.newValue));
             fullscreen.RegisterValueChangedCallback(e => SetFullscreen(e.newValue));
 
             if (actions != null)
@@ -104,6 +110,7 @@ namespace BugReport.UI
             int bindingIndex = BindingOverrides.BindingIndex(action, r);
             if (bindingIndex < 0) return;
             CancelRebinding();
+            string oldPath = BindingOverrides.PathOf(bindings, index);
             keyButtons[index].text = "PRESS A KEY...";
             rebinding = action.PerformInteractiveRebinding(bindingIndex)
                 .WithControlsExcluding("<Mouse>/position")
@@ -115,6 +122,7 @@ namespace BugReport.UI
                 {
                     op.Dispose();
                     rebinding = null;
+                    BindingOverrides.ResolveConflict(bindings, index, oldPath);
                     BindingOverrides.SaveFrom(bindings);
                     RefreshKeys();
                 })
@@ -167,6 +175,8 @@ namespace BugReport.UI
             sensitivity.SetValueWithoutNotify(s.mouseSensitivity);
             invertY.SetValueWithoutNotify(s.invertY);
             colourSplit.SetValueWithoutNotify(s.colourSplitEffects);
+            reducedFlashes.SetValueWithoutNotify(s.reducedFlashes);
+            uiScale.SetValueWithoutNotify(s.uiScale);
             fullscreen.SetValueWithoutNotify(s.fullscreen);
         }
 
@@ -177,6 +187,8 @@ namespace BugReport.UI
         public void SetMusicVolume(float value) => Change(s => s.musicVolume = value);
         public void SetSensitivity(float value) => Change(s => s.mouseSensitivity = value);
         public void SetInvertY(bool value) => Change(s => s.invertY = value);
+        public void SetReducedFlashes(bool value) => Change(s => s.reducedFlashes = value);
+        public void SetUiScale(float value) => Change(s => s.uiScale = value);
         public void SetColourSplit(bool value) => Change(s => s.colourSplitEffects = value);
         public void SetFullscreen(bool value) => Change(s => s.fullscreen = value);
 

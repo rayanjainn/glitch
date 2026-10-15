@@ -156,9 +156,9 @@ namespace BugReport.UI
             var buttons = Ui.Add(columns, Ui.Element("pause-buttons", "br-card__buttons"));
             resumeButton = Ui.Add(buttons, MenuButton("resume", "RESUME", Resume));
             buttons.Add(MenuButton("open-settings", "SETTINGS", OpenSettings));
-            buttons.Add(MenuButton("restart", "RESTART LEVEL", LevelFlow.RestartLevel));
-            buttons.Add(MenuButton("main-menu", "MAIN MENU", LevelFlow.LoadMainMenu));
-            buttons.Add(MenuButton("quit", "QUIT GAME", LevelFlow.Quit));
+            buttons.Add(ConfirmButton("restart", "RESTART LEVEL", LevelFlow.RestartLevel));
+            buttons.Add(ConfirmButton("main-menu", "MAIN MENU", LevelFlow.LoadMainMenu));
+            buttons.Add(ConfirmButton("quit", "QUIT GAME", LevelFlow.Quit));
 
             var controls = Ui.Add(columns, Ui.Element("controls", "br-controls"));
             controls.Add(Ui.Text("controls-caption", "CONTROLS", "br-caption"));
@@ -211,6 +211,9 @@ namespace BugReport.UI
             Ui.SetText(completeStats, "TIME " + RunSummary.Time(recorder.Seconds) + "   GLITCHES " + recorder.GlitchUses
                 + " (PAR " + recorder.ParUses + ")   PEAK ALERT " + recorder.MaxStage);
             Ui.SetText(completeHint, RunSummary.NextStarHint(recorder.Stars, recorder.ParUses));
+            string[] verdicts = { "WORKS AS INTENDED", "WON'T FIX", "CANNOT REPRODUCE", "CLOSED", "DUPLICATE OF ITSELF" };
+            Ui.SetText(completeStamp, verdicts[System.Math.Abs(recorder.CurrentIndex()) % verdicts.Length]);
+            Ui.SetText(completeStats, completeStats.text + "\nFILED UNDER: " + recorder.UsedSummary());
             int index = recorder.CurrentIndex();
             Ui.SetText(completeOutro, index >= 0 && catalog != null ? catalog.Get(index).outro ?? string.Empty : string.Empty);
         }
@@ -220,6 +223,29 @@ namespace BugReport.UI
             var screen = Ui.Element(name, "br-screen");
             screen.pickingMode = PickingMode.Position; // blocks clicks to anything underneath
             return screen;
+        }
+
+        /// <summary>A button that needs a second click within three seconds (destructive actions).</summary>
+        internal static Button ConfirmButton(string name, string text, System.Action onConfirmed)
+        {
+            Button button = null;
+            bool armed = false;
+            button = MenuButton(name, text, () =>
+            {
+                if (armed)
+                {
+                    onConfirmed();
+                    return;
+                }
+                armed = true;
+                button.text = "CLICK AGAIN TO CONFIRM";
+                button.schedule.Execute(() =>
+                {
+                    armed = false;
+                    button.text = text;
+                }).ExecuteLater(3000);
+            });
+            return button;
         }
 
         internal static Button MenuButton(string name, string text, System.Action onClick)

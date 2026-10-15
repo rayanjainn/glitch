@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine
 {
+    public enum FindObjectsSortMode { None, InstanceID }
     public class Object
     {
         public string name { get => throw null; set { } }
@@ -19,6 +20,7 @@ namespace UnityEngine
         public static void DestroyImmediate(Object o) { }
         public static T Instantiate<T>(T original) where T : Object => throw null;
         public static T FindAnyObjectByType<T>() where T : Object => throw null;
+        public static T[] FindObjectsByType<T>(FindObjectsSortMode sortMode) where T : Object => throw null;
         public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent) where T : Object => throw null;
         public int GetInstanceID() => throw null;
     }

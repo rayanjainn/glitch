@@ -116,7 +116,7 @@ namespace BugReport.UI
             buttons.Add(GameMenus.MenuButton("level-select", "LEVEL SELECT", ShowLevels));
             buttons.Add(GameMenus.MenuButton("settings", "SETTINGS", ShowSettings));
             buttons.Add(GameMenus.MenuButton("credits", "CREDITS", ShowCredits));
-            buttons.Add(GameMenus.MenuButton("quit", "QUIT", LevelFlow.Quit));
+            buttons.Add(GameMenus.ConfirmButton("quit", "QUIT", LevelFlow.Quit));
 
             levels = Ui.Add(screen, Ui.Element("menu-levels", "br-card", "br-menu__levels"));
             levels.pickingMode = PickingMode.Position;
@@ -162,6 +162,7 @@ namespace BugReport.UI
                 button.AddToClassList("br-chapter-" + Mathf.Clamp(entry.chapterIndex, 1, 7));
                 button.tooltip = entry.chapter;
                 button.SetEnabled(unlocked);
+                if (!unlocked) button.text += "  (FINISH " + (i).ToString("00") + ")";
                 levelList.Add(button);
             }
             // Focus the level the player most likely wants: the first open level not yet completed.

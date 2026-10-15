@@ -49,9 +49,23 @@ namespace BugReport.Progress
             s.Glitches.OperationStarted += OnGlitch;
         }
 
+        private readonly System.Collections.Generic.Dictionary<string, int> usedByName = new System.Collections.Generic.Dictionary<string, int>();
+
         private void OnGlitch(Core.Glitches.GlitchOperation op)
         {
-            if (!Finished) GlitchUses++;
+            if (Finished) return;
+            GlitchUses++;
+            usedByName.TryGetValue(op.Spec.DisplayName, out int n);
+            usedByName[op.Spec.DisplayName] = n + 1;
+        }
+
+        /// <summary>"COLLISION TRANSFER x2, FREEZE x1" for the bug-report card.</summary>
+        public string UsedSummary()
+        {
+            if (usedByName.Count == 0) return "NONE";
+            var parts = new System.Collections.Generic.List<string>();
+            foreach (var pair in usedByName) parts.Add(pair.Key + " x" + pair.Value);
+            return string.Join(", ", parts);
         }
 
         private void Update()

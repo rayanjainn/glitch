@@ -189,7 +189,7 @@ namespace BugReport.UI
             for (int i = 0; i < HudFormat.StageCount; i++) alert.EnableInClassList("br-alert--stage" + i, model.Stage == i);
 
             Ui.Show(stageLabel, model.Stage > 0 || model.Pressure01 > 0.04f);
-            bool flashing = now < stageFlashUntil && Mathf.Repeat(now * 2.5f, 1f) < 0.5f;
+            bool flashing = !ComfortSettings.ReducedFlashes && now < stageFlashUntil && Mathf.Repeat(now * 2.5f, 1f) < 0.5f;
             alert.EnableInClassList("br-alert--flash", flashing);
 
             string detail = HudFormat.ContainmentDetail(model.Stage, containment.NextPatchIn);

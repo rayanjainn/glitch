@@ -119,18 +119,23 @@ namespace BugReport.Core.Progress
     {
         public const float MinSensitivity = 0.25f;
         public const float MaxSensitivity = 3f;
+        public const float MinUiScale = 0.8f;
+        public const float MaxUiScale = 1.5f;
 
         public float masterVolume = 0.8f;
         public float musicVolume = 0.7f;
         public float mouseSensitivity = 1f;
         public bool invertY;
         public bool colourSplitEffects = true;
+        public bool reducedFlashes;
+        public float uiScale = 1f;
         public bool fullscreen = true;
 
         public void Sanitize()
         {
             masterVolume = Clamp(masterVolume, 0f, 1f, 0.8f);
             musicVolume = Clamp(musicVolume, 0f, 1f, 0.7f);
+            uiScale = Clamp(uiScale, MinUiScale, MaxUiScale, 1f);
             mouseSensitivity = Clamp(mouseSensitivity, MinSensitivity, MaxSensitivity, 1f);
         }
 
