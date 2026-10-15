@@ -32,6 +32,14 @@ namespace BugReport.Containment
 
         public void Configure(ContainmentSettingsAsset newSettings) => settings = newSettings;
 
+        private bool sighted;
+
+        /// <summary>
+        /// A guard or drone has the anomaly in view this frame (adds pressure each frame it is called).
+        /// Consumed by the next <see cref="Step"/>.
+        /// </summary>
+        public void ReportSighted() => sighted = true;
+
         private void OnEnable()
         {
             bindCallback = Bind;
@@ -73,7 +81,8 @@ namespace BugReport.Containment
             if (services == null || services.IsDisposed) return;
             var glitches = services.Glitches;
             var model = services.Containment;
-            model.Tick(deltaTime, new ContainmentInputs(glitches.ActiveContainmentWeight, glitches.ActiveProductCount, anomalySighted: false));
+            model.Tick(deltaTime, new ContainmentInputs(glitches.ActiveContainmentWeight, glitches.ActiveProductCount, anomalySighted: sighted));
+            sighted = false;
 
             int stage = model.Stage;
             glitches.CooldownScale = settings != null ? settings.CooldownScale(stage) : 1f;

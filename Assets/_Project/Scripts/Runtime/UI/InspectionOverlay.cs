@@ -23,6 +23,9 @@ namespace BugReport.UI
             (EntityCapabilities.CollisionTransferable, CollisionTransferDefinition.ElectricBlue, "COLLISION"),
             (EntityCapabilities.Duplicable, DuplicationDefinition.Magenta, "DUPLICATE"),
             (EntityCapabilities.Freezable, FreezeDefinition.PaleCyan, "FREEZE"),
+            (EntityCapabilities.PropertyMutable, PropertySwapDefinition.Amber, "SWAP"),
+            (EntityCapabilities.AIControllable, Guards.AiOverrideDefinition.Violet, "AI"),
+            (EntityCapabilities.Desyncable, DesyncDefinition.Lime, "DESYNC"),
         };
 
         [SerializeField] private Camera viewCamera;

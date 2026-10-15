@@ -76,6 +76,8 @@ namespace UnityEngine
     public class Transform : Component, System.Collections.IEnumerable
     {
         public Vector3 InverseTransformPoint(Vector3 position) => throw null;
+        public Vector3 TransformVector(Vector3 vector) => throw null;
+        public Vector3 TransformDirection(Vector3 direction) => throw null;
         public void LookAt(Vector3 worldPosition) { }
         public Vector3 position { get => throw null; set { } }
         public Vector3 localPosition { get => throw null; set { } }
@@ -96,6 +98,7 @@ namespace UnityEngine
     {
         public float x, y;
         public Vector2(float x, float y) { this.x = x; this.y = y; }
+        public float magnitude => throw null; public float sqrMagnitude => throw null; public Vector2 normalized => throw null;
         public static Vector2 zero => default; public static Vector2 up => default;
         public static Vector2 ClampMagnitude(Vector2 v, float m) => throw null;
         public static Vector2 operator +(Vector2 a, Vector2 b) => throw null;
@@ -123,6 +126,7 @@ namespace UnityEngine
         public static Vector3 SmoothDamp(Vector3 c, Vector3 t, ref Vector3 v, float s) => throw null;
         public static Vector3 operator +(Vector3 a, Vector3 b) => throw null;
         public static Vector3 operator -(Vector3 a, Vector3 b) => throw null;
+        public static Vector3 operator -(Vector3 a) => throw null;
         public static Vector3 operator *(Vector3 a, float b) => throw null;
         public static Vector3 operator *(float b, Vector3 a) => throw null;
         public static Vector3 operator /(Vector3 a, float b) => throw null;
@@ -185,6 +189,8 @@ namespace UnityEngine
     {
         public const int AllLayers = -1;
         public static void SyncTransforms() { }
+        public static bool CheckBox(Vector3 center, Vector3 halfExtents) => throw null;
+        public static bool Linecast(Vector3 start, Vector3 end, int layerMask, QueryTriggerInteraction q) => throw null;
         public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction q) => throw null;
         public static bool SphereCast(Vector3 o, float r, Vector3 d, out RaycastHit h, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static int SphereCastNonAlloc(Ray ray, float r, RaycastHit[] results, float max, int mask, QueryTriggerInteraction q) => throw null;
@@ -256,11 +262,13 @@ namespace UnityEngine
     public class Renderer : Component
     {
         public bool enabled { get => throw null; set { } } public Bounds bounds => throw null;
+        public void GetPropertyBlock(MaterialPropertyBlock block) { } public void SetPropertyBlock(MaterialPropertyBlock block) { }
         public Material sharedMaterial { get => throw null; set { } }
         public Material[] sharedMaterials { get => throw null; set { } }
         public Rendering.ShadowCastingMode shadowCastingMode { get => throw null; set { } }
         public bool receiveShadows { get => throw null; set { } } public bool allowOcclusionWhenDynamic { get => throw null; set { } }
     }
+    public sealed class MaterialPropertyBlock { public void SetColor(string name, Color value) { } public void SetFloat(string name, float value) { } public void Clear() { } }
     public class MeshRenderer : Renderer { }
     public class TrailRenderer : Renderer
     {
@@ -273,7 +281,7 @@ namespace UnityEngine
     {
         public bool useWorldSpace { get => throw null; set { } } public bool loop { get => throw null; set { } }
         public int positionCount { get => throw null; set { } }
-        public float startWidth { get => throw null; set { } } public float endWidth { get => throw null; set { } }
+        public float startWidth { get => throw null; set { } } public float endWidth { get => throw null; set { } } public float widthMultiplier { get => throw null; set { } }
         public int numCornerVertices { get => throw null; set { } } public int numCapVertices { get => throw null; set { } }
         public Color startColor { get => throw null; set { } } public Color endColor { get => throw null; set { } }
         public void SetPositions(Vector3[] p) { }

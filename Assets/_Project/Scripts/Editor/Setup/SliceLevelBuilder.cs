@@ -338,6 +338,9 @@ namespace BugReport.EditorTools.Setup
         {
             int world = GameLayers.Index(GameLayers.World);
             var visual = Block(name, parent, position + new Vector3(0f, 0.05f, 0f), new Vector3(1f, 0.1f, 1f), mats.PlateIdle, world);
+            // The plate is a sensor, not a step: a solid top would leave only ~1 cm of clearance when a
+            // copy spawns next to a crate standing on it.
+            Object.DestroyImmediate(visual.GetComponent<Collider>());
             var sensor = new GameObject(name + "_Sensor", typeof(BoxCollider));
             sensor.transform.SetParent(parent, false);
             sensor.transform.position = position + new Vector3(0f, 0.5f, 0f);

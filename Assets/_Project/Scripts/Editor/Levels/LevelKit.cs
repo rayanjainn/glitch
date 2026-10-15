@@ -219,7 +219,7 @@ namespace BugReport.EditorTools.Levels
             => CrateInstance(CratePrefab, Env, name, displayName, description, floorPosition + Vector3.up * 0.62f, Quaternion.identity);
 
         /// <summary>Divider at <paramref name="x"/> whose doorway is closed by a gate that sinks when all plates are pressed.</summary>
-        public GameEntity Gate(string name, float x, PressurePlate[] plates)
+        public GameEntity Gate(string name, float x, PressurePlate[] plates, bool transferable = false)
         {
             const float doorWidth = 3.2f;
             Divider(name + "Wall", x, doorWidth);
@@ -227,9 +227,11 @@ namespace BugReport.EditorTools.Levels
             var body = gate.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.interpolation = RigidbodyInterpolation.Interpolate;
-            AddEntity(gate, "SECURITY_GATE", EntityCategory.Structure, EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
+            // Not transferable by default: giving the gate's solidity away would skip the plates entirely.
+            AddEntity(gate, "SECURITY_GATE", EntityCategory.Structure,
+                transferable ? EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable : EntityCapabilities.Inspectable,
                 "Opens when all of its pressure plates are weighed down.");
-            AddCollision(gate, CollisionMode.Solid, Mats);
+            if (transferable) AddCollision(gate, CollisionMode.Solid, Mats);
             gate.AddComponent<GateController>().Configure(plates, new Vector3(0f, -3.2f, 0f), 1.2f);
             return gate.GetComponent<GameEntity>();
         }
@@ -238,7 +240,7 @@ namespace BugReport.EditorTools.Levels
         /// A 4 m corridor centred on <paramref name="x"/> (dividers at x ± 2) with a piston slamming across it
         /// from the south. It starts retracted (phase 0) unless <paramref name="startPhase"/> says otherwise.
         /// </summary>
-        public GameEntity Piston(string name, string displayName, float x, float period, float startPhase)
+        public GameEntity Piston(string name, string displayName, float x, float period, float startPhase, bool transferable = false)
         {
             const float doorHalf = 1.6f;
             Divider(name + "_DividerW", x - 2f, doorHalf * 2f);
@@ -252,11 +254,13 @@ namespace BugReport.EditorTools.Levels
             body.isKinematic = true;
             body.interpolation = RigidbodyInterpolation.Interpolate;
             AddEntity(piston, displayName, EntityCategory.SystemDevice,
-                EntityCapabilities.Inspectable | EntityCapabilities.Freezable | EntityCapabilities.CollisionTransferable,
+                transferable
+                    ? EntityCapabilities.Inspectable | EntityCapabilities.Freezable | EntityCapabilities.CollisionTransferable
+                    : EntityCapabilities.Inspectable | EntityCapabilities.Freezable,
                 "Slams across the corridor on a timer. The hero will not walk into it while it moves.");
             piston.AddComponent<PingPongMover>().Configure(new Vector3(0f, 0f, 3.4f), period, startPhase);
             AddFreeze(piston, Mats);
-            AddCollision(piston, CollisionMode.Solid, Mats);
+            if (transferable) AddCollision(piston, CollisionMode.Solid, Mats);
             Hazard(piston, new Vector3(x, 1.5f, 0f), new Vector3(1.6f, 3f, doorHalf * 2f));
             return piston.GetComponent<GameEntity>();
         }
@@ -268,7 +272,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public GameEntity MovingPlatform(string name, string displayName, float fromX, float toX, float travelZ, float period, float startPhase)
         {
-            const float width = 2.4f;
+            const float width = 3.2f; // wide enough that the hero's whole capsule is supported while it lines up
             float length = toX - fromX + 0.3f;
             var platform = Block(name, Env, new Vector3((fromX + toX) * 0.5f, -0.12f, 0f), new Vector3(length, 0.2f, width), Mats.Lift, World);
             var body = platform.AddComponent<Rigidbody>();
