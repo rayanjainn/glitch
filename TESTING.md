@@ -52,6 +52,14 @@ bash Tools/Assets/fetch-cc0-assets.sh
 ```
 (slow and silent: it downloads about 140 MB). Ends with "OK: 224 files ... match". It downloads the CC0 models, sounds and font from their authors' GitHub repositories (see CREDITS.md).
 
+## 4c. Get the second art batch (scenery, skeleton guards)
+The full game also uses 326 more CC0 files (landscape, sci-fi and graveyard scenery, skeleton characters, about 96 MB). They are **not** in the repository until you commit them (the cloud session cannot upload LFS files). Run once, from the `BugReport` folder:
+```bash
+bash Tools/Assets/fetch-cc0-assets-2.sh
+```
+It prints a progress line per pack and ends with "OK: 326 files ... match". Then `git add Assets/ThirdParty && git commit -m "Add second CC0 art batch" && git push` so it is stored in LFS (GitHub's free LFS quota is 1 GB; this adds about 96 MB).
+Without this step the game still works: guards become simple capsules and the levels have no scenery around the hall.
+
 ## 5. Set up and build everything
 1. Top menu **BUG REPORT ▸ Setup ▸ 1. Configure Project** → OK. The Console prints a report. Lines starting with `ERROR` need fixing, so send them to me.
 2. **BUG REPORT ▸ Setup ▸ 5. Build ALL (menu + every level).** The Console lists each scene as OK or FAIL.

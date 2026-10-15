@@ -11,6 +11,12 @@ namespace BugReport.Level
     /// machine safe. The volume is also what Freeze/Collision Transfer check before letting the
     /// machine move/solidify again, so a machine never restarts with someone in its path.
     /// </summary>
+    /// <summary>Lets a hazard's owner declare it harmless right now (a lured, stunned or frozen guard).</summary>
+    public interface IHeroHazardSource
+    {
+        bool IsNeutralized { get; }
+    }
+
     [DisallowMultipleComponent]
     public sealed class HeroHazard : MonoBehaviour
     {
@@ -21,6 +27,7 @@ namespace BugReport.Level
 
         private FreezeCapability freeze;
         private CollisionCapability collision;
+        private IHeroHazardSource source;
         private Collider[] volumeList;
 
         public static IReadOnlyList<HeroHazard> Active => active;
@@ -30,7 +37,8 @@ namespace BugReport.Level
 
         public bool IsSafe =>
             (freeze != null && freeze.IsFrozen) ||
-            (collision != null && collision.EffectiveMode == CollisionMode.Intangible);
+            (collision != null && collision.EffectiveMode == CollisionMode.Intangible) ||
+            (source != null && source.IsNeutralized);
 
         public void Configure(BoxCollider newVolume)
         {
@@ -42,6 +50,7 @@ namespace BugReport.Level
         {
             freeze = GetComponent<FreezeCapability>();
             collision = GetComponent<CollisionCapability>();
+            source = GetComponent<IHeroHazardSource>();
             if (volume != null) volume.isTrigger = true;
         }
 

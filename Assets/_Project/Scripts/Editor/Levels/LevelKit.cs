@@ -20,7 +20,7 @@ namespace BugReport.EditorTools.Levels
     /// gates, pistons, moving platforms, the exit, the hero's route and objectives. Gameplay objects
     /// are configured exactly like TRAINING LAB's (same components, layers and capabilities).
     /// </summary>
-    internal sealed class LevelKit
+    internal sealed partial class LevelKit
     {
         public const float WallHeight = 4.5f;
         public const float Thickness = 0.4f;
@@ -48,11 +48,11 @@ namespace BugReport.EditorTools.Levels
         // ---------------------------------------------------------------- start / finish
 
         /// <summary>New empty scene with every shared asset loaded (after NewScene, see TestRoomBuilder).</summary>
-        public static LevelKit Begin(out string error)
+        public static LevelKit Begin(out string error, int chapter = 1)
         {
             error = null;
             EnsureFolder(LevelCatalogBuilder.ScenesFolder);
-            var kit = new LevelKit { Scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single) };
+            var kit = new LevelKit { Chapter = chapter, Scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single) };
             kit.Mats = new MaterialSet();
             if (!kit.Mats.Create(out error)) return null;
             kit.Actions = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
@@ -76,6 +76,7 @@ namespace BugReport.EditorTools.Levels
             kit.World = GameLayers.Index(GameLayers.World);
             kit.Intangible = GameLayers.Index(GameLayers.Intangible);
             BuildLighting();
+            ChapterTheme.Apply(chapter, RenderSettings.sun);
             kit.Env = new GameObject("--- ENVIRONMENT ---").transform;
             return kit;
         }
@@ -90,6 +91,8 @@ namespace BugReport.EditorTools.Levels
             var cameraRig = BuildCamera(anomaly.transform, out var scanner);
             var systems = BuildSystems(Mats, scanner, motor, Hero, glitches, Containment, objectives, debugOverlayVisible: false, levelTitle: title);
             WirePlayer(anomaly, motor, cameraRig, systems);
+            foreach (var configure in deferred) configure(anomaly.transform, systems.Containment);
+            Surroundings(scenePath);
             PresentationBuilder.Apply(Presentation, Mats, systems, anomaly, Hero, cameraRig.GetComponent<Camera>());
 
             var missing = FindUnassignedReferences(Scene);
@@ -219,7 +222,7 @@ namespace BugReport.EditorTools.Levels
             => CrateInstance(CratePrefab, Env, name, displayName, description, floorPosition + Vector3.up * 0.62f, Quaternion.identity);
 
         /// <summary>Divider at <paramref name="x"/> whose doorway is closed by a gate that sinks when all plates are pressed.</summary>
-        public GameEntity Gate(string name, float x, PressurePlate[] plates)
+        public GameEntity Gate(string name, float x, PressurePlate[] plates, bool transferable = false)
         {
             const float doorWidth = 3.2f;
             Divider(name + "Wall", x, doorWidth);
@@ -227,9 +230,11 @@ namespace BugReport.EditorTools.Levels
             var body = gate.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.interpolation = RigidbodyInterpolation.Interpolate;
-            AddEntity(gate, "SECURITY_GATE", EntityCategory.Structure, EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable,
+            // Not transferable by default: giving the gate's solidity away would skip the plates entirely.
+            AddEntity(gate, "SECURITY_GATE", EntityCategory.Structure,
+                transferable ? EntityCapabilities.Inspectable | EntityCapabilities.CollisionTransferable : EntityCapabilities.Inspectable,
                 "Opens when all of its pressure plates are weighed down.");
-            AddCollision(gate, CollisionMode.Solid, Mats);
+            if (transferable) AddCollision(gate, CollisionMode.Solid, Mats);
             gate.AddComponent<GateController>().Configure(plates, new Vector3(0f, -3.2f, 0f), 1.2f);
             return gate.GetComponent<GameEntity>();
         }
@@ -238,7 +243,7 @@ namespace BugReport.EditorTools.Levels
         /// A 4 m corridor centred on <paramref name="x"/> (dividers at x ± 2) with a piston slamming across it
         /// from the south. It starts retracted (phase 0) unless <paramref name="startPhase"/> says otherwise.
         /// </summary>
-        public GameEntity Piston(string name, string displayName, float x, float period, float startPhase)
+        public GameEntity Piston(string name, string displayName, float x, float period, float startPhase, bool transferable = false)
         {
             const float doorHalf = 1.6f;
             Divider(name + "_DividerW", x - 2f, doorHalf * 2f);
@@ -252,11 +257,13 @@ namespace BugReport.EditorTools.Levels
             body.isKinematic = true;
             body.interpolation = RigidbodyInterpolation.Interpolate;
             AddEntity(piston, displayName, EntityCategory.SystemDevice,
-                EntityCapabilities.Inspectable | EntityCapabilities.Freezable | EntityCapabilities.CollisionTransferable,
+                transferable
+                    ? EntityCapabilities.Inspectable | EntityCapabilities.Freezable | EntityCapabilities.CollisionTransferable
+                    : EntityCapabilities.Inspectable | EntityCapabilities.Freezable,
                 "Slams across the corridor on a timer. The hero will not walk into it while it moves.");
             piston.AddComponent<PingPongMover>().Configure(new Vector3(0f, 0f, 3.4f), period, startPhase);
             AddFreeze(piston, Mats);
-            AddCollision(piston, CollisionMode.Solid, Mats);
+            if (transferable) AddCollision(piston, CollisionMode.Solid, Mats);
             Hazard(piston, new Vector3(x, 1.5f, 0f), new Vector3(1.6f, 3f, doorHalf * 2f));
             return piston.GetComponent<GameEntity>();
         }
@@ -268,7 +275,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public GameEntity MovingPlatform(string name, string displayName, float fromX, float toX, float travelZ, float period, float startPhase)
         {
-            const float width = 2.4f;
+            const float width = 3.2f; // wide enough that the hero's whole capsule is supported while it lines up
             float length = toX - fromX + 0.3f;
             var platform = Block(name, Env, new Vector3((fromX + toX) * 0.5f, -0.12f, 0f), new Vector3(length, 0.2f, width), Mats.Lift, World);
             var body = platform.AddComponent<Rigidbody>();

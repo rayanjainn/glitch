@@ -612,3 +612,88 @@
 .br-settings .br-button.unity-button {
     margin-top: 10px;
 }
+
+/* ---- level-complete bug report card ---- */
+.br-stars { font-size: 56px; letter-spacing: 12px; color: #FFD34D; margin-bottom: 10px; -unity-text-align: middle-center; }
+.br-stats { font-size: 18px; letter-spacing: 2px; color: #CFE9F5; margin-bottom: 6px; }
+.br-outro { font-size: 20px; color: #E8F2F8; margin-top: 14px; margin-bottom: 14px; max-width: 760px; white-space: normal; }
+.br-stamp {
+    position: absolute;
+    right: 18%;
+    top: 16%;
+    font-size: 72px;
+    letter-spacing: 8px;
+    color: rgba(90, 255, 160, 0.8);
+    border-width: 5px;
+    border-color: rgba(90, 255, 160, 0.8);
+    border-radius: 6px;
+    padding: 4px 22px;
+    rotate: -9deg;
+}
+
+/* ---- hero speech bubble ---- */
+.br-bubble {
+    position: absolute;
+    translate: -50% -100%;
+    max-width: 320px;
+    white-space: normal;
+    padding: 8px 14px;
+    font-size: 20px;
+    color: #10202A;
+    background-color: rgba(245, 250, 255, 0.95);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgba(60, 200, 255, 0.9);
+    -unity-text-align: middle-center;
+}
+
+/* ---- story beat ---- */
+.br-story {
+    position: absolute;
+    left: 50%;
+    bottom: 150px;
+    translate: -50% 0;
+    width: 820px;
+    padding: 14px 22px;
+    border-left-width: 4px;
+    border-left-color: #35C8FF;
+}
+.br-story__text { font-size: 22px; color: #D8F3FF; white-space: normal; min-height: 56px; letter-spacing: 1px; }
+
+/* ---- level select grid, one accent colour per chapter ---- */
+.br-menu .br-menu__levels { max-width: 1200px; }
+.br-levelgrid { width: 1130px; flex-direction: row; flex-wrap: wrap; }
+.br-levelgrid .br-button.unity-button { width: 360px; margin-right: 12px; border-left-width: 5px; }
+.br-chapter-1.unity-button { border-left-color: #35C8FF; }
+.br-chapter-2.unity-button { border-left-color: #FF4DD8; }
+.br-chapter-3.unity-button { border-left-color: #A8F0FF; }
+.br-chapter-4.unity-button { border-left-color: #FFB633; }
+.br-chapter-5.unity-button { border-left-color: #A56BFF; }
+.br-chapter-6.unity-button { border-left-color: #A6FF4D; }
+.br-chapter-7.unity-button { border-left-color: #FF5A5A; }
+
+/* ---- readability pass (from fresh-player feedback): bigger guide, prompt and reticle feedback ---- */
+.br-guide__text { font-size: 24px; }
+.br-prompt { font-size: 17px; padding: 4px 12px; }
+.br-reticle--valid { scale: 1.45 1.45; }
+
+/* ---- glitch countdown on the dock slot, readable text, steadier flashes (UX review) ---- */
+.br-slot__run { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background-color: #FFFFFF; }
+.br-slot--running .br-slot__timer { color: #7CFFB2; font-size: 16px; }
+.br-slot--ending .br-slot__timer { color: #FFD24A; }
+.br-slot--ending .br-slot__run { background-color: #FFD24A; }
+.br-caption { font-size: 14px; }
+.br-reticle__tick, .br-reticle__dot { background-color: rgba(255, 255, 255, 0.95); border-width: 1px; border-color: rgba(0, 0, 0, 0.9); }
+.br-alert__stage, .br-banner { -unity-text-outline-width: 2px; -unity-text-outline-color: rgba(0, 0, 0, 0.9); }
+.br-story { bottom: auto; top: 14%; }
+.br-objective { max-width: 420px; }
+.br-chip { font-size: 13px; }
+.br-inspect__description { font-size: 15px; }
+
+/* ---- a different swatch SHAPE per glitch slot, so colour is never the only cue ---- */
+.br-shape-0 { border-radius: 5px; }
+.br-shape-1 { border-radius: 1px; }
+.br-shape-2 { border-radius: 1px; rotate: 45deg; }
+.br-shape-3 { width: 18px; height: 8px; border-radius: 4px; }
+.br-shape-4 { width: 8px; height: 18px; border-radius: 4px; }
+.br-shape-5 { border-radius: 1px; border-width: 2px; border-color: #FFFFFF; }

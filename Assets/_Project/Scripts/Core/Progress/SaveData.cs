@@ -15,6 +15,7 @@ namespace BugReport.Core.Progress
 
         public int version = CurrentVersion;
         public List<string> completedLevels = new List<string>();
+        public List<LevelRecord> records = new List<LevelRecord>();
         public GameSettingsData settings = new GameSettingsData();
         /// <summary>Input System binding overrides (its own JSON format); empty = default keys.</summary>
         public string bindingOverrides = string.Empty;
@@ -31,9 +32,49 @@ namespace BugReport.Core.Progress
             return true;
         }
 
+        public LevelRecord RecordFor(string levelId)
+        {
+            if (records == null) return null;
+            foreach (var r in records) if (r != null && r.id == levelId) return r;
+            return null;
+        }
+
+        public int StarsFor(string levelId) => RecordFor(levelId)?.stars ?? (IsCompleted(levelId) ? 1 : 0);
+
+        /// <summary>
+        /// Records a finished run: marks the level complete and keeps the best time, fewest glitch
+        /// uses and best stars. Returns the stars earned by this run.
+        /// </summary>
+        public int SubmitRun(string levelId, float seconds, int glitchUses, int maxContainmentStage, int parUses)
+        {
+            if (string.IsNullOrEmpty(levelId)) return 0;
+            MarkCompleted(levelId);
+            if (records == null) records = new List<LevelRecord>();
+            var record = RecordFor(levelId);
+            if (record == null)
+            {
+                record = new LevelRecord { id = levelId, bestSeconds = float.MaxValue, fewestUses = int.MaxValue };
+                records.Add(record);
+            }
+            int stars = StarRating.Compute(glitchUses, parUses, maxContainmentStage);
+            record.stars = Math.Max(record.stars, stars);
+            if (seconds > 0f && seconds < record.bestSeconds) record.bestSeconds = seconds;
+            if (glitchUses >= 0 && glitchUses < record.fewestUses) record.fewestUses = glitchUses;
+            record.plays++;
+            return stars;
+        }
+
         /// <summary>Repairs anything a hand-edited or older file could contain.</summary>
         public void Sanitize()
         {
+            if (records == null) records = new List<LevelRecord>();
+            records.RemoveAll(r => r == null || string.IsNullOrEmpty(r.id));
+            foreach (var r in records)
+            {
+                r.stars = Math.Max(0, Math.Min(3, r.stars));
+                if (float.IsNaN(r.bestSeconds) || r.bestSeconds <= 0f) r.bestSeconds = float.MaxValue;
+                if (r.fewestUses < 0) r.fewestUses = int.MaxValue;
+            }
             if (completedLevels == null) completedLevels = new List<string>();
             completedLevels.RemoveAll(string.IsNullOrEmpty);
             if (settings == null) settings = new GameSettingsData();
@@ -43,22 +84,58 @@ namespace BugReport.Core.Progress
         }
     }
 
+    /// <summary>Best result per level.</summary>
+    [Serializable]
+    public sealed class LevelRecord
+    {
+        public string id;
+        public int stars;
+        public float bestSeconds = float.MaxValue;
+        public int fewestUses = int.MaxValue;
+        public int plays;
+    }
+
+    /// <summary>
+    /// 1 star: finished. 2 stars: finished using no more glitches than the level's par. 3 stars: also
+    /// never let containment get past stage 1 (the system barely noticed you).
+    /// </summary>
+    public static class StarRating
+    {
+        public static int Compute(int glitchUses, int parUses, int maxContainmentStage)
+        {
+            int stars = 1;
+            if (parUses > 0 && glitchUses <= parUses)
+            {
+                stars = 2;
+                if (maxContainmentStage <= 1) stars = 3;
+            }
+            return stars;
+        }
+    }
+
     /// <summary>Player settings. Ranges are enforced by <see cref="Sanitize"/>.</summary>
     [Serializable]
     public sealed class GameSettingsData
     {
         public const float MinSensitivity = 0.25f;
         public const float MaxSensitivity = 3f;
+        public const float MinUiScale = 0.8f;
+        public const float MaxUiScale = 1.5f;
 
         public float masterVolume = 0.8f;
+        public float musicVolume = 0.7f;
         public float mouseSensitivity = 1f;
         public bool invertY;
         public bool colourSplitEffects = true;
+        public bool reducedFlashes;
+        public float uiScale = 1f;
         public bool fullscreen = true;
 
         public void Sanitize()
         {
             masterVolume = Clamp(masterVolume, 0f, 1f, 0.8f);
+            musicVolume = Clamp(musicVolume, 0f, 1f, 0.7f);
+            uiScale = Clamp(uiScale, MinUiScale, MaxUiScale, 1f);
             mouseSensitivity = Clamp(mouseSensitivity, MinSensitivity, MaxSensitivity, 1f);
         }
 

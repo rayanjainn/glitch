@@ -31,6 +31,9 @@ namespace BugReport.Presentation
     /// <summary>Player comfort preferences, stored in the save file's settings (see SaveStore).</summary>
     public static class ComfortSettings
     {
+        /// <summary>Turns off flashing UI and the patch vignette pulse.</summary>
+        public static bool ReducedFlashes => Progress.SaveStore.Settings.reducedFlashes;
+
         /// <summary>Colour-split and lens-warp bursts. Some players find them uncomfortable (GDD 9.4).</summary>
         public static bool ChromaticEffects
         {

@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace BugReport.Hero
 {
+    public enum BlockCause { None, Machine, Guard, Other }
+
     public enum HeroState
     {
         /// <summary>Waiting for the level to start.</summary>
@@ -97,6 +99,8 @@ namespace BugReport.Hero
 
         /// <summary>Times the hero fell out of the world and was put back at its start.</summary>
         public int RespawnCount { get; private set; }
+        /// <summary>True when the last respawn was a guard catching the hero (speech and feedback differ from a fall).</summary>
+        public bool LastRespawnWasCaught { get; private set; }
 
         private void Awake()
         {
@@ -109,7 +113,7 @@ namespace BugReport.Hero
         /// Puts the hero back where the level started it (it fell into a pit, e.g. a bridge stopped
         /// being solid under it). The CharacterController must be disabled to teleport.
         /// </summary>
-        public void Respawn()
+        public void Respawn(bool caught = false)
         {
             if (controller == null) controller = GetComponent<CharacterController>();
             bool wasEnabled = controller.enabled;
@@ -118,6 +122,7 @@ namespace BugReport.Hero
             controller.enabled = wasEnabled;
             verticalVelocity = 0f;
             RespawnCount++;
+            LastRespawnWasCaught = caught;
             ResetHero();
             timer = confusedDuration;
             SetState(HeroState.Confused);
@@ -327,14 +332,36 @@ namespace BugReport.Hero
             return d.magnitude;
         }
 
+        /// <summary>What the hero is waiting for (valid while Blocked/Confused).</summary>
+        public BlockCause Cause { get; private set; }
+
+        private void ClassifyBlock()
+        {
+            Cause = BlockCause.Other;
+            var hazards = Level.HeroHazard.Active;
+            var feet = Feet;
+            float best = 12f;
+            for (int i = 0; i < hazards.Count; i++)
+            {
+                var h = hazards[i];
+                if (h.IsSafe || h.Volume == null) continue;
+                float d = Vector3.Distance(h.Volume.bounds.ClosestPoint(feet), feet);
+                if (d >= best) continue;
+                best = d;
+                Cause = h.GetComponent<Guards.GuardController>() != null ? BlockCause.Guard : BlockCause.Machine;
+            }
+        }
+
         private void EnterBlocked()
         {
+            ClassifyBlock();
             timer = retryDelay;
             SetState(HeroState.Blocked);
         }
 
         private void EnterConfused()
         {
+            ClassifyBlock();
             timer = confusedDuration;
             SetState(HeroState.Confused);
         }

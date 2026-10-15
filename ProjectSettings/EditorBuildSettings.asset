@@ -21,6 +21,9 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/Level_04_TwoBirds.unity
     guid: d9f9f1b9acd3b4a0ababa032f1805696
   - enabled: 1
+    path: Assets/_Project/Scenes/Level_21_ForkInTheRoad.unity
+    guid: a8bc8ad13071f4a72b1daceecf6a8b27
+  - enabled: 1
     path: Assets/_Project/Scenes/Level_05_ThreePlates.unity
     guid: 3fb242d00a5524c0a90fc4a8f897cd40
   - enabled: 1
@@ -35,6 +38,39 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/Level_09_TheBuild.unity
     guid: ddfa14e29db304dc8a817ad5789153ad
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_10_HeavyLifting.unity
+    guid: 5b6483279992b403a8ae01b2b23e7e19
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_11_TwinScales.unity
+    guid: b70a04ca39af246ef92ed0e30fb9bc18
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_12_WeighStation.unity
+    guid: 64d3a41b43ecf4702b4f43729197b7b3
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_13_NightWatch.unity
+    guid: 78f2fff9560524f32a81fcbf4abde02c
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_14_DoubleShift.unity
+    guid: 308815ee34df640f3858f9604abee1f0
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_15_FrozenStiff.unity
+    guid: 544688a7ca7334f75b7a516bc70c2fc4
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_16_FalseWall.unity
+    guid: 137e7d268fbeb4ef9916dc5b5fdd2fb2
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_17_FalseFloor.unity
+    guid: 74a7376cb114342e2a3f952bd98535b7
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_18_Searchlight.unity
+    guid: 8578f4b748213421eae6e0772677d0da
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_19_StackTheOrder.unity
+    guid: c08d85e100a17483eab1a4fbaa9c7263
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level_20_ReportClosed.unity
+    guid: ba81ca27bf2fb4bfb9558f3fc6fc9abc
   - enabled: 1
     path: Assets/_Project/Scenes/TestRoom.unity
     guid: 8c78bcf6da2354d7db410ad7df1ae096

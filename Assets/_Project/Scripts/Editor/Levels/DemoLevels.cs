@@ -66,13 +66,28 @@ namespace BugReport.EditorTools.Levels
             Run("Level_07_StopThePlatform", () => (StopThePlatform(out var e), e));
             Run("Level_08_TwoPistons", () => (TwoPistons(out var e), e));
             Run("Level_09_TheBuild", () => (TheBuild(out var e), e));
+            Run("Level_10_HeavyLifting", () => (FullGameLevels.HeavyLifting(out var e), e));
+            Run("Level_11_TwinScales", () => (FullGameLevels.TwinScales(out var e), e));
+            Run("Level_12_WeighStation", () => (FullGameLevels.WeighStation(out var e), e));
+            Run("Level_13_NightWatch", () => (FullGameLevels.NightWatch(out var e), e));
+            Run("Level_14_DoubleShift", () => (FullGameLevels.DoubleShift(out var e), e));
+            Run("Level_15_FrozenStiff", () => (FullGameLevels.FrozenStiff(out var e), e));
+            Run("Level_16_FalseWall", () => (FullGameLevels.FalseWall(out var e), e));
+            Run("Level_17_FalseFloor", () => (FullGameLevels.FalseFloor(out var e), e));
+            Run("Level_18_Searchlight", () => (FullGameLevels.Searchlight(out var e), e));
+            Run("Level_19_StackTheOrder", () => (FullGameLevels.StackTheOrder(out var e), e));
+            Run("Level_21_ForkInTheRoad", () => (FullGameLevels.ForkInTheRoad(out var e), e));
+            Run("Level_20_ReportClosed", () => (FullGameLevels.ReportClosed(out var e), e));
             Run("MainMenu", () => (MenuBuilder.Build(out var e), e)); // last, so it opens when done
+            int stale = LevelCatalogBuilder.DeleteStaleScenes();
+            if (stale > 0) lines.Append("  removed ").Append(stale).Append(" scene(s) no longer in the catalog\n");
+            LevelCatalogBuilder.SyncBuildSettings();
             report = lines.ToString();
             return failures;
         }
 
-        private static string PathOf(string id) => LevelCatalogBuilder.ScenePath(LevelCatalogBuilder.Entry(id));
-        private static string TitleOf(string id) => LevelCatalogBuilder.Entry(id).title;
+        internal static string PathOf(string id) => LevelCatalogBuilder.ScenePath(LevelCatalogBuilder.Entry(id));
+        internal static string TitleOf(string id) => LevelCatalogBuilder.Entry(id).title;
 
         // ================================================================ chapter 1: Collision Transfer
 
@@ -83,17 +98,17 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool BridgeOut(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 1);
             if (kit == null) return false;
             kit.Hall(18f, 6f, (-3f, 3f));
             kit.Barrier("OldBarrier", "OLD_BARRIER", new Vector3(-10f, 1f, 4.6f), new Vector3(3f, 2f, 0.4f),
                 "Left over from an old build. Solid, and no longer needed.");
-            kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", -3f, 3f, 2.4f);
+            var bridge = kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", -3f, 3f, 2.4f);
             kit.Exit(15f);
             kit.HeroOnRoute(new Vector3(-15f, 0f, 0f), true, new Vector3(-4f, 0f, 0f), new Vector3(4f, 0f, 0f), new Vector3(15f, 0f, 0f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("cross", "GET THE HERO ACROSS THE GAP",
-                    "The bridge is only a hologram. Something else in this room is solid, and useless.", kit.ZoneBetween("Zone_Across", 3.5f, 13.5f)),
+                    "The bridge is only a hologram. What else in this room is solid?", kit.ZoneBetween("Zone_Across", 3.5f, 13.5f), bridge),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Nothing left in the way.", kit.ZoneAtExit(15f)));
             kit.Dress(("barrel_large", -16.5f, 5f, 0f, 1.1f), ("crates_stacked", -16.5f, -5f, 90f, 1.3f),
                 ("keg", 8f, 5.1f, 0f, 0.9f), ("chest_gold", 16.8f, -2.4f, -90f, 0.8f));
@@ -109,20 +124,20 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TwoDoors(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 1);
             if (kit == null) return false;
             kit.Hall(20f, 6f);
-            kit.Firewall("FirewallA", "FIREWALL_A", -7f);
-            kit.Firewall("FirewallB", "FIREWALL_B", 7f);
+            var wallA = kit.Firewall("FirewallA", "FIREWALL_A", -7f);
+            var wallB = kit.Firewall("FirewallB", "FIREWALL_B", 7f);
             kit.Shadow("Shadow", "SHADOW_DECAL", new Vector3(-14f, 0.02f, 3.5f));
             kit.Exit(17f);
             kit.HeroOnRoute(new Vector3(-17f, 0f, 0f), false,
                 new Vector3(-9f, 0f, 0f), new Vector3(-5f, 0f, 0f), new Vector3(5f, 0f, 0f), new Vector3(9f, 0f, 0f), new Vector3(17f, 0f, 0f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("first", "GET PAST THE FIRST FIREWALL", "There is only one shadow in here. Use it.",
-                    kit.ZoneBetween("Zone_Middle", -6.5f, 6.5f)),
+                    kit.ZoneBetween("Zone_Middle", -6.5f, 6.5f), wallA),
                 new ObjectiveDirector.Entry("second", "GET PAST THE SECOND FIREWALL",
-                    "The shadow is busy. [R] undoes your last glitch: the first wall doesn't matter any more.", kit.ZoneAtExit(17f)));
+                    "The shadow is busy. [R] undoes your last glitch: the first wall doesn't matter any more.", kit.ZoneAtExit(17f), wallB));
             kit.Dress(("barrel_small_stack", -18f, 5f, 0f, 1f), ("box_stacked", -2f, -5f, 15f, 1.2f), ("barrel_large", 2f, 5f, 0f, 1.1f),
                 ("chest_gold", 18.8f, -2.4f, -90f, 0.8f));
             return kit.Finish(PathOf("two_doors"), TitleOf("two_doors"), new GlitchDefinition[] { kit.CollisionTransfer },
@@ -137,11 +152,11 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TwoBirds(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 1);
             if (kit == null) return false;
             kit.Hall(20f, 6f, (2f, 6f));
-            kit.Firewall("Firewall", "FIREWALL", -8f);
-            kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", 2f, 6f, 2.4f);
+            var firewall = kit.Firewall("Firewall", "FIREWALL", -8f);
+            var bridge = kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", 2f, 6f, 2.4f);
             kit.Divider("DoorWall", 12f, 3.2f);
             kit.HoloDoor("HoloDoor", "HOLO_DOOR", 12f, 3.2f);
             kit.Exit(17f);
@@ -149,8 +164,8 @@ namespace BugReport.EditorTools.Levels
                 new Vector3(-10f, 0f, 0f), new Vector3(-6f, 0f, 0f), new Vector3(1f, 0f, 0f), new Vector3(7f, 0f, 0f),
                 new Vector3(11f, 0f, 0f), new Vector3(13f, 0f, 0f), new Vector3(17f, 0f, 0f));
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("firewall", "GET PAST THE FIREWALL", "One transfer. Two problems.", kit.ZoneBetween("Zone_Lab", -7.5f, 1.5f)),
-                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "Where did that solidity go?", kit.ZoneBetween("Zone_FarSide", 6.5f, 11.5f)),
+                new ObjectiveDirector.Entry("firewall", "GET PAST THE FIREWALL", "One transfer. Two problems.", kit.ZoneBetween("Zone_Lab", -7.5f, 1.5f), firewall),
+                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "Where did that solidity go?", kit.ZoneBetween("Zone_FarSide", 6.5f, 11.5f), bridge),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "That door had better still be a hologram.", kit.ZoneAtExit(17f)));
             kit.Dress(("barrel_large", -18f, 5f, 0f, 1.1f), ("crates_stacked", -12f, -5f, 0f, 1.3f), ("keg", 9f, 5.1f, 0f, 0.9f),
                 ("chest_gold", 18.8f, -2.4f, -90f, 0.8f));
@@ -167,7 +182,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool ThreePlates(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 2);
             if (kit == null) return false;
             kit.Hall(18f, 6f);
             var plates = new[]
@@ -176,13 +191,13 @@ namespace BugReport.EditorTools.Levels
                 kit.Plate("Plate_2", new Vector3(-1f, 0f, -3f)),
                 kit.Plate("Plate_3", new Vector3(0.1f, 0f, -3f)),
             };
-            kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Heavy enough for one plate.");
+            var crate = kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Heavy enough for one plate.");
             kit.Gate("Gate", 4f, plates);
             kit.Exit(15f);
             kit.HeroOnRoute(new Vector3(-15f, 0f, 0f), false, new Vector3(2f, 0f, 0f), new Vector3(6f, 0f, 0f), new Vector3(15f, 0f, 0f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Three plates. One crate. Copies can be made more than once.",
-                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f)),
+                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f), crate),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Off you go.", kit.ZoneAtExit(15f)));
             kit.Dress(("barrel_large", -16.5f, 5f, 0f, 1.1f), ("shelf_small_candles", -8f, 5.3f, 180f, 1.6f), ("keg", 10f, -5.1f, 0f, 0.9f),
                 ("chest_gold", 16.8f, -2.4f, -90f, 0.8f));
@@ -197,7 +212,7 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool CopyTheCopy(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 2);
             if (kit == null) return false;
             kit.Hall(18f, 6f);
             var plates = new[]
@@ -207,13 +222,13 @@ namespace BugReport.EditorTools.Levels
                 kit.Plate("Plate_3", new Vector3(1.2f, 0f, -3f)),
             };
             TestRoomBuilder.Block("Pillar", kit.Env, new Vector3(-2.1f, 0.75f, -3f), new Vector3(1f, 1.5f, 1f), kit.Mats.Wall, kit.World);
-            kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Heavy enough for one plate. Copies are crates too.");
+            var crate = kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Heavy enough for one plate. Copies are crates too.");
             kit.Gate("Gate", 4f, plates);
             kit.Exit(15f);
             kit.HeroOnRoute(new Vector3(-15f, 0f, 0f), false, new Vector3(2f, 0f, 0f), new Vector3(6f, 0f, 0f), new Vector3(15f, 0f, 0f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Three plates in a row. A copy lands next to whatever was copied.",
-                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f)),
+                    kit.ZoneBetween("Zone_Beyond", 4.5f, 13.5f), crate),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Off you go.", kit.ZoneAtExit(15f)));
             kit.Dress(("barrel_small_stack", -16.5f, 5f, 0f, 1f), ("crates_stacked", -9f, 5f, 0f, 1.3f), ("barrel_large", 10f, -5f, 0f, 1.1f),
                 ("chest_gold", 16.8f, -2.4f, -90f, 0.8f));
@@ -230,15 +245,15 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool StopThePlatform(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 3);
             if (kit == null) return false;
             kit.Hall(18f, 6f, (-2f, 2f));
-            kit.MovingPlatform("Platform", "SHUTTLE_PLATFORM", -2f, 2f, 4f, 4f, 0f);
+            var platform = kit.MovingPlatform("Platform", "SHUTTLE_PLATFORM", -2f, 2f, 4f, 4f, 0f);
             kit.Exit(15f);
             kit.HeroOnRoute(new Vector3(-15f, 0f, 0f), true, new Vector3(-3f, 0f, 0f), new Vector3(3f, 0f, 0f), new Vector3(15f, 0f, 0f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("cross", "GET THE HERO ACROSS", "The hero won't step onto something that moves. Catch it when it lines up.",
-                    kit.ZoneBetween("Zone_Across", 2.5f, 13.5f)),
+                    kit.ZoneBetween("Zone_Across", 2.5f, 13.5f), platform),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Keep going.", kit.ZoneAtExit(15f)));
             kit.Dress(("barrel_large", -16.5f, 5f, 0f, 1.1f), ("keg", -10f, -5.1f, 0f, 0.9f), ("crates_stacked", 9f, 5f, 0f, 1.3f),
                 ("chest_gold", 16.8f, -2.4f, -90f, 0.8f));
@@ -253,17 +268,17 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TwoPistons(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 3);
             if (kit == null) return false;
             kit.Hall(20f, 6f);
-            kit.Piston("PistonA", "PISTON_A", -4f, 3f, 0f);
-            kit.Piston("PistonB", "PISTON_B", 6f, 2.4f, 0.5f);
+            var pistonA = kit.Piston("PistonA", "PISTON_A", -4f, 3f, 0f);
+            var pistonB = kit.Piston("PistonB", "PISTON_B", 6f, 2.4f, 0.5f);
             kit.Exit(17f);
             kit.HeroOnRoute(new Vector3(-17f, 0f, 0f), false,
                 new Vector3(-7f, 0f, 0f), new Vector3(-1f, 0f, 0f), new Vector3(3f, 0f, 0f), new Vector3(9f, 0f, 0f), new Vector3(17f, 0f, 0f));
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("first", "GET PAST THE FIRST PISTON", "Freeze it while it is pulled back.", kit.ZoneBetween("Zone_Middle", -1.8f, 3.8f)),
-                new ObjectiveDirector.Entry("second", "GET PAST THE SECOND PISTON", "Freezes don't last forever. One at a time.", kit.ZoneAtExit(17f)));
+                new ObjectiveDirector.Entry("first", "GET PAST THE FIRST PISTON", "Freeze it while it is pulled back.", kit.ZoneBetween("Zone_Middle", -1.8f, 3.8f), pistonA),
+                new ObjectiveDirector.Entry("second", "GET PAST THE SECOND PISTON", "Freezes don't last forever. One at a time.", kit.ZoneAtExit(17f), pistonB));
             kit.Dress(("barrel_large", -18f, 5f, 0f, 1.1f), ("box_stacked", -12f, -5f, 0f, 1.2f), ("keg", 13f, 5.1f, 0f, 0.9f),
                 ("chest_gold", 18.8f, -2.4f, -90f, 0.8f));
             return kit.Finish(PathOf("two_pistons"), TitleOf("two_pistons"),
@@ -278,27 +293,27 @@ namespace BugReport.EditorTools.Levels
         /// </summary>
         public static bool TheBuild(out string error)
         {
-            var kit = LevelKit.Begin(out error);
+            var kit = LevelKit.Begin(out error, 3);
             if (kit == null) return false;
             kit.Hall(24f, 6f, (-12f, -8f));
-            kit.Firewall("Firewall", "FIREWALL", -16f);
+            var firewall = kit.Firewall("Firewall", "FIREWALL", -16f);
             kit.HoloBridge("HoloBridge", "HOLO_BRIDGE", -12f, -8f, 2.4f);
             var plates = new[]
             {
                 kit.Plate("Plate_1", new Vector3(-4.1f, 0f, -3f)),
                 kit.Plate("Plate_2", new Vector3(-3f, 0f, -3f)),
             };
-            kit.Crate("Crate", "CRATE", new Vector3(-4.1f, 0f, -3f), "One crate, two plates. You know this one.");
+            var crate = kit.Crate("Crate", "CRATE", new Vector3(-4.1f, 0f, -3f), "One crate, two plates. You know this one.");
             kit.Gate("Gate", 0f, plates);
-            kit.Piston("Piston", "CRUSHER_PISTON", 8f, 3f, 0f);
+            var piston = kit.Piston("Piston", "CRUSHER_PISTON", 8f, 3f, 0f);
             kit.Exit(21f);
             kit.HeroOnRoute(new Vector3(-22f, 0f, 0f), true,
                 new Vector3(-18f, 0f, 0f), new Vector3(-14f, 0f, 0f), new Vector3(-13f, 0f, 0f), new Vector3(-7f, 0f, 0f),
                 new Vector3(-2f, 0f, 0f), new Vector3(2f, 0f, 0f), new Vector3(5f, 0f, 0f), new Vector3(11f, 0f, 0f), new Vector3(21f, 0f, 0f));
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "One wall. One bridge.", kit.ZoneBetween("Zone_Lab", -7.5f, -0.5f)),
-                new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Two plates. One crate.", kit.ZoneBetween("Zone_Machines", 0.5f, 5.8f)),
-                new ObjectiveDirector.Entry("exit", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneAtExit(21f)));
+                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "One wall. One bridge.", kit.ZoneBetween("Zone_Lab", -7.5f, -0.5f), firewall),
+                new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Two plates. One crate.", kit.ZoneBetween("Zone_Machines", 0.5f, 5.8f), crate),
+                new ObjectiveDirector.Entry("exit", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneAtExit(21f), piston));
             kit.Dress(("barrel_large", -23f, 5f, 0f, 1.1f), ("crates_stacked", -20f, -5f, 90f, 1.3f), ("shelf_small_candles", -5f, 5.3f, 180f, 1.6f),
                 ("keg", 14f, 5.1f, 0f, 0.9f), ("barrel_small_stack", 17f, -5f, 0f, 1f), ("chest_gold", 22.8f, -2.4f, -90f, 0.8f));
             return kit.Finish(PathOf("the_build"), TitleOf("the_build"),

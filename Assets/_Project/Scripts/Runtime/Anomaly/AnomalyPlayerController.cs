@@ -67,6 +67,18 @@ namespace BugReport.Anomaly
             bool active = services != null && !services.IsDisposed && services.State.IsGameplayActive;
             if (!active) return;
 
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (keyboard != null && glitches != null)
+            {
+                // Fixed number keys pick a glitch slot directly (the Q key still cycles).
+                if (keyboard.digit1Key.wasPressedThisFrame) glitches.SelectGlitch(0);
+                else if (keyboard.digit2Key.wasPressedThisFrame) glitches.SelectGlitch(1);
+                else if (keyboard.digit3Key.wasPressedThisFrame) glitches.SelectGlitch(2);
+                else if (keyboard.digit4Key.wasPressedThisFrame) glitches.SelectGlitch(3);
+                else if (keyboard.digit5Key.wasPressedThisFrame) glitches.SelectGlitch(4);
+                else if (keyboard.digit6Key.wasPressedThisFrame) glitches.SelectGlitch(5);
+            }
+
             float dt = Time.deltaTime;
             var look = input.ReadLook(out bool fromPointer);
             cameraRig.AddLook(look, fromPointer, dt);
@@ -106,6 +118,8 @@ namespace BugReport.Anomaly
 
         private void OnPause()
         {
+            // Esc inside the settings screen goes back to the pause menu instead of resuming the game.
+            if (UI.GameMenus.TryCloseSettingsWithEscape()) return;
             if (services != null && !services.IsDisposed) services.State.TogglePause();
         }
     }

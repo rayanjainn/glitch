@@ -66,6 +66,7 @@ namespace BugReport.EditorTools.Setup
             ConfigureCamera(cam);
             BuildPostFx(assets, systems, cam);
             UpgradeAnomaly(assets, mats, anomaly, cam);
+            BuildSpectacle(mats, systems, anomaly, hero);
             var heroAnimator = AttachHeroAnimator(assets, hero);
             Wire(systems.Root.GetComponent<EntityHighlightPresenter>(), "settings", assets.Settings);
             var chime = AssetDatabase.LoadAssetAtPath<AudioClip>(ArtBuilder.SoundFolder + "/coin.ogg");
@@ -87,6 +88,11 @@ namespace BugReport.EditorTools.Setup
             Wire(inspection, "heroAnimator", heroAnimator);
             Wire(inspection, "settings", assets.Settings);
             if (systems.Guide != null) Wire(inspection, "guide", systems.Guide);
+            if (systems.Hints != null) Wire(inspection, "hints", systems.Hints);
+
+            var story = go.AddComponent<StoryOverlay>();
+            Wire(story, "styleSheet", assets.Style);
+            if (systems.Objectives != null) Wire(story, "catalog", LevelCatalogBuilder.LoadOrCreate());
 
             var hud = go.AddComponent<GameHud>();
             Wire(hud, "styleSheet", assets.Style);
@@ -96,6 +102,7 @@ namespace BugReport.EditorTools.Setup
             if (systems.Objectives != null) Wire(hud, "objectives", systems.Objectives);
             Wire(hud, "settings", assets.Settings);
             if (systems.Guide != null) Wire(hud, "guide", systems.Guide);
+            if (systems.Hints != null) Wire(hud, "hints", systems.Hints);
 
             var menus = go.AddComponent<GameMenus>();
             Wire(menus, "styleSheet", assets.Style);
@@ -154,6 +161,17 @@ namespace BugReport.EditorTools.Setup
             Wire(fx, "glitches", systems.Glitches);
             Wire(fx, "containment", systems.Containment);
             Wire(fx, "viewCamera", cam);
+        }
+
+        private static void BuildSpectacle(MaterialSet mats, Systems systems, GameObject anomaly, HeroController hero)
+        {
+            var go = new GameObject("PowerSpectacle");
+            var spectacle = go.AddComponent<PowerSpectacle>();
+            Wire(spectacle, "lineMaterial", mats.Line);
+            Wire(spectacle, "glitches", systems.Glitches);
+            Wire(spectacle, "origin", anomaly.transform);
+            if (hero != null) Wire(spectacle, "celebrate", hero.transform);
+            if (systems.Objectives != null) Wire(spectacle, "objectives", systems.Objectives);
         }
 
         private static void UpgradeAnomaly(Assets assets, MaterialSet mats, GameObject anomaly, Camera cam)

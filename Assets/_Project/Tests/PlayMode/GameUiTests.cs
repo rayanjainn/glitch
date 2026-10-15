@@ -115,7 +115,7 @@ namespace BugReport.Tests.PlayMode
             Assert.That(first, Is.Not.Null);
             Assert.That(second, Is.Not.Null);
             Assert.That(first.ClassListContains("br-slot--active"), Is.True);
-            Assert.That(first.Q<Label>("slot-name").text, Is.EqualTo(glitches.DefinitionAt(0).DisplayName));
+            Assert.That(first.Q<Label>("slot-name").text, Is.EqualTo("1 " + glitches.DefinitionAt(0).DisplayName));
 
             glitches.CycleGlitch();
             hud.RefreshNow();

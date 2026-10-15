@@ -19,16 +19,17 @@ namespace UnityEngine
         public static void DestroyImmediate(Object o) { }
         public static T Instantiate<T>(T original) where T : Object => throw null;
         public static T FindAnyObjectByType<T>() where T : Object => throw null;
+        public static T[] FindObjectsByType<T>() where T : Object => throw null;
         public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent) where T : Object => throw null;
-        public int GetInstanceID() => throw null;
     }
+    public enum KeyCode { None = 0, Escape = 27 }
     public class YieldInstruction { }
     public class AsyncOperation : YieldInstruction { public bool isDone => throw null; }
     public sealed class WaitForFixedUpdate : YieldInstruction { }
     public class ScriptableObject : Object { public static T CreateInstance<T>() where T : ScriptableObject => throw null; }
     public class Sprite : Object { }
     [AttributeUsage(AttributeTargets.Class)] public class CreateAssetMenuAttribute : Attribute { public string menuName; public string fileName; public int order; }
-    public static class ColorUtility { public static string ToHtmlStringRGB(Color c) => throw null; }
+    public static class ColorUtility { public static string ToHtmlStringRGB(Color c) => throw null; public static bool TryParseHtmlString(string s, out Color c) { c = default; return false; } }
 
     // Unity 6.x engine type. Present so a project type with the same simple name
     // produces the same CS0104 ambiguity here that it does in Unity.
@@ -76,6 +77,8 @@ namespace UnityEngine
     public class Transform : Component, System.Collections.IEnumerable
     {
         public Vector3 InverseTransformPoint(Vector3 position) => throw null;
+        public Vector3 TransformVector(Vector3 vector) => throw null;
+        public Vector3 TransformDirection(Vector3 direction) => throw null;
         public void LookAt(Vector3 worldPosition) { }
         public Vector3 position { get => throw null; set { } }
         public Vector3 localPosition { get => throw null; set { } }
@@ -96,6 +99,7 @@ namespace UnityEngine
     {
         public float x, y;
         public Vector2(float x, float y) { this.x = x; this.y = y; }
+        public float magnitude => throw null; public float sqrMagnitude => throw null; public Vector2 normalized => throw null;
         public static Vector2 zero => default; public static Vector2 up => default;
         public static Vector2 ClampMagnitude(Vector2 v, float m) => throw null;
         public static Vector2 operator +(Vector2 a, Vector2 b) => throw null;
@@ -123,6 +127,7 @@ namespace UnityEngine
         public static Vector3 SmoothDamp(Vector3 c, Vector3 t, ref Vector3 v, float s) => throw null;
         public static Vector3 operator +(Vector3 a, Vector3 b) => throw null;
         public static Vector3 operator -(Vector3 a, Vector3 b) => throw null;
+        public static Vector3 operator -(Vector3 a) => throw null;
         public static Vector3 operator *(Vector3 a, float b) => throw null;
         public static Vector3 operator *(float b, Vector3 a) => throw null;
         public static Vector3 operator /(Vector3 a, float b) => throw null;
@@ -169,7 +174,7 @@ namespace UnityEngine
     {
         public Bounds(Vector3 c, Vector3 s) { }
         public Vector3 center => throw null; public Vector3 size => throw null; public Vector3 extents => throw null; public Vector3 min => throw null; public Vector3 max => throw null;
-        public void Encapsulate(Bounds b) { } public void Encapsulate(Vector3 point) { } public void Expand(float a) { } public bool Contains(Vector3 p) => throw null;
+        public void Encapsulate(Bounds b) { } public void Encapsulate(Vector3 point) { } public void Expand(float a) { } public bool Contains(Vector3 p) => throw null; public Vector3 ClosestPoint(Vector3 p) => throw null;
     }
     public struct Ray { }
     public struct RaycastHit { public float distance => throw null; public Transform transform => throw null; public Collider collider => throw null; public Vector3 point => throw null; }
@@ -185,6 +190,8 @@ namespace UnityEngine
     {
         public const int AllLayers = -1;
         public static void SyncTransforms() { }
+        public static bool CheckBox(Vector3 center, Vector3 halfExtents) => throw null;
+        public static bool Linecast(Vector3 start, Vector3 end, int layerMask, QueryTriggerInteraction q) => throw null;
         public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction q) => throw null;
         public static bool SphereCast(Vector3 o, float r, Vector3 d, out RaycastHit h, float max, int mask, QueryTriggerInteraction q) => throw null;
         public static int SphereCastNonAlloc(Ray ray, float r, RaycastHit[] results, float max, int mask, QueryTriggerInteraction q) => throw null;
@@ -212,7 +219,7 @@ namespace UnityEngine
         public static float Lerp(float a, float b, float t) => throw null;
         public static int RoundToInt(float v) => throw null; public static float Round(float v) => throw null; public static int CeilToInt(float v) => throw null;
     }
-    public static class Time { public static float fixedDeltaTime => throw null; public static float deltaTime => throw null; public static float unscaledDeltaTime => throw null; public static float time => throw null; public static float unscaledTime => throw null; public static float timeScale { get => throw null; set { } } }
+    public static class Time { public static float fixedDeltaTime => throw null; public static float deltaTime => throw null; public static float unscaledDeltaTime => throw null; public static float time => throw null; public static float realtimeSinceStartup => throw null; public static float unscaledTime => throw null; public static float timeScale { get => throw null; set { } } }
     public enum CursorLockMode { None, Locked, Confined }
     public static class Cursor { public static CursorLockMode lockState { get => throw null; set { } } public static bool visible { get => throw null; set { } } }
     public static class Screen { public static int width => throw null; public static int height => throw null; public static bool fullScreen { get => throw null; set { } } }
@@ -240,6 +247,8 @@ namespace UnityEngine
     }
     public class Collider : Component { public bool enabled { get => throw null; set { } } public Bounds bounds => throw null; public Rigidbody attachedRigidbody => throw null; public bool isTrigger { get => throw null; set { } } }
     public class BoxCollider : Collider { public Vector3 center { get => throw null; set { } } public Vector3 size { get => throw null; set { } } }
+    public class SphereCollider : Collider { public float radius { get => throw null; set { } } public Vector3 center { get => throw null; set { } } }
+    public class CapsuleCollider : Collider { public float radius { get => throw null; set { } } public float height { get => throw null; set { } } public Vector3 center { get => throw null; set { } } }
     public class MeshCollider : Collider { }
     public class CharacterController : Collider
     {
@@ -256,11 +265,13 @@ namespace UnityEngine
     public class Renderer : Component
     {
         public bool enabled { get => throw null; set { } } public Bounds bounds => throw null;
+        public void GetPropertyBlock(MaterialPropertyBlock block) { } public void SetPropertyBlock(MaterialPropertyBlock block) { }
         public Material sharedMaterial { get => throw null; set { } }
         public Material[] sharedMaterials { get => throw null; set { } }
         public Rendering.ShadowCastingMode shadowCastingMode { get => throw null; set { } }
         public bool receiveShadows { get => throw null; set { } } public bool allowOcclusionWhenDynamic { get => throw null; set { } }
     }
+    public sealed class MaterialPropertyBlock { public void SetColor(string name, Color value) { } public void SetFloat(string name, float value) { } public void Clear() { } }
     public class MeshRenderer : Renderer { }
     public class TrailRenderer : Renderer
     {
@@ -273,7 +284,7 @@ namespace UnityEngine
     {
         public bool useWorldSpace { get => throw null; set { } } public bool loop { get => throw null; set { } }
         public int positionCount { get => throw null; set { } }
-        public float startWidth { get => throw null; set { } } public float endWidth { get => throw null; set { } }
+        public float startWidth { get => throw null; set { } } public float endWidth { get => throw null; set { } } public float widthMultiplier { get => throw null; set { } }
         public int numCornerVertices { get => throw null; set { } } public int numCapVertices { get => throw null; set { } }
         public Color startColor { get => throw null; set { } } public Color endColor { get => throw null; set { } }
         public void SetPositions(Vector3[] p) { }
@@ -289,6 +300,7 @@ namespace UnityEngine
         public static Camera main => throw null;
     }
     public enum CameraClearFlags { Skybox = 1, SolidColor = 2, Depth = 3, Nothing = 4 }
+    public static class AudioSettings { public static int outputSampleRate => throw null; }
     public class AudioListener : Behaviour { public static float volume { get => throw null; set { } } }
     public class Font : Object { }
     public sealed class AudioClip : Object
@@ -308,6 +320,7 @@ namespace UnityEngine
         public AudioClip clip { get => throw null; set { } } public float volume { get => throw null; set { } }
         public void Play() { } public void Stop() { }
     }
+    public enum FogMode { Linear = 1, Exponential = 2, ExponentialSquared = 3 }
     public enum LightType { Spot, Directional, Point }
     public enum LightShadows { None, Hard, Soft }
     public class Light : Behaviour
@@ -359,6 +372,9 @@ namespace UnityEngine
         public static Rendering.AmbientMode ambientMode { get => throw null; set { } }
         public static Color ambientSkyColor { get => throw null; set { } } public static Color ambientEquatorColor { get => throw null; set { } }
         public static Color ambientGroundColor { get => throw null; set { } } public static Light sun { get => throw null; set { } }
+        public static Material skybox { get => throw null; set { } } public static bool fog { get => throw null; set { } }
+        public static Color fogColor { get => throw null; set { } } public static FogMode fogMode { get => throw null; set { } }
+        public static float fogDensity { get => throw null; set { } }
     }
     public enum EventType { MouseDown = 0, Repaint = 7, Layout = 8 }
     public class Event { public static Event current => throw null; public EventType type => throw null; }
@@ -419,7 +435,7 @@ namespace UnityEngine
     public class TooltipAttribute : PropertyAttribute { public TooltipAttribute(string t) { } }
     public class RangeAttribute : PropertyAttribute { public RangeAttribute(float a, float b) { } }
     public class MinAttribute : PropertyAttribute { public MinAttribute(float m) { } }
-    public class TextAreaAttribute : PropertyAttribute { public TextAreaAttribute(int a, int b) { } }
+    public class TextAreaAttribute : PropertyAttribute { public TextAreaAttribute() { } public TextAreaAttribute(int a, int b) { } }
 }
 
 namespace UnityEngine.Rendering
@@ -513,7 +529,7 @@ namespace UnityEngine.InputSystem
     public class Pointer : InputDevice { }
     public class InputControl { public InputDevice device => throw null; }
     public class ButtonControl : InputControl { public bool wasPressedThisFrame => throw null; }
-    public class Keyboard : InputDevice { public static Keyboard current => throw null; public ButtonControl f1Key => throw null; public ButtonControl f5Key => throw null; }
+    public class Keyboard : InputDevice { public static Keyboard current => throw null; public ButtonControl f1Key => throw null; public ButtonControl f5Key => throw null; public ButtonControl digit1Key => throw null; public ButtonControl digit2Key => throw null; public ButtonControl digit3Key => throw null; public ButtonControl digit4Key => throw null; public ButtonControl digit5Key => throw null; public ButtonControl digit6Key => throw null; }
     public struct InputBinding
     {
         public bool isComposite => throw null; public bool isPartOfComposite => throw null; public string groups => throw null;
@@ -584,6 +600,7 @@ namespace UnityEditor
         public SerializedProperty GetIterator() => throw null;
         public bool ApplyModifiedPropertiesWithoutUndo() => throw null; public void Update() { }
     }
+    public static class ShaderUtil { public static bool ShaderHasError(Shader s) => throw null; }
     public static class AssetDatabase
     {
         public static T LoadAssetAtPath<T>(string p) where T : Object => throw null;
@@ -595,9 +612,10 @@ namespace UnityEditor
         public static string CreateFolder(string parent, string name) => throw null;
         public static void CreateAsset(Object o, string p) { }
         public static string[] FindAssets(string filter) => throw null;
+        public static string[] FindAssets(string filter, string[] searchInFolders) => throw null;
+        public static string GUIDToAssetPath(string guid) => throw null;
         public static void ImportAsset(string path) { }
         public static void AddObjectToAsset(Object o, Object asset) { }
-        public static string GUIDToAssetPath(string guid) => throw null;
         public static string GetAssetPath(Object o) => throw null;
     }
     public static class EditorUtility
@@ -714,7 +732,10 @@ namespace UnityEngine.UIElements
     public struct StyleFontDefinition { public StyleFontDefinition(FontDefinition v) { } }
     public struct UQueryBuilder<T> where T : VisualElement { public void ForEach(System.Action<T> funcCall) { } }
     public interface IPanel { }
-    public interface IVisualElementScheduledItem { }
+    public interface IVisualElementScheduledItem { IVisualElementScheduledItem ExecuteLater(long delayMs); }
+    public abstract class EventBase { public void StopPropagation() { } }
+    public abstract class EventBase<T> : EventBase where T : EventBase<T>, new() { }
+    public sealed class KeyDownEvent : EventBase<KeyDownEvent> { public UnityEngine.KeyCode keyCode => throw null; }
     public interface IVisualElementScheduler { IVisualElementScheduledItem Execute(System.Action timerUpdateEvent); }
     public struct VisualElementStyleSheetSet
     {
@@ -724,6 +745,8 @@ namespace UnityEngine.UIElements
     public abstract class Focusable : CallbackEventHandler { public virtual void Focus() { } public void Blur() { } }
     public class VisualElement : Focusable
     {
+        public string tooltip { get => throw null; set { } }
+        public void RegisterCallback<T>(EventCallback<T> callback) where T : EventBase<T>, new() { }
         public string name { get => throw null; set { } }
         public PickingMode pickingMode { get => throw null; set { } }
         public object userData { get => throw null; set { } }

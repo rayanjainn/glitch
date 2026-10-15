@@ -223,8 +223,20 @@ Playtest finding: the owner needed the written guide to finish TRAINING LAB.
 - [ ] **Owner:** Build ALL, run both test suites, play the demo (PLAYTEST.md), one fresh player
 - [ ] Profiling at 1080p on the reference PC
 
-## Milestones 11+
-See DESIGN_ROADMAP.md §6: Property Swap, guards/AI Override, Desync, finale, release prep. Not started, deliberately: each needs a large new system and should be built on a verified demo.
+## Milestone 11 — Full game (implemented, `feature/full-game-content`, untested in Unity)
+- [~] Core (dotnet-tested, 185 tests): property swap math, guard brain, vision cone, stuck-hint tiers, run summary, hero barks, typewriter, procedural music engine, star ratings
+- [~] Glitches: Property Swap (mass), AI Override (guards), Desync; skeleton guards, security drones
+- [~] Levels 10–20 (chapters 4–7) with a written solution each and a playthrough test each (FullGamePlaythroughTests)
+- [~] Presentation: hologram + gradient-sky shaders, per-chapter sky/fog/lighting, scenery kits around the hall (needs art batch 2), orb + burst + FOV punch, hero speech bubbles, confetti, story overlay, bug-report card with stars/time/uses, level select grid with stars, procedural music + volume slider, hints that escalate with idle time, one-time containment explainer
+- [~] Tests added: ShaderHealthTests, HintDirectorTests, FullGamePlaythroughTests (11), PresentationCoreTests
+- [ ] **Owner:** fetch art batch 2 (TESTING.md 4c), Build ALL, both test suites, play it (PLAYTEST.md), one fresh player
+- [ ] Skeleton guards: check the animation clip names after the fetch (the log warns if Idle/Walking_A are missing)
+- [ ] Profiling at 1080p on the reference PC
+
+## Not done (deliberately)
+- Speed Swap and size/bounciness swaps (Speed Swap exists in code and tests but no level uses it).
+- Levels are still straight halls along +x with the hero on z = 0; variety comes from mechanics, chapter lighting and scenery, not layouts.
+- Release prep (icons, build profiles, store pages).
 
 ---
 

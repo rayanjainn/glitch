@@ -213,14 +213,40 @@ namespace BugReport.Glitches
             if (g.Spec.Arity > 1) services.Selection.ClearSelection(); // the source has been used
         }
 
+        /// <summary>
+        /// Undo. With an object under the reticle that one of your active glitches is acting on, undoes that glitch
+        /// (the newest one involving it); otherwise undoes the newest glitch.
+        /// </summary>
         public void RevertLatest()
         {
             if (!CanAct()) return;
-            var result = services.Glitches.RevertLatest();
+            GlitchResult result;
+            var hovered = services.Selection.Hovered;
+            var specific = hovered.IsValid ? FindLatestInvolving(hovered) : null;
+            result = specific != null ? services.Glitches.Revert(specific.Id) : services.Glitches.RevertLatest();
             if (result.Succeeded)
                 Emit(GlitchFeedbackKind.Reverted, "RESTORED: " + DescribeTargets(result.Operation), InfoColor);
             else
                 Emit(GlitchFeedbackKind.Rejected, result.Describe(), RejectColor);
+        }
+
+        private GlitchOperation FindLatestInvolving(GameEntityId id)
+        {
+            for (int i = services.Glitches.ActiveCount - 1; i >= 0; i--)
+            {
+                var operation = services.Glitches.GetActive(i);
+                for (int t = 0; t < operation.TargetCount; t++)
+                    if (operation.Target(t) == id) return operation;
+            }
+            return null;
+        }
+
+        /// <summary>Equips glitch slot <paramref name="index"/> (0-based) if it exists and is unlocked.</summary>
+        public void SelectGlitch(int index)
+        {
+            if (!CanAct() || index < 0 || index >= loaded.Count || !IsUnlocked(index) || index == current) return;
+            current = index;
+            Emit(GlitchFeedbackKind.Info, "GLITCH: " + loaded[current].Spec.DisplayName, loaded[current].Definition.Color);
         }
 
         public void CycleGlitch()

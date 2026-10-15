@@ -118,6 +118,9 @@ namespace BugReport.EditorTools.Setup
             var font = AssetDatabase.LoadAssetAtPath<Font>(ArtBuilder.DisplayFontPath);
             if (font != null) Wire(menu, "displayFont", font);
             ui.AddComponent<SettingsApplier>();
+            var musicHost = new GameObject("Music");
+            musicHost.transform.SetParent(ui.transform, false);
+            musicHost.AddComponent<BugReport.Audio.MusicDirector>().Configure(null, 0);
 
             var missingRefs = FindUnassignedReferences(scene);
             if (missingRefs.Count > 0)

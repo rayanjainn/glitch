@@ -365,3 +365,15 @@ Every new Core type gets unit tests before its Unity adapter is written. Every g
 - No `Time.deltaTime` in freezable movers (see 5.6).
 - Logs are prefixed `[BUG REPORT]`.
 - Debug-only shortcuts (F1, F5) read `Keyboard.current` directly and are not remappable. All gameplay input goes through `InputReader`.
+
+## 8f. Full game: new glitches, guards, presentation *(M11)*
+- **Property Swap** (`PropertyCapability`, `PropertySwapEffect`, `PropertySwapMath`): an explicit list of swappable properties (mass, speed), each an exclusive `ModifierStack` channel; limits live in Core (`PropertyLimits`).
+- **AI Override** (`GuardController`, `AiOverrideEffect`): decisions are Core (`GuardBrain` FSM, `VisionCone`); the component moves, looks and reports. A guard is a `IHeroHazardSource`: the hero waits while it is unsafe (patrolling, not lured, not frozen).
+- **Desync** (`DesyncCapability`): all colliders live under `collisionRoot`, moved by an authored offset; refused if the destination or the resync spot is occupied.
+- **Security drones**: report sightings to `ContainmentDirector.ReportSighted()`; containment at stage 3+ patches the oldest revertible glitch.
+- **Level kit**: `LevelKit` (+ `LevelKit.Advanced.cs`) builds levels from named parts; `FullGameLevels` is levels 10–20; guard/drone wiring that needs the anomaly or containment is deferred to `Finish`.
+- **Run tracking**: `LevelCompletionRecorder` counts playing time (not paused), glitch uses and the worst containment stage, then calls `SaveStore.SubmitRun` (stars/records). `GameMenus` shows them on the level-complete card with the catalog's outro text.
+- **Story**: `LevelCatalog.Entry` carries chapter index, par and intro/outro; `StoryOverlay` types the intro on first play; the chapter index also selects the music theme and the scenery/sky theme (`ChapterTheme`).
+- **Hints**: `HintDirector` wraps Core `StuckHints`: hint text at tier 2, a world marker on the objective's `focus` entity at tier 3.
+- **Music**: `MusicDirector` plays Core `MusicEngine` (original, procedural) via `OnAudioFilterRead` on an AudioSource looping a silent clip; the audio thread touches only the pure-C# engine.
+- **Presentation**: `PowerSpectacle` (orb, rays, confetti; line renderers only), `GlitchCameraFx` FOV punch, hero speech bubble in `InspectionOverlay` from Core `HeroBarks`. Shaders: `BugReport/Hologram` and `BugReport/GradientSky` (URP HLSL; `ShaderHealthTests` guards them).

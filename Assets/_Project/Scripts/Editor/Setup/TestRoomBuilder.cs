@@ -436,6 +436,8 @@ namespace BugReport.EditorTools.Setup
             public string LevelTitle;
             /// <summary>Set by levels that teach (optional); wired into the UI by PresentationBuilder.</summary>
             public BugReport.Tutorial.GuideDirector Guide;
+            /// <summary>Escalating help for a stuck player; present whenever the level has objectives.</summary>
+            public BugReport.Tutorial.HintDirector Hints;
         }
 
         /// <summary>Bootstrap, state, selection, glitches, containment, presenters, audio, kill plane. The UI is added by PresentationBuilder.</summary>
@@ -475,8 +477,16 @@ namespace BugReport.EditorTools.Setup
 
             systems.AddComponent<WorldBoundsGuard>();
 
+            var musicHost = new GameObject("Music");
+            musicHost.transform.SetParent(systems.transform, false);
+            var music = musicHost.AddComponent<Audio.MusicDirector>();
+            Wire(music, "catalog", LevelCatalogBuilder.LoadOrCreate());
+
+            BugReport.Tutorial.HintDirector hintDirector = null;
             if (objectives != null)
             {
+                hintDirector = systems.AddComponent<BugReport.Tutorial.HintDirector>();
+                Wire(hintDirector, "objectives", objectives);
                 var recorder = systems.AddComponent<Progress.LevelCompletionRecorder>();
                 Wire(recorder, "objectives", objectives);
                 Wire(recorder, "catalog", LevelCatalogBuilder.LoadOrCreate());
@@ -494,7 +504,7 @@ namespace BugReport.EditorTools.Setup
             return new Systems
             {
                 Root = systems, Selection = selection, Glitches = glitchController, Containment = containment,
-                Objectives = objectives, LevelTitle = levelTitle,
+                Objectives = objectives, LevelTitle = levelTitle, Hints = hintDirector,
             };
         }
 
@@ -541,6 +551,7 @@ namespace BugReport.EditorTools.Setup
             AddEntity(temp, "CRATE", EntityCategory.Prop,
                 EntityCapabilities.Inspectable | EntityCapabilities.Duplicable | EntityCapabilities.Freezable | EntityCapabilities.PropertyMutable,
                 "Standard-issue crate.");
+            temp.AddComponent<PropertyCapability>();
             temp.AddComponent<DuplicationCapability>().Configure(profile);
             AddFreeze(temp, mats);
             if (ArtBuilder.DungeonAvailable)
@@ -771,7 +782,7 @@ namespace BugReport.EditorTools.Setup
         internal sealed class MaterialSet
         {
             public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified, Frozen, Lift,
-                PlateIdle, PlatePressed, Gate, Piston;
+                PlateIdle, PlatePressed, Gate, Piston, SearchLight, GuardBody, Anvil, DesyncSurface, Drone;
 
             public bool Create(out string error)
             {
@@ -794,7 +805,10 @@ namespace BugReport.EditorTools.Setup
                 EnsureFolder(MaterialFolder);
                 Floor = Lit(lit, "M_Floor", new Color(0.78f, 0.74f, 0.68f), 0.25f);
                 Wall = Lit(lit, "M_Wall", new Color(0.88f, 0.86f, 0.82f), 0.2f);
-                Firewall = Lit(lit, "M_Firewall", new Color(0.25f, 0.35f, 0.6f), 0.6f, new Color(0.1f, 0.35f, 1f) * 0.6f);
+                var hologram = Shader.Find("BugReport/Hologram");
+                Firewall = hologram != null
+                    ? Hologram(hologram, "M_Firewall", new Color(0.35f, 0.8f, 2.2f), 0.5f, rim: 1.6f, glitch: 0.18f)
+                    : Lit(lit, "M_Firewall", new Color(0.25f, 0.35f, 0.6f), 0.6f, new Color(0.1f, 0.35f, 1f) * 0.6f);
                 Exit = Lit(lit, "M_Exit", new Color(0.3f, 0.8f, 0.45f), 0.5f, new Color(0.2f, 1f, 0.45f) * 1.2f);
                 Crate = Lit(lit, "M_Crate", new Color(0.85f, 0.55f, 0.25f), 0.3f);
                 Ball = Lit(lit, "M_Ball", new Color(0.9f, 0.3f, 0.35f), 0.7f);
@@ -805,16 +819,34 @@ namespace BugReport.EditorTools.Setup
                 AnomalyFragment = Lit(lit, "M_AnomalyFragment", new Color(0.9f, 0.3f, 1f), 0.9f, new Color(0.9f, 0.2f, 1f) * 1.5f);
                 Line = Save(new Material(lineShader) { name = "M_DebugLine" }, "M_DebugLine");
                 // Collision Transfer placeholder looks (electric blue): see-through ghost, glowing solid.
-                Ghost = Transparent(lit, "M_CollisionGhost", new Color(0.2f, 0.55f, 1f, 0.28f), new Color(0.1f, 0.35f, 1f) * 0.4f);
+                Ghost = hologram != null
+                    ? Hologram(hologram, "M_CollisionGhost", new Color(0.3f, 0.75f, 2.4f), 0.2f, rim: 1.4f, glitch: 0.4f)
+                    : Transparent(lit, "M_CollisionGhost", new Color(0.2f, 0.55f, 1f, 0.28f), new Color(0.1f, 0.35f, 1f) * 0.4f);
                 Solidified = Lit(lit, "M_CollisionSolidified", new Color(0.15f, 0.4f, 0.95f), 0.8f, new Color(0.15f, 0.5f, 1f) * 1.6f);
                 Frozen = Lit(lit, "M_Frozen", new Color(0.75f, 0.95f, 1f), 0.95f, new Color(0.45f, 0.85f, 1f) * 0.9f);
                 Lift = Lit(lit, "M_Lift", new Color(0.45f, 0.5f, 0.58f), 0.5f);
-                PlateIdle = Lit(lit, "M_PlateIdle", new Color(0.55f, 0.2f, 0.2f), 0.4f, new Color(0.6f, 0.1f, 0.1f) * 0.5f);
-                PlatePressed = Lit(lit, "M_PlatePressed", new Color(0.2f, 0.6f, 0.3f), 0.4f, new Color(0.1f, 0.9f, 0.3f) * 0.9f);
+                PlateIdle = Lit(lit, "M_PlateIdle", new Color(0.75f, 0.45f, 0.08f), 0.4f, new Color(1f, 0.55f, 0.05f) * 0.6f);
+                PlatePressed = Lit(lit, "M_PlatePressed", new Color(0.7f, 0.9f, 1f), 0.4f, new Color(0.5f, 0.85f, 1.4f) * 0.9f);
                 Gate = Lit(lit, "M_Gate", new Color(0.7f, 0.55f, 0.2f), 0.6f, new Color(0.9f, 0.5f, 0.1f) * 0.25f);
                 Piston = Lit(lit, "M_Piston", new Color(0.35f, 0.37f, 0.42f), 0.7f, new Color(1f, 0.3f, 0.1f) * 0.3f);
+                SearchLight = Transparent(lit, "M_SearchLight", new Color(1f, 0.85f, 0.3f, 0.25f), new Color(1f, 0.7f, 0.2f) * 0.5f);
+                GuardBody = Lit(lit, "M_GuardBody", new Color(0.82f, 0.8f, 0.7f), 0.3f, new Color(1f, 0.3f, 0.2f) * 0.25f);
+                Anvil = Lit(lit, "M_Anvil", new Color(0.22f, 0.23f, 0.27f), 0.6f, new Color(1f, 0.6f, 0.1f) * 0.35f);
+                DesyncSurface = Lit(lit, "M_DesyncSurface", new Color(0.35f, 0.5f, 0.3f), 0.35f, new Color(0.5f, 1f, 0.3f) * 0.35f);
+                Drone = Lit(lit, "M_Drone", new Color(0.25f, 0.27f, 0.32f), 0.8f, new Color(1f, 0.75f, 0.2f) * 0.8f);
                 AssetDatabase.SaveAssets();
                 return true;
+            }
+
+            /// <summary>Hologram look (see BugReportHologram.shader). <paramref name="color"/> is HDR.</summary>
+            internal static Material Hologram(Shader shader, string name, Color color, float alpha, float rim = 1.2f, float glitch = 0.25f)
+            {
+                var m = new Material(shader) { name = name };
+                m.SetColor("_Color", color);
+                m.SetFloat("_Alpha", alpha);
+                m.SetFloat("_RimBoost", rim);
+                m.SetFloat("_Glitch", glitch);
+                return Save(m, name);
             }
 
             private static Material Lit(Shader shader, string name, Color baseColor, float smoothness, Color? emission = null)

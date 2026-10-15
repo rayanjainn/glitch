@@ -94,6 +94,7 @@ namespace BugReport.EditorTools.Setup
             var presentation = PresentationBuilder.LoadOrCreateAssets(mats);
 
             BuildLighting();
+            ChapterTheme.Apply(1, RenderSettings.sun);
             var env = new GameObject("--- ENVIRONMENT ---").transform;
             BuildHall(env, mats);
             env.Find("Floor").GetComponent<MeshRenderer>().sharedMaterial = PresentationBuilder.GridFloor(HalfX * 2f, HalfZ * 2f);
@@ -224,17 +225,18 @@ namespace BugReport.EditorTools.Setup
             var pistonEntity = piston.GetComponent<GameEntity>();
             guide.Configure(new[]
             {
-                new GuideDirector.Step(0, "Fly with [W][A][S][D] and the mouse. [SPACE] and [CTRL] move up and down.", GuideCondition.Move),
+                new GuideDirector.Step(0, "You are the BUG in this game. Help the knight reach the exit. Fly with [W][A][S][D] and the mouse; [SPACE] and [CTRL] go up and down.", GuideCondition.Move),
                 new GuideDirector.Step(0, "The hero is stuck behind the blue FIREWALL. Look at it.", GuideCondition.LookAt, firewallEntity),
                 new GuideDirector.Step(0, "Press [E] to select the firewall.", GuideCondition.Select, firewallEntity),
-                new GuideDirector.Step(0, "Now look at the dark SHADOW on the floor.", GuideCondition.LookAt, shadowA, requireSelected: firewallEntity),
+                new GuideDirector.Step(0, "Now look at the dark SHADOW on the floor. A shadow has no collision of its own, so it can hold the wall's.", GuideCondition.LookAt, shadowA, requireSelected: firewallEntity),
                 new GuideDirector.Step(0, "Click [LMB]: the wall's solidity moves into the shadow.", GuideCondition.Apply, shadowA, collisionTransfer),
-                new GuideDirector.Step(0, "The firewall is a ghost now. Watch the hero walk through.", GuideCondition.WaitForObjective),
+                new GuideDirector.Step(0, "Not sure what you can change? Press [TAB] for X-RAY: it tags everything you can affect.", GuideCondition.Inspect),
+                new GuideDirector.Step(0, "The firewall is a ghost now. Watch the hero walk through. [R] undoes your last glitch if you ever need it.", GuideCondition.WaitForObjective),
 
                 new GuideDirector.Step(1, "New glitch: DUPLICATION. Press [Q] to switch to it.", GuideCondition.Equip, glitch: duplication),
-                new GuideDirector.Step(1, "Both red plates need weight, and there is one crate. Look at the CRATE.", GuideCondition.LookAt, crate),
+                new GuideDirector.Step(1, "Both plates need weight, and there is one crate. Look at the CRATE.", GuideCondition.LookAt, crate),
                 new GuideDirector.Step(1, "Click [LMB] to copy it. The copy lands on the empty plate.", GuideCondition.Apply, crate, duplication),
-                new GuideDirector.Step(1, "The gate opens when both plates are pressed. Made a mistake? [R] undoes your last glitch.", GuideCondition.WaitForObjective),
+                new GuideDirector.Step(1, "The gate opens when both plates are pressed. The copy is a real crate, and you can copy it again.", GuideCondition.WaitForObjective),
 
                 new GuideDirector.Step(2, "New glitch: FREEZE. Press [Q] until FREEZE is selected.", GuideCondition.Equip, glitch: freeze),
                 new GuideDirector.Step(2, "The hero won't walk into the moving PISTON. Look at it.", GuideCondition.LookAt, pistonEntity),
@@ -334,10 +336,13 @@ namespace BugReport.EditorTools.Setup
             return shadow.GetComponent<GameEntity>();
         }
 
-        internal static PressurePlate Plate(Transform parent, MaterialSet mats, string name, Vector3 position)
+        internal static PressurePlate Plate(Transform parent, MaterialSet mats, string name, Vector3 position, float minMass = 5f)
         {
             int world = GameLayers.Index(GameLayers.World);
             var visual = Block(name, parent, position + new Vector3(0f, 0.05f, 0f), new Vector3(1f, 0.1f, 1f), mats.PlateIdle, world);
+            // The plate is a sensor, not a step: a solid top would leave only ~1 cm of clearance when a
+            // copy spawns next to a crate standing on it.
+            Object.DestroyImmediate(visual.GetComponent<Collider>());
             var sensor = new GameObject(name + "_Sensor", typeof(BoxCollider));
             sensor.transform.SetParent(parent, false);
             sensor.transform.position = position + new Vector3(0f, 0.5f, 0f);
@@ -346,7 +351,7 @@ namespace BugReport.EditorTools.Setup
             box.size = new Vector3(0.9f, 0.8f, 0.9f);
             sensor.layer = GameLayers.IgnoreRaycastLayer;
             var plate = sensor.AddComponent<PressurePlate>();
-            plate.Configure(5f, visual.GetComponent<Renderer>(), mats.PlateIdle, mats.PlatePressed);
+            plate.Configure(minMass, visual.GetComponent<Renderer>(), mats.PlateIdle, mats.PlatePressed);
             return plate;
         }
 

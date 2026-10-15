@@ -23,6 +23,9 @@ namespace BugReport.Glitches
 
         /// <summary>Cycles completed (fractional). Frozen time does not advance it.</summary>
         public float Phase { get; private set; }
+
+        /// <summary>Property Swap changes this; 1 = authored speed.</summary>
+        public float SpeedScale { get; set; } = 1f;
         public bool AutoStep
         {
             get => autoStep;
@@ -55,7 +58,7 @@ namespace BugReport.Glitches
         /// <summary>Advances by <paramref name="deltaTime"/> of world time, scaled by the local freeze.</summary>
         public void Step(float deltaTime)
         {
-            float scale = freeze != null ? freeze.TimeScale : 1f;
+            float scale = (freeze != null ? freeze.TimeScale : 1f) * SpeedScale;
             Phase += deltaTime * scale / period;
             body.MovePosition(PositionAt(Phase));
         }

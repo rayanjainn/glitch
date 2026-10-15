@@ -116,13 +116,13 @@ namespace BugReport.UI
             buttons.Add(GameMenus.MenuButton("level-select", "LEVEL SELECT", ShowLevels));
             buttons.Add(GameMenus.MenuButton("settings", "SETTINGS", ShowSettings));
             buttons.Add(GameMenus.MenuButton("credits", "CREDITS", ShowCredits));
-            buttons.Add(GameMenus.MenuButton("quit", "QUIT", LevelFlow.Quit));
+            buttons.Add(GameMenus.ConfirmButton("quit", "QUIT", LevelFlow.Quit));
 
-            levels = Ui.Add(screen, Ui.Element("menu-levels", "br-card"));
+            levels = Ui.Add(screen, Ui.Element("menu-levels", "br-card", "br-menu__levels"));
             levels.pickingMode = PickingMode.Position;
             levels.Add(Ui.Text("levels-caption", "LEVEL SELECT", "br-caption"));
             levels.Add(Ui.Text("levels-title", "CHOOSE A LEVEL", "br-title", "br-display"));
-            levelList = Ui.Add(levels, Ui.Element("level-list", "br-card__buttons"));
+            levelList = Ui.Add(levels, Ui.Element("level-list", "br-levelgrid"));
             levels.Add(GameMenus.MenuButton("levels-back", "BACK", ShowHome));
 
             settings?.Dispose();
@@ -135,6 +135,14 @@ namespace BugReport.UI
             credits.Add(Ui.Text("credits-title", "CREDITS", "br-title", "br-display"));
             credits.Add(Ui.Text("credits-text", Credits, "br-card__body", "br-credits"));
             credits.Add(GameMenus.MenuButton("credits-back", "BACK", ShowHome));
+
+            // Esc goes back one page (keyboard players have no mouse for BACK).
+            layer.RegisterCallback<KeyDownEvent>(e =>
+            {
+                if (e.keyCode != KeyCode.Escape || Showing == "home" || (settings != null && settings.IsRebinding)) return;
+                ShowHome();
+                e.StopPropagation();
+            });
 
             ShowHome();
         }
@@ -149,12 +157,17 @@ namespace BugReport.UI
                 int index = i;
                 var entry = catalog.Get(i);
                 bool unlocked = LevelProgress.IsUnlocked(catalog.Ids, save, i);
-                string state = !unlocked ? "  [LOCKED]" : save.IsCompleted(entry.id) ? "  [DONE]" : string.Empty;
-                var button = GameMenus.MenuButton("level-" + i, (i + 1) + ". " + entry.title + state, () => Play(index));
+                string state = !unlocked ? "  [LOCKED]" : save.IsCompleted(entry.id) ? "  " + RunSummary.Stars(save.StarsFor(entry.id)) : string.Empty;
+                var button = GameMenus.MenuButton("level-" + i, (i + 1).ToString("00") + "  " + entry.title + state, () => Play(index));
+                button.AddToClassList("br-chapter-" + Mathf.Clamp(entry.chapterIndex, 1, 7));
+                button.tooltip = entry.chapter;
                 button.SetEnabled(unlocked);
+                if (!unlocked) button.text += "  (FINISH " + (i).ToString("00") + ")";
                 levelList.Add(button);
             }
-            if (levelList.childCount > 0) Ui.FocusSoon((Focusable)levelList[0]);
+            // Focus the level the player most likely wants: the first open level not yet completed.
+            int focus = LevelProgress.ContinueIndex(catalog.Ids, save);
+            if (levelList.childCount > 0) Ui.FocusSoon((Focusable)levelList[focus >= 0 && focus < levelList.childCount ? focus : 0]);
         }
 
         private void UpdateContinue()

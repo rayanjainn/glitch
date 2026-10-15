@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
+using BugReport.Core.Presentation;
 using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.Presentation;
@@ -23,18 +24,30 @@ namespace BugReport.UI
             (EntityCapabilities.CollisionTransferable, CollisionTransferDefinition.ElectricBlue, "COLLISION"),
             (EntityCapabilities.Duplicable, DuplicationDefinition.Magenta, "DUPLICATE"),
             (EntityCapabilities.Freezable, FreezeDefinition.PaleCyan, "FREEZE"),
+            (EntityCapabilities.PropertyMutable, PropertySwapDefinition.Amber, "SWAP"),
+            (EntityCapabilities.AIControllable, Guards.AiOverrideDefinition.Violet, "AI"),
+            (EntityCapabilities.Desyncable, DesyncDefinition.Lime, "DESYNC"),
         };
 
         [SerializeField] private Camera viewCamera;
         [SerializeField, OptionalReference] private HeroAnimator heroAnimator;
         [SerializeField, OptionalReference] private VisualSettings settings;
         [SerializeField, OptionalReference] private GuideDirector guide;
+        [SerializeField, OptionalReference] private HintDirector hints;
         [SerializeField, Min(1f)] private float maxDistance = 28f;
 
         private readonly List<IEntityDescriptor> buffer = new List<IEntityDescriptor>();
         private readonly List<VisualElement> tags = new List<VisualElement>();
         private VisualElement tagLayer;
         private Label heroIcon;
+        private Label heroBubble;
+        private HeroController heroController;
+        private HeroBarks barks;
+        private HeroState lastHeroState = HeroState.Idle;
+        private int lastRespawnCount;
+        private float bubbleUntil;
+        private bool heroStarted;
+        private float glitchStartedAt = -1f;
         private VisualElement guideMarker;
         private VisualElement panel;
         private Label panelName;
@@ -60,10 +73,21 @@ namespace BugReport.UI
             settings = visualSettings;
         }
 
+        protected override void OnBound(GameServices s) => s.Glitches.OperationStarted += OnGlitchStarted;
+
+        protected override void OnUnbound()
+        {
+            if (Services != null && !Services.IsDisposed) Services.Glitches.OperationStarted -= OnGlitchStarted;
+        }
+
+        private void OnGlitchStarted(Core.Glitches.GlitchOperation _) => glitchStartedAt = Time.unscaledTime;
+
         protected override void Build(VisualElement layer)
         {
             tagLayer = Ui.Add(layer, Ui.Element("tags", "br-tags"));
             heroIcon = Ui.Add(layer, Ui.Text("hero-icon", string.Empty, "br-hero-icon"));
+            heroBubble = Ui.Add(layer, Ui.Text("hero-bubble", string.Empty, "br-bubble"));
+            Ui.Show(heroBubble, false);
             guideMarker = Ui.Add(layer, Ui.Element("guide-marker", "br-guide-marker"));
             guideMarker.Add(Ui.Element("guide-marker-diamond", "br-guide-marker__diamond"));
 
@@ -110,6 +134,7 @@ namespace BugReport.UI
             for (int i = VisibleTagCount; i < tags.Count; i++) Ui.Show(tags[i], false);
 
             RefreshHeroIcon();
+            RefreshHeroBubble();
             RefreshGuideMarker();
             RefreshPanel(labels);
         }
@@ -168,9 +193,67 @@ namespace BugReport.UI
             Ui.SetText(heroIcon, icon);
         }
 
+        /// <summary>The knight comments on what happens to them, in a short speech bubble above their head.</summary>
+        private void RefreshHeroBubble()
+        {
+            if (heroAnimator == null) return;
+            if (heroController == null)
+            {
+                heroController = heroAnimator.GetComponent<HeroController>();
+                if (heroController == null) return;
+                barks = new HeroBarks(Mathf.RoundToInt(Time.realtimeSinceStartup * 1000f));
+                lastHeroState = heroController.State;
+                lastRespawnCount = heroController.RespawnCount;
+            }
+
+            float now = Time.unscaledTime;
+            string line = null;
+            if (glitchStartedAt > 0f && now - glitchStartedAt > 0.9f)
+            {
+                glitchStartedAt = -1f;
+                line = barks.TryBark(BarkEvent.Glitched, now);
+            }
+            if (heroController.RespawnCount != lastRespawnCount)
+            {
+                lastRespawnCount = heroController.RespawnCount;
+                line = barks.TryBark(heroController.LastRespawnWasCaught ? BarkEvent.Caught : BarkEvent.Fell, now);
+            }
+            else if (heroController.State != lastHeroState)
+            {
+                switch (heroController.State)
+                {
+                    case HeroState.Walking when !heroStarted:
+                        heroStarted = true;
+                        line = barks.TryBark(BarkEvent.Start, now);
+                        break;
+                    case HeroState.Blocked:
+                        line = barks.TryBark(heroController.Cause == BlockCause.Machine ? BarkEvent.BlockedMachine
+                            : heroController.Cause == BlockCause.Guard ? BarkEvent.BlockedGuard : BarkEvent.Blocked, now);
+                        break;
+                    case HeroState.Confused: line = barks.TryBark(BarkEvent.Confused, now); break;
+                    case HeroState.Arrived: line = barks.TryBark(BarkEvent.Arrived, now); break;
+                }
+            }
+            lastHeroState = heroController.State;
+
+            if (line != null)
+            {
+                Ui.SetText(heroBubble, line);
+                bubbleUntil = now + 3.2f;
+            }
+
+            Vector2 position = default;
+            bool on = now < bubbleUntil && TryPlace(heroAnimator.transform.position + Vector3.up * 2.3f, out position);
+            Ui.Show(heroBubble, on);
+            if (!on) return;
+            heroBubble.style.left = position.x;
+            heroBubble.style.top = position.y;
+        }
+
         private void RefreshGuideMarker()
         {
             var target = guide != null ? guide.CurrentTarget : null;
+            if (target == null && hints != null) target = hints.FocusTarget;
             Vector2 position = default;
             bool on = false;
             if (target != null)

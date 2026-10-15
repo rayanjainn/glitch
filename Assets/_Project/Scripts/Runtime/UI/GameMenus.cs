@@ -46,6 +46,11 @@ namespace BugReport.UI
         private Button nextButton;
         private Button completeRestartButton;
         private Label completeSummary;
+        private Label completeStars;
+        private Label completeStats;
+        private Label completeHint;
+        private Label completeOutro;
+        private Label completeStamp;
         private GameState shownState = GameState.Boot;
 
         protected override string LayerName => "menus";
@@ -57,6 +62,23 @@ namespace BugReport.UI
         public bool NextLevelAvailable => nextButton != null && Ui.IsShown(nextButton);
         public string CompleteSummaryText => completeSummary != null ? completeSummary.text : string.Empty;
         public SettingsPanel Settings => settings;
+
+        private static GameMenus instance;
+
+        /// <summary>Esc while the settings screen is open (and no key is being rebound) goes back; returns true if it did.</summary>
+        public static bool TryCloseSettingsWithEscape()
+        {
+            if (instance == null || !instance.SettingsVisible) return false;
+            if (instance.settings.IsRebinding) return true; // Esc cancels the rebind only
+            instance.CloseSettings();
+            return true;
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            instance = this;
+        }
 
         public void Configure(ObjectiveDirector objectiveDirector, string title, LevelCatalog levelCatalog = null)
         {
@@ -82,6 +104,7 @@ namespace BugReport.UI
 
         protected override void OnDisable()
         {
+            if (instance == this) instance = null;
             settings?.Dispose();
             settings = null;
             base.OnDisable();
@@ -133,9 +156,9 @@ namespace BugReport.UI
             var buttons = Ui.Add(columns, Ui.Element("pause-buttons", "br-card__buttons"));
             resumeButton = Ui.Add(buttons, MenuButton("resume", "RESUME", Resume));
             buttons.Add(MenuButton("open-settings", "SETTINGS", OpenSettings));
-            buttons.Add(MenuButton("restart", "RESTART LEVEL", LevelFlow.RestartLevel));
-            buttons.Add(MenuButton("main-menu", "MAIN MENU", LevelFlow.LoadMainMenu));
-            buttons.Add(MenuButton("quit", "QUIT GAME", LevelFlow.Quit));
+            buttons.Add(ConfirmButton("restart", "RESTART LEVEL", LevelFlow.RestartLevel));
+            buttons.Add(ConfirmButton("main-menu", "MAIN MENU", LevelFlow.LoadMainMenu));
+            buttons.Add(ConfirmButton("quit", "QUIT GAME", LevelFlow.Quit));
 
             var controls = Ui.Add(columns, Ui.Element("controls", "br-controls"));
             controls.Add(Ui.Text("controls-caption", "CONTROLS", "br-caption"));
@@ -155,6 +178,11 @@ namespace BugReport.UI
             var completeCard = Ui.Add(completeScreen, Ui.Element("complete-card", "br-card", "br-card--success"));
             completeCard.Add(Ui.Text("complete-caption", "REPORT CLOSED", "br-caption"));
             completeCard.Add(Ui.Text("complete-title", levelTitle + " COMPLETE", "br-title", "br-display"));
+            completeStars = Ui.Add(completeCard, Ui.Text("complete-stars", string.Empty, "br-stars", "br-display"));
+            completeStats = Ui.Add(completeCard, Ui.Text("complete-stats", string.Empty, "br-card__body", "br-stats"));
+            completeHint = Ui.Add(completeCard, Ui.Text("complete-hint", string.Empty, "br-caption"));
+            completeOutro = Ui.Add(completeCard, Ui.Text("complete-outro", string.Empty, "br-card__body", "br-outro"));
+            completeStamp = Ui.Add(completeScreen, Ui.Text("complete-stamp", "CLOSED", "br-stamp", "br-display"));
             completeSummary = Ui.Add(completeCard, Ui.Text("complete-summary", string.Empty, "br-card__body"));
             var completeButtons = Ui.Add(completeCard, Ui.Element("complete-buttons", "br-card__buttons"));
             nextButton = Ui.Add(completeButtons, MenuButton("next-level", "NEXT LEVEL", LoadNextLevel));
@@ -167,11 +195,57 @@ namespace BugReport.UI
             shownState = GameState.Boot;
         }
 
+        /// <summary>Stars, time, uses and the story outro on the level-complete card.</summary>
+        private void FillRunCard()
+        {
+            var recorder = FindAnyObjectByType<LevelCompletionRecorder>();
+            if (recorder == null || recorder.CurrentIndex() < 0)
+            {
+                Ui.SetText(completeStars, string.Empty);
+                Ui.SetText(completeStats, string.Empty);
+                Ui.SetText(completeHint, string.Empty);
+                Ui.SetText(completeOutro, string.Empty);
+                return;
+            }
+            Ui.SetText(completeStars, RunSummary.Stars(recorder.Stars));
+            string stats = "TIME " + RunSummary.Time(recorder.Seconds) + "   GLITCHES " + recorder.GlitchUses
+                + " (PAR " + recorder.ParUses + ")   PEAK ALERT " + recorder.MaxStage + "\nFILED UNDER: " + recorder.UsedSummary();
+            Ui.SetText(completeStats, stats);
+            Ui.SetText(completeHint, RunSummary.NextStarHint(recorder.Stars, recorder.ParUses));
+            string[] verdicts = { "WORKS AS INTENDED", "WON'T FIX", "CANNOT REPRODUCE", "CLOSED", "DUPLICATE OF ITSELF" };
+            Ui.SetText(completeStamp, verdicts[System.Math.Abs(recorder.CurrentIndex()) % verdicts.Length]);
+            int index = recorder.CurrentIndex();
+            Ui.SetText(completeOutro, index >= 0 && catalog != null ? catalog.Get(index).outro ?? string.Empty : string.Empty);
+        }
+
         private static VisualElement MakeScreen(string name)
         {
             var screen = Ui.Element(name, "br-screen");
             screen.pickingMode = PickingMode.Position; // blocks clicks to anything underneath
             return screen;
+        }
+
+        /// <summary>A button that needs a second click within three seconds (destructive actions).</summary>
+        internal static Button ConfirmButton(string name, string text, System.Action onConfirmed)
+        {
+            Button button = null;
+            bool armed = false;
+            button = MenuButton(name, text, () =>
+            {
+                if (armed)
+                {
+                    onConfirmed();
+                    return;
+                }
+                armed = true;
+                button.text = "CLICK AGAIN TO CONFIRM";
+                button.schedule.Execute(() =>
+                {
+                    armed = false;
+                    button.text = text;
+                }).ExecuteLater(3000);
+            });
+            return button;
         }
 
         internal static Button MenuButton(string name, string text, System.Action onClick)
@@ -212,9 +286,17 @@ namespace BugReport.UI
                 Ui.SetText(completeSummary, tracker != null
                     ? HudFormat.CompletionSummary(tracker.CompletedCount, objectives.Count)
                     : HudFormat.CompletionSummary(0, 0));
+                FillRunCard();
                 bool hasNext = NextLevelScene() != null;
                 Ui.Show(nextButton, hasNext);
-                Ui.FocusSoon(hasNext ? nextButton : completeRestartButton);
+                // A moment of read-only time so a player still clicking does not skip the card.
+                var buttons = new[] { nextButton, completeRestartButton };
+                foreach (var b in buttons) b.SetEnabled(false);
+                completeScreen.schedule.Execute(() =>
+                {
+                    foreach (var b in buttons) b.SetEnabled(true);
+                    Ui.FocusSoon(hasNext ? nextButton : completeRestartButton);
+                }).ExecuteLater(800);
             }
         }
     }

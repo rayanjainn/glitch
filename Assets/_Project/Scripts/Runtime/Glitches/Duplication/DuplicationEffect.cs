@@ -125,7 +125,7 @@ namespace BugReport.Glitches
         /// <summary>First free spot beside the source (right, left, front, back, top). World-axis aligned.</summary>
         private static bool TryFindSpawn(GameEntity source, out Vector3 position)
         {
-            var bounds = source.GetWorldBounds();
+            var bounds = source.GetPhysicalBounds();
             var size = bounds.size;
             var half = bounds.extents * 0.98f;
             var candidates = new[]

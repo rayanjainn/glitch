@@ -70,6 +70,25 @@ namespace BugReport
             GetComponentsInChildren(true, colliders);
         }
 
+        /// <summary>
+        /// World-space bounds of the solid colliders (what physically occupies space), falling back to
+        /// <see cref="GetWorldBounds"/>. Placement logic uses this, so swapping a primitive for a model
+        /// with different proportions never changes where copies land.
+        /// </summary>
+        public Bounds GetPhysicalBounds()
+        {
+            bool has = false;
+            var bounds = new Bounds(transform.position, Vector3.zero);
+            for (int i = 0; i < colliders.Count; i++)
+            {
+                var c = colliders[i];
+                if (c == null || !c.enabled || c.isTrigger) continue;
+                if (has) bounds.Encapsulate(c.bounds);
+                else { bounds = c.bounds; has = true; }
+            }
+            return has ? bounds : GetWorldBounds();
+        }
+
         /// <summary>World-space bounds from renderers, falling back to colliders, then to the pivot.</summary>
         public Bounds GetWorldBounds()
         {

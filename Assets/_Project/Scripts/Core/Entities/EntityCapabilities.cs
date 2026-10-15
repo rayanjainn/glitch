@@ -19,6 +19,7 @@ namespace BugReport.Core.Entities
         PropertyMutable = 1 << 4,
         AIControllable = 1 << 5,
         ObjectiveRelevant = 1 << 6,
+        Desyncable = 1 << 7,
     }
 
     public static class EntityCapabilitiesExtensions

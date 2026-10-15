@@ -308,3 +308,25 @@
 - **Error:** `CS0104 'Cursor' is ambiguous between UnityEngine.UIElements.Cursor and UnityEngine.Cursor` in `MainMenu.cs`. It is the same class of problem as `DebugOverlay`: a file that imports `UnityEngine.UIElements` gains that namespace's type names.
 - **Fix:** `UnityEngine.Cursor` is spelled out. The compile-check stubs now include `UIElements.Cursor`, so it reproduces offline (verified: the same 2 errors before the fix, 0 after).
 - **Docs:** TESTING.md says to run `Tools/Assets/fetch-cc0-assets.sh` only if `Assets/ThirdParty` is missing. The files are in the repo through LFS (`git lfs pull`).
+
+## 2026-10-15 — Milestone 11: the full game (untested in Unity)
+
+Request: "the full ready game, asset heavy, visually appealing, no demo, test it against a gamer agent".
+- **Honest status:** nothing from M11 has run in Unity. Verified offline only: 185 Core tests pass, the six-assembly stub compile has 0 errors, the filename check passes. Past milestones needed one to three fixes after the first Unity run; expect the same here.
+- **Gamer agent:** the fresh-player review is a stand-in (an agent reading the game's text, UI and levels as a newcomer would), not a human. Its findings drove: hint tiers instead of up-front solutions, bigger guide text, clearer reticle feedback, a containment explainer, hero personality, a real end-of-level card, chapter-coloured level select. A second pass is recorded below when done.
+- **New content:** Property Swap (mass), AI Override with skeleton guards, Desync, security drones; levels 10–20; 7 chapters with sky/fog/lighting, scenery kits, story lines, music themes.
+- **Cut:** bounciness/size swaps; Speed Swap has no level. Layouts are still straight halls.
+- **Assets:** art batch 2 (326 files, ~96 MB, CC0) is fetched by `Tools/Assets/fetch-cc0-assets-2.sh`; not in the repo until the owner commits it (LFS upload is not possible from the cloud session). The game degrades gracefully without it.
+- **Music** is original and procedural, so there is no third-party audio to credit or license.
+
+### M11 review round (four read-only reviewers: level QA, puzzle design, runtime bug-hunt, UX)
+- **Real bug found and fixed:** a lured guard never walked to its decoy (`GuardBrain.ShouldMove` stayed false during the patrol pause). It would have broken levels 13, 14, 15, 19 and 20. Regression test added.
+- **Other fixes:** guards no longer catch the hero after the level is won; drones/guards sight the anomaly at any height (stealth is real now); per-frame allocations removed (desync outline, drone property block, story text); FOV punch restores the camera; old catalog assets get sane chapter/par defaults; hint thresholds are sorted; run time counts inspection mode; story clock ignores pause.
+- **UX:** glitch slots show a countdown bar and "ENDS 3.2s"; containment bar always labelled; slower flash (2.5 Hz); Esc goes back in menus and settings; complete card ignores clicks for 0.8 s; plates are orange/pale-blue and lower when pressed; tutorial states the goal and teaches [TAB] and [R]; bigger/outlined text.
+- **Reviewer claims I checked and did not act on:** "a duplicate of a mass-swapped crate keeps the swapped mass": wrong, copies are built from the prefab, not the live object.
+- **Not done, on purpose:** branching routes (HeroNavGraph supports them but I would be guessing at the hero's replanning without Unity), Speed Swap levels (a swapped piston never becomes safe for the hero, so no honest puzzle), patch-order puzzles, UI scale and colour-blind glitch shapes, number-key glitch selection (needs input-asset edits), "revert a specific glitch", and cutting or replacing repeated levels (Three Plates, Patch Day is only re-worded).
+
+### M11 round 2: the reviewers' remaining list
+- **Done:** FORK IN THE ROAD (branching hero route, first non-corridor layout); STACK THE ORDER replaces PATCH DAY (custom containment settings: the system patches the oldest glitch, so freeze a crate first as a sacrifice; the wrong order drops the hero off the long bridge); a decoy holds one lure at a time; guards cannot be frozen (so AI Override has its own job); undo targets the glitch on the thing under the reticle; number keys 1-6; a different swatch shape per glitch slot; UI size slider; reduced-flashing toggle; rebinding swaps instead of duplicating keys; click-twice confirms for restart/main menu/quit; lock reason on level select; the hero explains why he waits (machine/guard) and reacts to glitches; the end card lists the glitches used and a ticket verdict; stale level scenes are removed by Build ALL.
+- **Deliberately not done:** Speed Swap level (a swapped piston never becomes safe for the hero under the current hazard rule, so there is no honest puzzle); safe-area padding and sound captions (desktop-first; small value for the risk); a "trampoline bridge" level and a vertical ledge level (would need hero routes with height, which I cannot validate without Unity); cutting THREE PLATES.
+- **Known behaviour kept on purpose:** undoing or being patched out of a hologram bridge while the hero stands on it drops him (the new STACK THE ORDER level relies on it).
