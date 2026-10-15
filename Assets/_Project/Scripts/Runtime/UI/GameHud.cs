@@ -287,7 +287,7 @@ namespace BugReport.UI
                 slot.EnableInClassList("br-slot--cooling", cooldown > 0f);
                 slot.style.borderBottomColor = active ? def.Color : new Color(def.Color.r, def.Color.g, def.Color.b, 0.25f);
                 slot.Q("slot-swatch").style.backgroundColor = def.Color;
-                Ui.SetText(slot.Q<Label>("slot-name"), def.DisplayName);
+                Ui.SetText(slot.Q<Label>("slot-name"), (i + 1) + " " + def.DisplayName);
                 float left = 0f;
                 float total = 1f;
                 for (int j = 0; j < Services.Glitches.ActiveCount; j++)
@@ -324,7 +324,7 @@ namespace BugReport.UI
             for (int i = 0; i < count; i++)
             {
                 var slot = Ui.Add(slotRow, Ui.Element("slot-" + i, "br-slot"));
-                slot.Add(Ui.Element("slot-swatch", "br-slot__swatch"));
+                slot.Add(Ui.Element("slot-swatch", "br-slot__swatch", "br-shape-" + (i % 6)));
                 slot.Add(Ui.Text("slot-name", string.Empty, "br-slot__name"));
                 slot.Add(Ui.Text("slot-timer", string.Empty, "br-slot__timer"));
                 slot.Add(Ui.Element("slot-run", "br-slot__run"));

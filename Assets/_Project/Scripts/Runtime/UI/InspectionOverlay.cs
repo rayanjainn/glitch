@@ -47,6 +47,7 @@ namespace BugReport.UI
         private int lastRespawnCount;
         private float bubbleUntil;
         private bool heroStarted;
+        private float glitchStartedAt = -1f;
         private VisualElement guideMarker;
         private VisualElement panel;
         private Label panelName;
@@ -71,6 +72,15 @@ namespace BugReport.UI
             heroAnimator = hero;
             settings = visualSettings;
         }
+
+        protected override void OnBound(GameServices s) => s.Glitches.OperationStarted += OnGlitchStarted;
+
+        protected override void OnUnbound()
+        {
+            if (Services != null && !Services.IsDisposed) Services.Glitches.OperationStarted -= OnGlitchStarted;
+        }
+
+        private void OnGlitchStarted(Core.Glitches.GlitchOperation _) => glitchStartedAt = Time.unscaledTime;
 
         protected override void Build(VisualElement layer)
         {
@@ -198,6 +208,11 @@ namespace BugReport.UI
 
             float now = Time.unscaledTime;
             string line = null;
+            if (glitchStartedAt > 0f && now - glitchStartedAt > 0.9f)
+            {
+                glitchStartedAt = -1f;
+                line = barks.TryBark(BarkEvent.Glitched, now);
+            }
             if (heroController.RespawnCount != lastRespawnCount)
             {
                 lastRespawnCount = heroController.RespawnCount;
@@ -211,7 +226,10 @@ namespace BugReport.UI
                         heroStarted = true;
                         line = barks.TryBark(BarkEvent.Start, now);
                         break;
-                    case HeroState.Blocked: line = barks.TryBark(BarkEvent.Blocked, now); break;
+                    case HeroState.Blocked:
+                        line = barks.TryBark(heroController.Cause == BlockCause.Machine ? BarkEvent.BlockedMachine
+                            : heroController.Cause == BlockCause.Guard ? BarkEvent.BlockedGuard : BarkEvent.Blocked, now);
+                        break;
                     case HeroState.Confused: line = barks.TryBark(BarkEvent.Confused, now); break;
                     case HeroState.Arrived: line = barks.TryBark(BarkEvent.Arrived, now); break;
                 }

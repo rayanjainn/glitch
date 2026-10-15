@@ -174,7 +174,7 @@ namespace UnityEngine
     {
         public Bounds(Vector3 c, Vector3 s) { }
         public Vector3 center => throw null; public Vector3 size => throw null; public Vector3 extents => throw null; public Vector3 min => throw null; public Vector3 max => throw null;
-        public void Encapsulate(Bounds b) { } public void Encapsulate(Vector3 point) { } public void Expand(float a) { } public bool Contains(Vector3 p) => throw null;
+        public void Encapsulate(Bounds b) { } public void Encapsulate(Vector3 point) { } public void Expand(float a) { } public bool Contains(Vector3 p) => throw null; public Vector3 ClosestPoint(Vector3 p) => throw null;
     }
     public struct Ray { }
     public struct RaycastHit { public float distance => throw null; public Transform transform => throw null; public Collider collider => throw null; public Vector3 point => throw null; }
@@ -529,7 +529,7 @@ namespace UnityEngine.InputSystem
     public class Pointer : InputDevice { }
     public class InputControl { public InputDevice device => throw null; }
     public class ButtonControl : InputControl { public bool wasPressedThisFrame => throw null; }
-    public class Keyboard : InputDevice { public static Keyboard current => throw null; public ButtonControl f1Key => throw null; public ButtonControl f5Key => throw null; }
+    public class Keyboard : InputDevice { public static Keyboard current => throw null; public ButtonControl f1Key => throw null; public ButtonControl f5Key => throw null; public ButtonControl digit1Key => throw null; public ButtonControl digit2Key => throw null; public ButtonControl digit3Key => throw null; public ButtonControl digit4Key => throw null; public ButtonControl digit5Key => throw null; public ButtonControl digit6Key => throw null; }
     public struct InputBinding
     {
         public bool isComposite => throw null; public bool isPartOfComposite => throw null; public string groups => throw null;

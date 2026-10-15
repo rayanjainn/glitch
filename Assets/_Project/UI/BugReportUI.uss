@@ -689,3 +689,11 @@
 .br-objective { max-width: 420px; }
 .br-chip { font-size: 13px; }
 .br-inspect__description { font-size: 15px; }
+
+/* ---- a different swatch SHAPE per glitch slot, so colour is never the only cue ---- */
+.br-shape-0 { border-radius: 5px; }
+.br-shape-1 { border-radius: 1px; }
+.br-shape-2 { border-radius: 1px; rotate: 45deg; }
+.br-shape-3 { width: 18px; height: 8px; border-radius: 4px; }
+.br-shape-4 { width: 8px; height: 18px; border-radius: 4px; }
+.br-shape-5 { border-radius: 1px; border-width: 2px; border-color: #FFFFFF; }

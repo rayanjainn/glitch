@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace BugReport.Hero
 {
+    public enum BlockCause { None, Machine, Guard, Other }
+
     public enum HeroState
     {
         /// <summary>Waiting for the level to start.</summary>
@@ -330,14 +332,36 @@ namespace BugReport.Hero
             return d.magnitude;
         }
 
+        /// <summary>What the hero is waiting for (valid while Blocked/Confused).</summary>
+        public BlockCause Cause { get; private set; }
+
+        private void ClassifyBlock()
+        {
+            Cause = BlockCause.Other;
+            var hazards = Level.HeroHazard.Active;
+            var feet = Feet;
+            float best = 12f;
+            for (int i = 0; i < hazards.Count; i++)
+            {
+                var h = hazards[i];
+                if (h.IsSafe || h.Volume == null) continue;
+                float d = Vector3.Distance(h.Volume.bounds.ClosestPoint(feet), feet);
+                if (d >= best) continue;
+                best = d;
+                Cause = h.GetComponent<Guards.GuardController>() != null ? BlockCause.Guard : BlockCause.Machine;
+            }
+        }
+
         private void EnterBlocked()
         {
+            ClassifyBlock();
             timer = retryDelay;
             SetState(HeroState.Blocked);
         }
 
         private void EnterConfused()
         {
+            ClassifyBlock();
             timer = confusedDuration;
             SetState(HeroState.Confused);
         }

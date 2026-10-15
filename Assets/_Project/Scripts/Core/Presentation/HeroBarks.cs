@@ -2,7 +2,7 @@ using System;
 
 namespace BugReport.Core.Presentation
 {
-    public enum BarkEvent { Start, Blocked, Confused, Fell, Caught, Arrived }
+    public enum BarkEvent { Start, Blocked, Confused, Fell, Caught, Arrived, BlockedMachine, BlockedGuard, Glitched }
 
     /// <summary>
     /// Short lines the hero says in character (a confident knight who has no idea the game is broken).
@@ -19,6 +19,9 @@ namespace BugReport.Core.Presentation
             /* Fell     */ new[] { "Curious. I seem to have fallen.", "Fear not, I have done this before.", "Gravity! Of course." },
             /* Caught   */ new[] { "A guard! Back to the start.", "Halt? I was merely walking.", "Not the dungeon again." },
             /* Arrived  */ new[] { "Victory!", "As foretold.", "Another quest complete.", "Easy. Mostly." },
+            /* BlockedMachine */ new[] { "That is moving. I will wait until it stops.", "I won't walk into that.", "Mechanisms. I shall wait." },
+            /* BlockedGuard   */ new[] { "A guard. I would rather not be seen.", "He is watching the door.", "I'll wait for him to leave." },
+            /* Glitched       */ new[] { "Is that crate... twice?", "Did the floor just change?", "I shall not question it.", "That was not there a moment ago." },
         };
 
         private readonly Random random;
