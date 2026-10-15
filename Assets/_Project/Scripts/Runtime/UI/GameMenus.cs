@@ -181,7 +181,7 @@ namespace BugReport.UI
         private void FillRunCard()
         {
             var recorder = FindAnyObjectByType<LevelCompletionRecorder>();
-            if (recorder == null)
+            if (recorder == null || recorder.CurrentIndex() < 0)
             {
                 Ui.SetText(completeStars, string.Empty);
                 Ui.SetText(completeStats, string.Empty);

@@ -39,7 +39,15 @@ namespace BugReport.Tutorial
 
         public void Configure(ObjectiveDirector objectiveDirector) => objectives = objectiveDirector;
 
-        private void Awake() => stuck = new StuckHints(pulseAfter, hintAfter, markerAfter);
+        private void Awake() => stuck = NewStuck();
+
+        private StuckHints NewStuck()
+        {
+            float a = Mathf.Max(1f, pulseAfter);
+            float b = Mathf.Max(a, hintAfter);
+            float c = Mathf.Max(b, markerAfter);
+            return new StuckHints(a, b, c);
+        }
 
         private void OnEnable()
         {
@@ -65,7 +73,7 @@ namespace BugReport.Tutorial
         /// <summary>Advances the idle clock. Public for tests.</summary>
         public void Step(float deltaTime)
         {
-            if (stuck == null) stuck = new StuckHints(pulseAfter, hintAfter, markerAfter);
+            if (stuck == null) stuck = NewStuck();
             if (services == null || services.IsDisposed || objectives == null || objectives.Tracker == null || objectives.Tracker.AllComplete) return;
             var state = services.State.Current;
             if (state != GameState.Playing && state != GameState.Inspection) return;

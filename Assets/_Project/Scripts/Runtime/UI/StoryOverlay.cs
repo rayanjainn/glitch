@@ -23,6 +23,8 @@ namespace BugReport.UI
         private Label body;
         private string text = string.Empty;
         private float startedAt = -1f;
+        private float elapsed;
+        private int shownCharacters = -1;
         private bool consumed;
 
         protected override string LayerName => "story";
@@ -53,9 +55,13 @@ namespace BugReport.UI
             bool running = startedAt >= 0f && state != GameState.Ending;
             if (running)
             {
-                float elapsed = Time.unscaledTime - startedAt;
+                if (state == GameState.Playing || state == GameState.Inspection) elapsed += Time.unscaledDeltaTime;
                 int visible = Typewriter.VisibleCharacters(elapsed, CharactersPerSecond, text.Length);
-                Ui.SetText(body, text.Substring(0, visible));
+                if (visible != shownCharacters)
+                {
+                    shownCharacters = visible;
+                    Ui.SetText(body, text.Substring(0, visible));
+                }
                 if (elapsed > text.Length / CharactersPerSecond + LingerSeconds) startedAt = -1f;
             }
             Ui.Show(box, running && state != GameState.Paused);
@@ -71,7 +77,8 @@ namespace BugReport.UI
             if (string.IsNullOrWhiteSpace(entry.intro)) return;
             if (!alwaysShow && SaveStore.Current.IsCompleted(entry.id)) return;
             text = entry.intro;
-            startedAt = Time.unscaledTime;
+            startedAt = 0f;
+            elapsed = 0f;
         }
     }
 }

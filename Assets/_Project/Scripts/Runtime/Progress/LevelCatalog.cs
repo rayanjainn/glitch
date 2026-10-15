@@ -49,7 +49,13 @@ namespace BugReport.Progress
         private string[] ids;
 
         public int Count => levels.Length;
-        public Entry Get(int index) => levels[index];
+        public Entry Get(int index)
+        {
+            var entry = levels[index];
+            if (entry.chapterIndex < 1) entry.chapterIndex = 1; // assets built before these fields existed
+            if (entry.parUses < 1) entry.parUses = 3;
+            return entry;
+        }
 
         public IReadOnlyList<string> Ids
         {

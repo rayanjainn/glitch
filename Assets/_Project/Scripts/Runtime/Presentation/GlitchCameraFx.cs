@@ -46,6 +46,7 @@ namespace BugReport.Presentation
         private void Awake()
         {
             volume = GetComponent<Volume>();
+            if (viewCamera == null) viewCamera = Camera.main;
             if (viewCamera != null) baseFov = viewCamera.fieldOfView;
             bool post = VisualSettings.On(settings, s => s.postProcessing);
             volume.enabled = post;
@@ -76,6 +77,7 @@ namespace BugReport.Presentation
 
         private void OnDisable()
         {
+            if (viewCamera != null && baseFov > 0f) viewCamera.fieldOfView = baseFov;
             if (glitches != null) glitches.Feedback -= OnGlitchFeedback;
             if (containment != null) containment.Patched -= OnPatched;
         }

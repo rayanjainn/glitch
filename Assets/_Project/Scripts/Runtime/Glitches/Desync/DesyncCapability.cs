@@ -20,6 +20,7 @@ namespace BugReport.Glitches
         private ModifierStack<Vector3> channel;
         private Vector3 restLocalPosition;
         private LineRenderer ghost;
+        private readonly Vector3[] outline = new Vector3[16];
         private Collider[] colliders;
 
         public Vector3 Offset => offset;
@@ -110,13 +111,11 @@ namespace BugReport.Glitches
             var b = CollisionBounds();
             var min = b.min;
             var max = b.max;
-            var p = new[]
-            {
-                new Vector3(min.x, min.y, min.z), new Vector3(max.x, min.y, min.z), new Vector3(max.x, min.y, max.z), new Vector3(min.x, min.y, max.z),
-                new Vector3(min.x, min.y, min.z), new Vector3(min.x, max.y, min.z), new Vector3(max.x, max.y, min.z), new Vector3(max.x, min.y, min.z),
-                new Vector3(max.x, max.y, min.z), new Vector3(max.x, max.y, max.z), new Vector3(max.x, min.y, max.z), new Vector3(max.x, max.y, max.z),
-                new Vector3(min.x, max.y, max.z), new Vector3(min.x, min.y, max.z), new Vector3(min.x, max.y, max.z), new Vector3(min.x, max.y, min.z),
-            };
+            var p = outline;
+            p[0] = new Vector3(min.x, min.y, min.z); p[1] = new Vector3(max.x, min.y, min.z); p[2] = new Vector3(max.x, min.y, max.z); p[3] = new Vector3(min.x, min.y, max.z);
+            p[4] = new Vector3(min.x, min.y, min.z); p[5] = new Vector3(min.x, max.y, min.z); p[6] = new Vector3(max.x, max.y, min.z); p[7] = new Vector3(max.x, min.y, min.z);
+            p[8] = new Vector3(max.x, max.y, min.z); p[9] = new Vector3(max.x, max.y, max.z); p[10] = new Vector3(max.x, min.y, max.z); p[11] = new Vector3(max.x, max.y, max.z);
+            p[12] = new Vector3(min.x, max.y, max.z); p[13] = new Vector3(min.x, min.y, max.z); p[14] = new Vector3(min.x, max.y, max.z); p[15] = new Vector3(min.x, max.y, min.z);
             ghost.SetPositions(p);
             float pulse = 0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 6f);
             ghost.startColor = ghost.endColor = new Color(0.6f * pulse + 0.2f, 1f, 0.35f * pulse + 0.1f, 1f);

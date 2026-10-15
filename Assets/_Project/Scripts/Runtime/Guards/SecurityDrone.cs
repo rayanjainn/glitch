@@ -29,6 +29,7 @@ namespace BugReport.Guards
         private int index;
         private int direction = 1;
         private Vector3 start;
+        private readonly MaterialPropertyBlock block = new MaterialPropertyBlock();
 
         public bool IsFrozen => freeze != null && freeze.IsFrozen;
         public bool SeesAnomaly { get; private set; }
@@ -88,7 +89,7 @@ namespace BugReport.Guards
             {
                 var d = anomaly.position - transform.position;
                 float flat = new Vector2(d.x, d.z).magnitude;
-                if (flat <= searchRadius && anomaly.position.y < transform.position.y &&
+                if (flat <= searchRadius &&
                     !Physics.Linecast(transform.position, anomaly.position, GameLayers.HeroBlockingMask, QueryTriggerInteraction.Ignore))
                 {
                     SeesAnomaly = true;
@@ -106,7 +107,6 @@ namespace BugReport.Guards
             searchDisc.localScale = new Vector3(searchRadius * 2f, 0.01f, searchRadius * 2f);
             if (discRenderer != null)
             {
-                var block = new MaterialPropertyBlock();
                 discRenderer.GetPropertyBlock(block);
                 var color = IsFrozen ? new Color(0.5f, 0.8f, 1f, 0.12f) : SeesAnomaly ? new Color(1f, 0.15f, 0.2f, 0.45f) : new Color(1f, 0.85f, 0.3f, 0.25f);
                 block.SetColor("_BaseColor", color);

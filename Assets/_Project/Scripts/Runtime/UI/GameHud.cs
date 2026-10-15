@@ -179,19 +179,22 @@ namespace BugReport.UI
                 explainedContainment = true;
                 toasts.Push("SYSTEM ALERTED. EACH ACTIVE GLITCH RAISES IT. UNDO ONE WITH [R] BEFORE IT PATCHES THEM FOR YOU.", ToastTone.Negative, Ui.Pack(new Color(1f, 0.75f, 0.3f)), now);
             }
-            if (model.Stage != shownStage || stageLabel.text.Length == 0)
-                Ui.SetText(stageLabel, "// " + HudFormat.StageName(model.Stage) + " //");
+            Ui.SetText(stageLabel, model.Stage > 0
+                ? "// " + HudFormat.StageName(model.Stage) + " //"
+                : "ALERT " + Mathf.RoundToInt(Mathf.Clamp01(model.Pressure01) * 100f) + "%");
             shownStage = model.Stage;
 
             Ui.Show(alert, model.Pressure > 0f || model.Stage > 0);
             pressureFill.style.width = Length.Percent(Mathf.Clamp01(model.Pressure01) * 100f);
             for (int i = 0; i < HudFormat.StageCount; i++) alert.EnableInClassList("br-alert--stage" + i, model.Stage == i);
 
-            Ui.Show(stageLabel, model.Stage > 0);
-            bool flashing = now < stageFlashUntil && Mathf.Repeat(now * 6f, 1f) < 0.5f;
+            Ui.Show(stageLabel, model.Stage > 0 || model.Pressure01 > 0.04f);
+            bool flashing = now < stageFlashUntil && Mathf.Repeat(now * 2.5f, 1f) < 0.5f;
             alert.EnableInClassList("br-alert--flash", flashing);
 
             string detail = HudFormat.ContainmentDetail(model.Stage, containment.NextPatchIn);
+            if (detail.Length == 0 && model.Stage >= 1) detail = "EACH ACTIVE GLITCH RAISES THE ALERT. AT PATCH THE SYSTEM UNDOES THEM.";
+            else if (detail.Length > 0) detail += ": YOUR LATEST GLITCH IS UNDONE";
             Ui.Show(alertDetail, detail.Length > 0);
             Ui.SetText(alertDetail, detail);
         }
@@ -285,14 +288,31 @@ namespace BugReport.UI
                 slot.style.borderBottomColor = active ? def.Color : new Color(def.Color.r, def.Color.g, def.Color.b, 0.25f);
                 slot.Q("slot-swatch").style.backgroundColor = def.Color;
                 Ui.SetText(slot.Q<Label>("slot-name"), def.DisplayName);
+                float left = 0f;
+                float total = 1f;
+                for (int j = 0; j < Services.Glitches.ActiveCount; j++)
+                {
+                    var op = Services.Glitches.GetActive(j);
+                    if (op.Spec.Id != def.Id || float.IsInfinity(op.EndTime)) continue;
+                    if (op.EndTime - time > left)
+                    {
+                        left = op.EndTime - time;
+                        total = Mathf.Max(0.01f, op.Spec.Duration);
+                    }
+                }
+                bool running = left > 0f;
+                slot.EnableInClassList("br-slot--running", running);
+                slot.EnableInClassList("br-slot--ending", running && left < 2f);
+                slot.Q("slot-run").style.width = Length.Percent(running ? Mathf.Clamp01(left / total) * 100f : 0f);
                 var timer = slot.Q<Label>("slot-timer");
-                Ui.SetText(timer, HudFormat.Seconds(cooldown));
-                Ui.Show(timer, cooldown > 0f);
+                bool showCooldown = cooldown >= 1f;
+                Ui.SetText(timer, running ? "ENDS " + HudFormat.Seconds(left) : HudFormat.Seconds(cooldown));
+                Ui.Show(timer, running || showCooldown);
             }
 
             string line = glitches.HasPreview
                 ? (glitches.Preview.Succeeded ? "[LMB] APPLY    [R] UNDO" : glitches.Preview.Describe())
-                : (glitches.Prompt ?? "[E] SELECT    [TAB] INSPECT");
+                : (glitches.Prompt ?? "[E] SELECT   [Q] SWITCH   [R] UNDO   [TAB] INSPECT");
             Ui.SetText(prompt, line);
             prompt.EnableInClassList("br-prompt--invalid", glitches.HasPreview && !glitches.Preview.Succeeded);
         }
@@ -307,6 +327,7 @@ namespace BugReport.UI
                 slot.Add(Ui.Element("slot-swatch", "br-slot__swatch"));
                 slot.Add(Ui.Text("slot-name", string.Empty, "br-slot__name"));
                 slot.Add(Ui.Text("slot-timer", string.Empty, "br-slot__timer"));
+                slot.Add(Ui.Element("slot-run", "br-slot__run"));
                 slots.Add(slot);
             }
         }

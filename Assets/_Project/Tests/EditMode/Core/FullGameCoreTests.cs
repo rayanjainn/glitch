@@ -358,7 +358,8 @@ namespace BugReport.Core.Tests
                 previous = line;
             }
         }
-    
+    }
+
     public class GuardLureMovementTests
     {
         [Test]
@@ -371,5 +372,4 @@ namespace BugReport.Core.Tests
             Assert.That(brain.ShouldMove, Is.True, "a lured guard walks to the decoy at once");
         }
     }
-}
 }

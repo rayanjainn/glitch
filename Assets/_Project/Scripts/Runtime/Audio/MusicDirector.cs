@@ -44,7 +44,7 @@ namespace BugReport.Audio
                 int index = catalog.IndexOfScene(gameObject.scene.name);
                 if (index >= 0) resolved = catalog.Get(index).chapterIndex;
             }
-            engine = new MusicEngine(MusicThemes.ForChapter(resolved), AudioSettings.outputSampleRate, (uint)(1000 + resolved * 77));
+            engine = new MusicEngine(MusicThemes.ForChapter(resolved), Mathf.Max(8000, AudioSettings.outputSampleRate), (uint)(1000 + resolved * 77));
             engine.Intensity = 0.35f;
 
             silence = AudioClip.Create("music_silence", 4096, 1, AudioSettings.outputSampleRate, false);
@@ -67,6 +67,10 @@ namespace BugReport.Audio
                 var state = services.State.Current;
                 if (state == GameState.Paused) target = 0.35f;
                 engine.Tension = services.Containment.Stage / 4f;
+            }
+            else
+            {
+                engine.Tension = 0f;
             }
             duck = Mathf.MoveTowards(duck, target, Time.unscaledDeltaTime * 2f);
             engine.Volume = baseVolume * SaveStore.Settings.musicVolume * duck;

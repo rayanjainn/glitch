@@ -676,3 +676,16 @@
 .br-guide__text { font-size: 24px; }
 .br-prompt { font-size: 17px; padding: 4px 12px; }
 .br-reticle--valid { scale: 1.45 1.45; }
+
+/* ---- glitch countdown on the dock slot, readable text, steadier flashes (UX review) ---- */
+.br-slot__run { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background-color: #FFFFFF; }
+.br-slot--running .br-slot__timer { color: #7CFFB2; font-size: 16px; }
+.br-slot--ending .br-slot__timer { color: #FFD24A; }
+.br-slot--ending .br-slot__run { background-color: #FFD24A; }
+.br-caption { font-size: 14px; }
+.br-reticle__tick, .br-reticle__dot { background-color: rgba(255, 255, 255, 0.95); border-width: 1px; border-color: rgba(0, 0, 0, 0.9); }
+.br-alert__stage, .br-banner { -unity-text-outline-width: 2px; -unity-text-outline-color: rgba(0, 0, 0, 0.9); }
+.br-story { bottom: auto; top: 14%; }
+.br-objective { max-width: 420px; }
+.br-chip { font-size: 13px; }
+.br-inspect__description { font-size: 15px; }

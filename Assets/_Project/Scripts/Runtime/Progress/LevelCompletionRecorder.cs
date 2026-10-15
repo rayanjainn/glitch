@@ -57,7 +57,7 @@ namespace BugReport.Progress
         private void Update()
         {
             if (Finished || services == null || services.IsDisposed) return;
-            if (services.State.Current != GameState.Playing) return;
+            if (!services.State.IsGameplayActive) return;
             Seconds += Time.unscaledDeltaTime;
             if (services.Containment.Stage > MaxStage) MaxStage = services.Containment.Stage;
         }

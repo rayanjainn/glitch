@@ -86,7 +86,12 @@ namespace BugReport.Guards
         /// <summary>Advances the guard by <paramref name="deltaTime"/>. Public for tests.</summary>
         public void Step(float deltaTime)
         {
-            if (deltaTime <= 0f || patrol.Length == 0 || IsFrozen) return;
+            if (deltaTime <= 0f || patrol.Length == 0) return;
+            if (IsFrozen)
+            {
+                SeesAnomaly = false;
+                return;
+            }
             catchCooldown = Mathf.Max(0f, catchCooldown - deltaTime);
 
             var target = CurrentTarget(out bool atTarget);
@@ -120,7 +125,10 @@ namespace BugReport.Guards
             switch (Brain.State)
             {
                 case GuardState.Investigate: target = decoyPoint; break;
-                default: target = patrol[Mathf.Clamp(Brain.PatrolIndex, 0, patrol.Length - 1)].position; break;
+                default:
+                    var point = patrol[Mathf.Clamp(Brain.PatrolIndex, 0, patrol.Length - 1)];
+                    target = point != null ? point.position : transform.position;
+                    break;
             }
             var flat = target - transform.position;
             flat.y = 0f;
@@ -138,7 +146,7 @@ namespace BugReport.Guards
             if (IsNeutralized || anomaly == null) return;
             var from = transform.position + Vector3.up * 1.4f;
             var to = anomaly.position;
-            if (Mathf.Abs(to.y - transform.position.y) > 5f) return;
+            if (Mathf.Abs(to.y - transform.position.y) > 14f) return;
             if (!VisionCone.Contains(from.x, from.z, transform.forward.x, transform.forward.z, to.x, to.z, sightRange, sightHalfAngle)) return;
             if (Physics.Linecast(from, to, GameLayers.HeroBlockingMask, QueryTriggerInteraction.Ignore)) return;
             SeesAnomaly = true;
@@ -147,7 +155,9 @@ namespace BugReport.Guards
 
         private void TryCatchHero()
         {
-            if (hero == null || IsNeutralized || catchCooldown > 0f) return;
+            if (hero == null || IsNeutralized || catchCooldown > 0f || hero.State == HeroState.Arrived) return;
+            var services = GameServices.Current;
+            if (services != null && !services.IsDisposed && !services.State.IsGameplayActive) return;
             var d = hero.Feet - transform.position;
             d.y = 0f;
             if (d.magnitude > catchDistance) return;
