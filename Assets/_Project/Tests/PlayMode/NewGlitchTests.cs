@@ -255,7 +255,8 @@ namespace BugReport.Tests.PlayMode
             Assert.That(guard.Brain.State, Is.EqualTo(Core.AI.GuardState.Investigate));
             Assert.That(guard.IsNeutralized, Is.True, "a lured guard does not threaten the hero");
 
-            Run(guard, 8f);
+            // 6.8 m at 1.8 m/s is about 3.8 s, then it lingers 3 s at the decoy (so it is still there at 5 s).
+            Run(guard, 5f);
             Assert.That(guard.transform.position.z, Is.GreaterThan(5f), "it walked to the decoy");
 
             Assert.That(services.Glitches.Revert(result.Operation.Id).Succeeded, Is.True);
