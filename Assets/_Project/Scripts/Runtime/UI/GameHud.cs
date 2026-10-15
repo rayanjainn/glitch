@@ -177,7 +177,7 @@ namespace BugReport.UI
             if (model.Stage >= 1 && !explainedContainment)
             {
                 explainedContainment = true;
-                toasts.Push("THE SYSTEM NOTICED YOU. FEWER GLITCHES AT ONCE KEEPS IT CALM.", ToastTone.Negative, Ui.Pack(new Color(1f, 0.75f, 0.3f)), now);
+                toasts.Push("SYSTEM ALERTED. EACH ACTIVE GLITCH RAISES IT. UNDO ONE WITH [R] BEFORE IT PATCHES THEM FOR YOU.", ToastTone.Negative, Ui.Pack(new Color(1f, 0.75f, 0.3f)), now);
             }
             if (model.Stage != shownStage || stageLabel.text.Length == 0)
                 Ui.SetText(stageLabel, "// " + HudFormat.StageName(model.Stage) + " //");

@@ -62,7 +62,7 @@ Stuck for more than two minutes? That's useful information. Write down which lev
 
 ## Also try
 - **Music**: there is a score that changes per chapter and gets tense when the alarm rises. Try the MUSIC VOLUME slider in SETTINGS.
-- **Hints**: the game does not tell you the solution up front. If you are stuck for about a minute the objective text gets a hint, and after much longer a marker appears on the key object. Tell me if that was too early or too late.
+- **Hints**: the game does not tell you the solution up front. If you are stuck for about 40 seconds the objective text gets a hint, and after much longer a marker appears on the key object. Tell me if that was too early or too late.
 - **Story**: the first time you play a level a few lines are typed out at the bottom; when you finish, the card shows your stars, time and a closing line.
 - **SETTINGS** (main menu and pause): volume, mouse sensitivity, invert look, colour-split effects, and the key list. Click a key, press a new one (Esc cancels). Quit and start again: your settings should still be there.
 - **CONTINUE** on the main menu should take you to the first level you haven't finished.

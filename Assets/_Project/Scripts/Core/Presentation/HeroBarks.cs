@@ -14,7 +14,7 @@ namespace BugReport.Core.Presentation
         private static readonly string[][] Lines =
         {
             /* Start    */ new[] { "Onward!", "The exit awaits.", "A hero's work is never done.", "Let us be brisk." },
-            /* Blocked  */ new[] { "Hm. A wall that was not there before.", "Who put that there?", "A minor setback.", "This... was not on the map." },
+            /* Blocked  */ new[] { "Hm. I will wait until that is safe.", "Something is in my way. I shall wait.", "I won't walk into that.", "This... was not on the map." },
             /* Confused */ new[] { "The floor... is moving?", "I distinctly remember this being solid.", "Is that crate... twice?", "I shall not question it." },
             /* Fell     */ new[] { "Curious. I seem to have fallen.", "Fear not, I have done this before.", "Gravity! Of course." },
             /* Caught   */ new[] { "A guard! Back to the start.", "Halt? I was merely walking.", "Not the dungeon again." },

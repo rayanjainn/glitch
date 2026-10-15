@@ -31,7 +31,7 @@ namespace BugReport.Glitches
             bool mass = swapProperty == SwapProperty.Mass;
             var caps = EntityCapabilities.Inspectable | EntityCapabilities.PropertyMutable;
             Configure(mass ? "mass_swap" : "speed_swap", mass ? "MASS SWAP" : "SPEED SWAP",
-                mass ? "Two objects trade their weight. The light one presses plates; the heavy one floats away."
+                mass ? "Two objects trade their weight. Light things become heavy; heavy things become light."
                      : "Two machines trade their pace. A slow thing gets quick; a quick thing gets slow.",
                 Amber, newDuration: 30f, newCooldown: 0.5f, newMaxActive: 2,
                 new[]

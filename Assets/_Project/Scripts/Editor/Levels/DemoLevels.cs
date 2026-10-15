@@ -104,7 +104,7 @@ namespace BugReport.EditorTools.Levels
             kit.HeroOnRoute(new Vector3(-15f, 0f, 0f), true, new Vector3(-4f, 0f, 0f), new Vector3(4f, 0f, 0f), new Vector3(15f, 0f, 0f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("cross", "GET THE HERO ACROSS THE GAP",
-                    "The bridge is only a hologram. Something else in this room is solid, and useless.", kit.ZoneBetween("Zone_Across", 3.5f, 13.5f), bridge),
+                    "The bridge is only a hologram. What else in this room is solid?", kit.ZoneBetween("Zone_Across", 3.5f, 13.5f), bridge),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Nothing left in the way.", kit.ZoneAtExit(15f)));
             kit.Dress(("barrel_large", -16.5f, 5f, 0f, 1.1f), ("crates_stacked", -16.5f, -5f, 90f, 1.3f),
                 ("keg", 8f, 5.1f, 0f, 0.9f), ("chest_gold", 16.8f, -2.4f, -90f, 0.8f));

@@ -15,8 +15,8 @@ namespace BugReport.Tutorial
     {
         [SerializeField] private ObjectiveDirector objectives;
         [SerializeField, Min(1f)] private float pulseAfter = 25f;
-        [SerializeField, Min(1f)] private float hintAfter = 50f;
-        [SerializeField, Min(1f)] private float markerAfter = 100f;
+        [SerializeField, Min(1f)] private float hintAfter = 40f;
+        [SerializeField, Min(1f)] private float markerAfter = 90f;
 
         private StuckHints stuck;
         private GameServices services;

@@ -29,7 +29,7 @@ namespace BugReport.EditorTools.Levels
             kit.Hall(18f, 6f);
             var plate = kit.HeavyPlate("Plate", new Vector3(-1f, 0f, -3f), 25f);
             kit.Crate("Crate", "CRATE", new Vector3(-1f, 0f, -3f), "Light. The plate wants something heavier.");
-            var anvil = kit.Weight("Anvil", "ANVIL", new Vector3(-10f, 0f, 4f), 60f, 1.2f, "Far too heavy to move. Its weight, though, is just a number.");
+            var anvil = kit.Weight("Anvil", "ANVIL", new Vector3(-10f, 0f, 4f), 60f, 1.2f, "A 60 kg anvil.");
             kit.Gate("Gate", 4f, new[] { plate });
             kit.Exit(15f);
             kit.HeroOnRoute(V(-15f), false, V(2f), V(6f), V(15f));
@@ -88,7 +88,7 @@ namespace BugReport.EditorTools.Levels
             kit.HeroOnRoute(V(-17f), true, V(-5f), V(-1f), V(7f), V(13f), V(17f));
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "The plate is too demanding for the crate.", kit.ZoneBetween("Zone_Gate", -2.5f, 7.5f), anvil),
-                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "A hologram bridge. Solidity is lying around.", kit.ZoneBetween("Zone_Far", 12.5f, 16f), bridge),
+                new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "A hologram bridge.", kit.ZoneBetween("Zone_Far", 12.5f, 16f), bridge),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Almost.", kit.ZoneAtExit(17f)));
             return kit.Finish(PathOf("weigh_station"), TitleOf("weigh_station"),
                 new GlitchDefinition[] { kit.CollisionTransfer, kit.MassSwap }, objectives, new Vector3(-18f, 2.2f, -4f), out error);
@@ -110,7 +110,7 @@ namespace BugReport.EditorTools.Levels
             var guard = kit.GuardPost("Guard", "SKELETON_GUARD", 0f).GetComponent<GameEntity>();
             kit.Exit(13f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "It won't leave its post. Give it something to investigate.",
+                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "The guard won't leave its post.",
                     kit.ZoneBetween("Zone_Beyond", 3.5f, 11.5f), guard),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Quietly.", kit.ZoneAtExit(13f)));
             return kit.Finish(PathOf("night_watch"), TitleOf("night_watch"), new GlitchDefinition[] { kit.AiOverride },
@@ -153,7 +153,7 @@ namespace BugReport.EditorTools.Levels
             var piston = kit.Piston("Piston", "PISTON", 6f, 3f, 0f);
             kit.Exit(17f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "A decoy would do nicely.", kit.ZoneBetween("Zone_Middle", -4.5f, 3.5f), guard),
+                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "The guard is watching the door.", kit.ZoneBetween("Zone_Middle", -4.5f, 3.5f), guard),
                 new ObjectiveDirector.Entry("exit", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneAtExit(17f), piston));
             return kit.Finish(PathOf("frozen_stiff"), TitleOf("frozen_stiff"), new GlitchDefinition[] { kit.Freeze, kit.AiOverride },
                 objectives, new Vector3(-18f, 2.2f, -4f), out error);
@@ -216,7 +216,7 @@ namespace BugReport.EditorTools.Levels
             kit.HeroOnRoute(V(-17f), false, V(-6f), V(2f), V(17f));
             kit.Exit(17f);
             var objectives = kit.Objectives(
-                new ObjectiveDirector.Entry("wall", "GET PAST THE WALL", "The drone is watching. Freeze it if you want to stay quiet.",
+                new ObjectiveDirector.Entry("wall", "GET PAST THE WALL", "The drone sweeps the room. Mind your containment.",
                     kit.ZoneBetween("Zone_Beyond", 0f, 14f), wall),
                 new ObjectiveDirector.Entry("exit", "REACH THE EXIT", "Keep your containment low.", kit.ZoneAtExit(17f)));
             return kit.Finish(PathOf("searchlight"), TitleOf("searchlight"), new GlitchDefinition[] { kit.Desync, kit.Freeze },
@@ -241,7 +241,7 @@ namespace BugReport.EditorTools.Levels
             kit.Exit(27f);
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("pit", "CROSS THE PIT", "A plate is lying around, solid in the wrong place.", kit.ZoneBetween("Zone_Pit", 0.5f, 8f), plate),
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Decoy.", kit.ZoneBetween("Zone_Guard", 12f, 17f), guard),
+                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Something in the room can draw the guard away.", kit.ZoneBetween("Zone_Guard", 12f, 17f), guard),
                 new ObjectiveDirector.Entry("exit", "GET PAST THE WALL", "Last picture of a wall.", kit.ZoneAtExit(27f), wall));
             return kit.Finish(PathOf("patch_day"), TitleOf("patch_day"), new GlitchDefinition[] { kit.Freeze, kit.AiOverride, kit.Desync },
                 objectives, new Vector3(-28f, 2.2f, -4f), out error);
@@ -273,7 +273,7 @@ namespace BugReport.EditorTools.Levels
             var objectives = kit.Objectives(
                 new ObjectiveDirector.Entry("gap", "CROSS THE GAP", "Start with the hologram.", kit.ZoneBetween("Zone_Gap", -23f, -19f), bridge),
                 new ObjectiveDirector.Entry("gate", "OPEN THE GATE", "Heavy plate, light crate.", kit.ZoneBetween("Zone_Gate", -12f, -9f), anvil),
-                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Decoy.", kit.ZoneBetween("Zone_Guard", -3f, 3f), guard),
+                new ObjectiveDirector.Entry("guard", "GET PAST THE GUARD", "Something in the room can draw the guard away.", kit.ZoneBetween("Zone_Guard", -3f, 3f), guard),
                 new ObjectiveDirector.Entry("piston", "GET PAST THE PISTON", "Catch it pulled back.", kit.ZoneBetween("Zone_Piston", 11f, 16f), piston),
                 new ObjectiveDirector.Entry("exit", "CLOSE THE REPORT", "One wall left, and it's only a picture.", kit.ZoneAtExit(37f), wall));
             return kit.Finish(PathOf("report_closed"), TitleOf("report_closed"),
