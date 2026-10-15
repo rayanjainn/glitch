@@ -825,8 +825,8 @@ namespace BugReport.EditorTools.Setup
                 Solidified = Lit(lit, "M_CollisionSolidified", new Color(0.15f, 0.4f, 0.95f), 0.8f, new Color(0.15f, 0.5f, 1f) * 1.6f);
                 Frozen = Lit(lit, "M_Frozen", new Color(0.75f, 0.95f, 1f), 0.95f, new Color(0.45f, 0.85f, 1f) * 0.9f);
                 Lift = Lit(lit, "M_Lift", new Color(0.45f, 0.5f, 0.58f), 0.5f);
-                PlateIdle = Lit(lit, "M_PlateIdle", new Color(0.55f, 0.2f, 0.2f), 0.4f, new Color(0.6f, 0.1f, 0.1f) * 0.5f);
-                PlatePressed = Lit(lit, "M_PlatePressed", new Color(0.2f, 0.6f, 0.3f), 0.4f, new Color(0.1f, 0.9f, 0.3f) * 0.9f);
+                PlateIdle = Lit(lit, "M_PlateIdle", new Color(0.75f, 0.45f, 0.08f), 0.4f, new Color(1f, 0.55f, 0.05f) * 0.6f);
+                PlatePressed = Lit(lit, "M_PlatePressed", new Color(0.7f, 0.9f, 1f), 0.4f, new Color(0.5f, 0.85f, 1.4f) * 0.9f);
                 Gate = Lit(lit, "M_Gate", new Color(0.7f, 0.55f, 0.2f), 0.6f, new Color(0.9f, 0.5f, 0.1f) * 0.25f);
                 Piston = Lit(lit, "M_Piston", new Color(0.35f, 0.37f, 0.42f), 0.7f, new Color(1f, 0.3f, 0.1f) * 0.3f);
                 SearchLight = Transparent(lit, "M_SearchLight", new Color(1f, 0.85f, 0.3f, 0.25f), new Color(1f, 0.7f, 0.2f) * 0.5f);

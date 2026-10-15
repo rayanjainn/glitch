@@ -42,7 +42,7 @@ namespace BugReport.UI
             music = Ui.Add(general, new Slider("MUSIC VOLUME", 0f, 1f) { name = "setting-music" });
             sensitivity = Ui.Add(general, new Slider("MOUSE SENSITIVITY", GameSettingsData.MinSensitivity, GameSettingsData.MaxSensitivity) { name = "setting-sensitivity" });
             invertY = Ui.Add(general, new Toggle("INVERT LOOK UP/DOWN") { name = "setting-invert" });
-            colourSplit = Ui.Add(general, new Toggle("COLOUR-SPLIT EFFECTS") { name = "setting-colour-split" });
+            colourSplit = Ui.Add(general, new Toggle("SCREEN-WARP BURSTS (COLOUR SPLIT, LENS WARP, ZOOM PUNCH)") { name = "setting-colour-split" });
             fullscreen = Ui.Add(general, new Toggle("FULLSCREEN") { name = "setting-fullscreen" });
             Ui.Show(fullscreen, showFullscreen);
             foreach (var field in new VisualElement[] { volume, music, sensitivity, invertY, colourSplit, fullscreen }) field.AddToClassList("br-setting");

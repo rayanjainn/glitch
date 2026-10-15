@@ -136,6 +136,14 @@ namespace BugReport.UI
             credits.Add(Ui.Text("credits-text", Credits, "br-card__body", "br-credits"));
             credits.Add(GameMenus.MenuButton("credits-back", "BACK", ShowHome));
 
+            // Esc goes back one page (keyboard players have no mouse for BACK).
+            layer.RegisterCallback<KeyDownEvent>(e =>
+            {
+                if (e.keyCode != KeyCode.Escape || Showing == "home" || (settings != null && settings.IsRebinding)) return;
+                ShowHome();
+                e.StopPropagation();
+            });
+
             ShowHome();
         }
 
@@ -156,7 +164,9 @@ namespace BugReport.UI
                 button.SetEnabled(unlocked);
                 levelList.Add(button);
             }
-            if (levelList.childCount > 0) Ui.FocusSoon((Focusable)levelList[0]);
+            // Focus the level the player most likely wants: the first open level not yet completed.
+            int focus = LevelProgress.ContinueIndex(catalog.Ids, save);
+            if (levelList.childCount > 0) Ui.FocusSoon((Focusable)levelList[focus >= 0 && focus < levelList.childCount ? focus : 0]);
         }
 
         private void UpdateContinue()

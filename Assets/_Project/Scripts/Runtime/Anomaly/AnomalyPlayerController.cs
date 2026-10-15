@@ -106,6 +106,8 @@ namespace BugReport.Anomaly
 
         private void OnPause()
         {
+            // Esc inside the settings screen goes back to the pause menu instead of resuming the game.
+            if (UI.GameMenus.TryCloseSettingsWithEscape()) return;
             if (services != null && !services.IsDisposed) services.State.TogglePause();
         }
     }

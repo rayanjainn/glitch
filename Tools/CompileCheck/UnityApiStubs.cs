@@ -22,6 +22,7 @@ namespace UnityEngine
         public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent) where T : Object => throw null;
         public int GetInstanceID() => throw null;
     }
+    public enum KeyCode { None = 0, Escape = 27 }
     public class YieldInstruction { }
     public class AsyncOperation : YieldInstruction { public bool isDone => throw null; }
     public sealed class WaitForFixedUpdate : YieldInstruction { }
@@ -730,7 +731,10 @@ namespace UnityEngine.UIElements
     public struct StyleFontDefinition { public StyleFontDefinition(FontDefinition v) { } }
     public struct UQueryBuilder<T> where T : VisualElement { public void ForEach(System.Action<T> funcCall) { } }
     public interface IPanel { }
-    public interface IVisualElementScheduledItem { }
+    public interface IVisualElementScheduledItem { IVisualElementScheduledItem ExecuteLater(long delayMs); }
+    public abstract class EventBase { public void StopPropagation() { } }
+    public abstract class EventBase<T> : EventBase where T : EventBase<T>, new() { }
+    public sealed class KeyDownEvent : EventBase<KeyDownEvent> { public UnityEngine.KeyCode keyCode => throw null; }
     public interface IVisualElementScheduler { IVisualElementScheduledItem Execute(System.Action timerUpdateEvent); }
     public struct VisualElementStyleSheetSet
     {
@@ -741,6 +745,7 @@ namespace UnityEngine.UIElements
     public class VisualElement : Focusable
     {
         public string tooltip { get => throw null; set { } }
+        public void RegisterCallback<T>(EventCallback<T> callback) where T : EventBase<T>, new() { }
         public string name { get => throw null; set { } }
         public PickingMode pickingMode { get => throw null; set { } }
         public object userData { get => throw null; set { } }

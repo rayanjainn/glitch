@@ -21,6 +21,8 @@ namespace BugReport.Level
         [SerializeField, OptionalReference] private Material pressedMaterial;
 
         private BoxCollider volume;
+        private bool restCaptured;
+        private float restY;
 
         public bool IsPressed { get; private set; }
         public event Action<bool> PressedChanged;
@@ -76,6 +78,16 @@ namespace BugReport.Level
             if (indicator == null) return;
             var m = IsPressed ? pressedMaterial : idleMaterial;
             if (m != null) indicator.sharedMaterial = m;
+            // A cue that does not depend on colour: a pressed plate sits lower.
+            var t = indicator.transform;
+            if (!restCaptured)
+            {
+                restCaptured = true;
+                restY = t.localPosition.y;
+            }
+            var p = t.localPosition;
+            p.y = restY - (IsPressed ? 0.04f : 0f);
+            t.localPosition = p;
         }
     }
 }

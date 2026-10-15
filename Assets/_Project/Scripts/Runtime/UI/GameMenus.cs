@@ -63,6 +63,23 @@ namespace BugReport.UI
         public string CompleteSummaryText => completeSummary != null ? completeSummary.text : string.Empty;
         public SettingsPanel Settings => settings;
 
+        private static GameMenus instance;
+
+        /// <summary>Esc while the settings screen is open (and no key is being rebound) goes back; returns true if it did.</summary>
+        public static bool TryCloseSettingsWithEscape()
+        {
+            if (instance == null || !instance.SettingsVisible) return false;
+            if (instance.settings.IsRebinding) return true; // Esc cancels the rebind only
+            instance.CloseSettings();
+            return true;
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            instance = this;
+        }
+
         public void Configure(ObjectiveDirector objectiveDirector, string title, LevelCatalog levelCatalog = null)
         {
             objectives = objectiveDirector;
@@ -87,6 +104,7 @@ namespace BugReport.UI
 
         protected override void OnDisable()
         {
+            if (instance == this) instance = null;
             settings?.Dispose();
             settings = null;
             base.OnDisable();
@@ -245,7 +263,14 @@ namespace BugReport.UI
                 FillRunCard();
                 bool hasNext = NextLevelScene() != null;
                 Ui.Show(nextButton, hasNext);
-                Ui.FocusSoon(hasNext ? nextButton : completeRestartButton);
+                // A moment of read-only time so a player still clicking does not skip the card.
+                var buttons = new[] { nextButton, completeRestartButton };
+                foreach (var b in buttons) b.SetEnabled(false);
+                completeScreen.schedule.Execute(() =>
+                {
+                    foreach (var b in buttons) b.SetEnabled(true);
+                    Ui.FocusSoon(hasNext ? nextButton : completeRestartButton);
+                }).ExecuteLater(800);
             }
         }
     }

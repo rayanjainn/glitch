@@ -61,6 +61,8 @@ Press **NEW GAME**. Each level unlocks the next one. There are 20 levels in 7 ch
 Stuck for more than two minutes? That's useful information. Write down which level and what you tried, then use **Esc ▸ MAIN MENU ▸ LEVEL SELECT** to skip ahead (only levels you've unlocked).
 
 ## Also try
+- **Timed powers show a bar and "ENDS 3.2s"** on their slot at the bottom. Does that make the Freeze timing clear? In the menus Esc goes back one step; on the level-complete card the buttons wake up after a second.
+- **Plates**: orange = waiting, pale blue and slightly lowered = pressed. Tell me if that reads clearly.
 - **Music**: there is a score that changes per chapter and gets tense when the alarm rises. Try the MUSIC VOLUME slider in SETTINGS.
 - **Hints**: the game does not tell you the solution up front. If you are stuck for about 40 seconds the objective text gets a hint, and after much longer a marker appears on the key object. Tell me if that was too early or too late.
 - **Story**: the first time you play a level a few lines are typed out at the bottom; when you finish, the card shows your stars, time and a closing line.

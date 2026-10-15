@@ -318,3 +318,10 @@ Request: "the full ready game, asset heavy, visually appealing, no demo, test it
 - **Cut:** bounciness/size swaps; Speed Swap has no level. Layouts are still straight halls.
 - **Assets:** art batch 2 (326 files, ~96 MB, CC0) is fetched by `Tools/Assets/fetch-cc0-assets-2.sh`; not in the repo until the owner commits it (LFS upload is not possible from the cloud session). The game degrades gracefully without it.
 - **Music** is original and procedural, so there is no third-party audio to credit or license.
+
+### M11 review round (four read-only reviewers: level QA, puzzle design, runtime bug-hunt, UX)
+- **Real bug found and fixed:** a lured guard never walked to its decoy (`GuardBrain.ShouldMove` stayed false during the patrol pause). It would have broken levels 13, 14, 15, 19 and 20. Regression test added.
+- **Other fixes:** guards no longer catch the hero after the level is won; drones/guards sight the anomaly at any height (stealth is real now); per-frame allocations removed (desync outline, drone property block, story text); FOV punch restores the camera; old catalog assets get sane chapter/par defaults; hint thresholds are sorted; run time counts inspection mode; story clock ignores pause.
+- **UX:** glitch slots show a countdown bar and "ENDS 3.2s"; containment bar always labelled; slower flash (2.5 Hz); Esc goes back in menus and settings; complete card ignores clicks for 0.8 s; plates are orange/pale-blue and lower when pressed; tutorial states the goal and teaches [TAB] and [R]; bigger/outlined text.
+- **Reviewer claims I checked and did not act on:** "a duplicate of a mass-swapped crate keeps the swapped mass": wrong, copies are built from the prefab, not the live object.
+- **Not done, on purpose:** branching routes (HeroNavGraph supports them but I would be guessing at the hero's replanning without Unity), Speed Swap levels (a swapped piston never becomes safe for the hero, so no honest puzzle), patch-order puzzles, UI scale and colour-blind glitch shapes, number-key glitch selection (needs input-asset edits), "revert a specific glitch", and cutting or replacing repeated levels (Three Plates, Patch Day is only re-worded).
