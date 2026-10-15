@@ -431,7 +431,7 @@ namespace UnityEngine
     public class TooltipAttribute : PropertyAttribute { public TooltipAttribute(string t) { } }
     public class RangeAttribute : PropertyAttribute { public RangeAttribute(float a, float b) { } }
     public class MinAttribute : PropertyAttribute { public MinAttribute(float m) { } }
-    public class TextAreaAttribute : PropertyAttribute { public TextAreaAttribute(int a, int b) { } }
+    public class TextAreaAttribute : PropertyAttribute { public TextAreaAttribute() { } public TextAreaAttribute(int a, int b) { } }
 }
 
 namespace UnityEngine.Rendering

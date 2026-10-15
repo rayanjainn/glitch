@@ -612,3 +612,37 @@
 .br-settings .br-button.unity-button {
     margin-top: 10px;
 }
+
+/* ---- level-complete bug report card ---- */
+.br-stars { font-size: 56px; letter-spacing: 12px; color: #FFD34D; margin-bottom: 10px; -unity-text-align: middle-center; }
+.br-stats { font-size: 18px; letter-spacing: 2px; color: #CFE9F5; margin-bottom: 6px; }
+.br-outro { font-size: 20px; color: #E8F2F8; margin-top: 14px; margin-bottom: 14px; max-width: 760px; white-space: normal; }
+.br-stamp {
+    position: absolute;
+    right: 18%;
+    top: 16%;
+    font-size: 72px;
+    letter-spacing: 8px;
+    color: rgba(90, 255, 160, 0.8);
+    border-width: 5px;
+    border-color: rgba(90, 255, 160, 0.8);
+    border-radius: 6px;
+    padding: 4px 22px;
+    rotate: -9deg;
+}
+
+/* ---- hero speech bubble ---- */
+.br-bubble {
+    position: absolute;
+    translate: -50% -100%;
+    max-width: 320px;
+    white-space: normal;
+    padding: 8px 14px;
+    font-size: 20px;
+    color: #10202A;
+    background-color: rgba(245, 250, 255, 0.95);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgba(60, 200, 255, 0.9);
+    -unity-text-align: middle-center;
+}

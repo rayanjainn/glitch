@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BugReport.Core.Entities;
 using BugReport.Core.GameFlow;
+using BugReport.Core.Presentation;
 using BugReport.Glitches;
 using BugReport.Hero;
 using BugReport.Presentation;
@@ -38,6 +39,13 @@ namespace BugReport.UI
         private readonly List<VisualElement> tags = new List<VisualElement>();
         private VisualElement tagLayer;
         private Label heroIcon;
+        private Label heroBubble;
+        private HeroController heroController;
+        private HeroBarks barks;
+        private HeroState lastHeroState = HeroState.Idle;
+        private int lastRespawnCount;
+        private float bubbleUntil;
+        private bool heroStarted;
         private VisualElement guideMarker;
         private VisualElement panel;
         private Label panelName;
@@ -67,6 +75,8 @@ namespace BugReport.UI
         {
             tagLayer = Ui.Add(layer, Ui.Element("tags", "br-tags"));
             heroIcon = Ui.Add(layer, Ui.Text("hero-icon", string.Empty, "br-hero-icon"));
+            heroBubble = Ui.Add(layer, Ui.Text("hero-bubble", string.Empty, "br-bubble"));
+            Ui.Show(heroBubble, false);
             guideMarker = Ui.Add(layer, Ui.Element("guide-marker", "br-guide-marker"));
             guideMarker.Add(Ui.Element("guide-marker-diamond", "br-guide-marker__diamond"));
 
@@ -113,6 +123,7 @@ namespace BugReport.UI
             for (int i = VisibleTagCount; i < tags.Count; i++) Ui.Show(tags[i], false);
 
             RefreshHeroIcon();
+            RefreshHeroBubble();
             RefreshGuideMarker();
             RefreshPanel(labels);
         }
@@ -169,6 +180,55 @@ namespace BugReport.UI
             heroIcon.style.left = position.x;
             heroIcon.style.top = position.y;
             Ui.SetText(heroIcon, icon);
+        }
+
+        /// <summary>The knight comments on what happens to them, in a short speech bubble above their head.</summary>
+        private void RefreshHeroBubble()
+        {
+            if (heroAnimator == null) return;
+            if (heroController == null)
+            {
+                heroController = heroAnimator.GetComponent<HeroController>();
+                if (heroController == null) return;
+                barks = new HeroBarks(heroController.GetInstanceID());
+                lastHeroState = heroController.State;
+                lastRespawnCount = heroController.RespawnCount;
+            }
+
+            float now = Time.unscaledTime;
+            string line = null;
+            if (heroController.RespawnCount != lastRespawnCount)
+            {
+                lastRespawnCount = heroController.RespawnCount;
+                line = barks.TryBark(heroController.LastRespawnWasCaught ? BarkEvent.Caught : BarkEvent.Fell, now);
+            }
+            else if (heroController.State != lastHeroState)
+            {
+                switch (heroController.State)
+                {
+                    case HeroState.Walking when !heroStarted:
+                        heroStarted = true;
+                        line = barks.TryBark(BarkEvent.Start, now);
+                        break;
+                    case HeroState.Blocked: line = barks.TryBark(BarkEvent.Blocked, now); break;
+                    case HeroState.Confused: line = barks.TryBark(BarkEvent.Confused, now); break;
+                    case HeroState.Arrived: line = barks.TryBark(BarkEvent.Arrived, now); break;
+                }
+            }
+            lastHeroState = heroController.State;
+
+            if (line != null)
+            {
+                Ui.SetText(heroBubble, line);
+                bubbleUntil = now + 3.2f;
+            }
+
+            Vector2 position = default;
+            bool on = now < bubbleUntil && TryPlace(heroAnimator.transform.position + Vector3.up * 2.3f, out position);
+            Ui.Show(heroBubble, on);
+            if (!on) return;
+            heroBubble.style.left = position.x;
+            heroBubble.style.top = position.y;
         }
 
         private void RefreshGuideMarker()

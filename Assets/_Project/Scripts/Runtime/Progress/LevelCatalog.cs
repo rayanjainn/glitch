@@ -20,13 +20,27 @@ namespace BugReport.Progress
             public string sceneName;
             public string title;
             public string chapter;
+            [Tooltip("Glitch uses allowed for 2 stars.")]
+            public int parUses;
+            [Tooltip("1-based story chapter; drives the music theme and the level select headings.")]
+            public int chapterIndex;
+            [TextArea] public string intro;
+            [TextArea] public string outro;
 
             public Entry(string id, string sceneName, string title, string chapter)
+                : this(id, sceneName, title, chapter, 3, 1, null, null) { }
+
+            public Entry(string id, string sceneName, string title, string chapter, int parUses, int chapterIndex,
+                string intro, string outro)
             {
                 this.id = id;
                 this.sceneName = sceneName;
                 this.title = title;
                 this.chapter = chapter;
+                this.parUses = parUses;
+                this.chapterIndex = chapterIndex < 1 ? 1 : chapterIndex;
+                this.intro = intro;
+                this.outro = outro;
             }
         }
 

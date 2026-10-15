@@ -66,6 +66,14 @@ namespace BugReport.Progress
             if (Current.MarkCompleted(levelId)) Write();
         }
 
+        /// <summary>Records a finished run (best time, fewest uses, stars) and writes the save. Returns the run's stars.</summary>
+        public static int SubmitRun(string levelId, float seconds, int glitchUses, int maxStage, int parUses)
+        {
+            int stars = Current.SubmitRun(levelId, seconds, glitchUses, maxStage, parUses);
+            Write();
+            return stars;
+        }
+
         /// <summary>Applies changed settings now; the file is written on <see cref="Flush"/>.</summary>
         public static void ApplySettings()
         {

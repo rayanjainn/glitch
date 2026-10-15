@@ -153,7 +153,7 @@ namespace BugReport.Guards
             if (d.magnitude > catchDistance) return;
             catchCooldown = 2f;
             CatchCount++;
-            hero.Respawn();
+            hero.Respawn(caught: true);
             HeroCaught?.Invoke();
         }
 

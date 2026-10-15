@@ -320,4 +320,43 @@ namespace BugReport.Core.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => new MusicEngine(MusicThemes.Lab(), 100));
         }
     }
+
+    public class PresentationCoreTests
+    {
+        [Test]
+        public void RunSummary_FormatsTimeAndStars()
+        {
+            Assert.That(RunSummary.Time(0f), Is.EqualTo("00:00"));
+            Assert.That(RunSummary.Time(125.9f), Is.EqualTo("02:05"));
+            Assert.That(RunSummary.Time(float.NaN), Is.EqualTo("00:00"));
+            Assert.That(RunSummary.Time(1e9f), Is.EqualTo("99:59"));
+            Assert.That(RunSummary.Stars(2), Is.EqualTo("\u2605\u2605\u2606"));
+            Assert.That(RunSummary.Stars(9), Is.EqualTo("\u2605\u2605\u2605"));
+            Assert.That(RunSummary.NextStarHint(3, 4), Is.Empty);
+            Assert.That(RunSummary.NextStarHint(1, 4), Does.Contain("4"));
+        }
+
+        [Test]
+        public void HeroBarks_AreRateLimited_ButVictoryAlwaysSpeaks()
+        {
+            var barks = new HeroBarks(7, 4f);
+            Assert.That(barks.TryBark(BarkEvent.Blocked, 10f), Is.Not.Null);
+            Assert.That(barks.TryBark(BarkEvent.Confused, 11f), Is.Null, "too soon");
+            Assert.That(barks.TryBark(BarkEvent.Arrived, 11.5f), Is.Not.Null);
+            Assert.That(barks.TryBark(BarkEvent.Blocked, 20f), Is.Not.Null);
+        }
+
+        [Test]
+        public void HeroBarks_NeverRepeatTheSameLineTwice()
+        {
+            var barks = new HeroBarks(3);
+            string previous = null;
+            for (int i = 0; i < 50; i++)
+            {
+                var line = barks.Pick(BarkEvent.Blocked);
+                Assert.That(line, Is.Not.EqualTo(previous));
+                previous = line;
+            }
+        }
+    }
 }

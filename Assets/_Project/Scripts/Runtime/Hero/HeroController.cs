@@ -97,6 +97,8 @@ namespace BugReport.Hero
 
         /// <summary>Times the hero fell out of the world and was put back at its start.</summary>
         public int RespawnCount { get; private set; }
+        /// <summary>True when the last respawn was a guard catching the hero (speech and feedback differ from a fall).</summary>
+        public bool LastRespawnWasCaught { get; private set; }
 
         private void Awake()
         {
@@ -109,7 +111,7 @@ namespace BugReport.Hero
         /// Puts the hero back where the level started it (it fell into a pit, e.g. a bridge stopped
         /// being solid under it). The CharacterController must be disabled to teleport.
         /// </summary>
-        public void Respawn()
+        public void Respawn(bool caught = false)
         {
             if (controller == null) controller = GetComponent<CharacterController>();
             bool wasEnabled = controller.enabled;
@@ -118,6 +120,7 @@ namespace BugReport.Hero
             controller.enabled = wasEnabled;
             verticalVelocity = 0f;
             RespawnCount++;
+            LastRespawnWasCaught = caught;
             ResetHero();
             timer = confusedDuration;
             SetState(HeroState.Confused);
