@@ -782,7 +782,7 @@ namespace BugReport.EditorTools.Setup
         internal sealed class MaterialSet
         {
             public Material Floor, Wall, Firewall, Exit, Crate, Ball, Shadow, Hero, HeroVisor, AnomalyCore, AnomalyFragment, Line, Ghost, Solidified, Frozen, Lift,
-                PlateIdle, PlatePressed, Gate, Piston, SearchLight, GuardBody, Anvil, DesyncSurface, Drone;
+                PlateIdle, PlatePressed, Gate, Piston, Portal, SearchLight, GuardBody, Anvil, DesyncSurface, Drone;
 
             public bool Create(out string error)
             {
@@ -829,6 +829,9 @@ namespace BugReport.EditorTools.Setup
                 PlatePressed = Lit(lit, "M_PlatePressed", new Color(0.7f, 0.9f, 1f), 0.4f, new Color(0.5f, 0.85f, 1.4f) * 0.9f);
                 Gate = Lit(lit, "M_Gate", new Color(0.7f, 0.55f, 0.2f), 0.6f, new Color(0.9f, 0.5f, 0.1f) * 0.25f);
                 Piston = Lit(lit, "M_Piston", new Color(0.35f, 0.37f, 0.42f), 0.7f, new Color(1f, 0.3f, 0.1f) * 0.3f);
+                Portal = hologram != null
+                    ? Hologram(hologram, "M_Portal", new Color(0.35f, 2.4f, 1.0f), 0.55f, rim: 2.2f, glitch: 0.08f)
+                    : Lit(lit, "M_Portal", new Color(0.3f, 0.9f, 0.5f), 0.5f, new Color(0.2f, 1f, 0.5f) * 1.5f);
                 SearchLight = Transparent(lit, "M_SearchLight", new Color(1f, 0.85f, 0.3f, 0.25f), new Color(1f, 0.7f, 0.2f) * 0.5f);
                 GuardBody = Lit(lit, "M_GuardBody", new Color(0.82f, 0.8f, 0.7f), 0.3f, new Color(1f, 0.3f, 0.2f) * 0.25f);
                 Anvil = Lit(lit, "M_Anvil", new Color(0.22f, 0.23f, 0.27f), 0.6f, new Color(1f, 0.6f, 0.1f) * 0.35f);

@@ -215,6 +215,7 @@ namespace BugReport.EditorTools.Setup
             var anomaly = BuildAnomaly(mats, actions, out var motor);
             anomaly.transform.position = new Vector3(-18f, 2.2f, -4f);
             var cameraRig = BuildCamera(anomaly.transform, out var scanner);
+            ArchitectureDresser.DressByName(env, HalfX, HalfZ, 1);
             var systems = BuildSystems(mats, scanner, motor, hero, new GlitchDefinition[] { collisionTransfer, duplication, freeze },
                 containmentSettings, objectives, debugOverlayVisible: false, levelTitle: LevelTitle);
             WirePlayer(anomaly, motor, cameraRig, systems);

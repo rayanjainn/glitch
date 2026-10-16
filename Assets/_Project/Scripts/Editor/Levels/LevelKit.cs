@@ -317,6 +317,18 @@ namespace BugReport.EditorTools.Levels
             Block("Post_L", root.transform, new Vector3(x + 1.2f, 1.4f, -1.4f), new Vector3(0.25f, 2.8f, 0.25f), Mats.Exit, World);
             Block("Post_R", root.transform, new Vector3(x + 1.2f, 1.4f, 1.4f), new Vector3(0.25f, 2.8f, 0.25f), Mats.Exit, World);
             Block("Lintel", root.transform, new Vector3(x + 1.2f, 2.9f, 0f), new Vector3(0.25f, 0.25f, 3.05f), Mats.Exit, World);
+            // The doorway glows: a hologram portal between the posts and a green light on the floor in front of it.
+            var portal = Primitive(PrimitiveType.Quad, "Portal", root.transform, new Vector3(x + 1.2f, 1.4f, 0f), new Vector3(2.6f, 2.8f, 1f), Mats.Portal, 0, keepCollider: false);
+            portal.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+            var glow = new GameObject("ExitGlow", typeof(Light));
+            glow.transform.SetParent(root.transform, false);
+            glow.transform.position = new Vector3(x + 0.2f, 1.6f, 0f);
+            var glowLight = glow.GetComponent<Light>();
+            glowLight.type = LightType.Point;
+            glowLight.color = new Color(0.3f, 1f, 0.55f);
+            glowLight.intensity = 5f;
+            glowLight.range = 6f;
+            glowLight.shadows = LightShadows.None;
             AddEntity(root, "EXIT_DOOR", EntityCategory.Objective, EntityCapabilities.Inspectable | EntityCapabilities.ObjectiveRelevant,
                 "Level objective. The hero wants to be here.");
         }
