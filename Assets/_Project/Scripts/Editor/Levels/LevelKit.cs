@@ -92,6 +92,7 @@ namespace BugReport.EditorTools.Levels
             var systems = BuildSystems(Mats, scanner, motor, Hero, glitches, Containment, objectives, debugOverlayVisible: false, levelTitle: title);
             WirePlayer(anomaly, motor, cameraRig, systems);
             foreach (var configure in deferred) configure(anomaly.transform, systems.Containment);
+            DressArchitecture();
             Surroundings(scenePath);
             PresentationBuilder.Apply(Presentation, Mats, systems, anomaly, Hero, cameraRig.GetComponent<Camera>());
 
@@ -137,10 +138,10 @@ namespace BugReport.EditorTools.Levels
             FloorSegment("Floor_" + index, x, halfX);
 
             float y = WallHeight * 0.5f;
-            Block("Wall_North", Env, new Vector3(0f, y, halfZ), new Vector3(halfX * 2f, WallHeight, Thickness), Mats.Wall, World);
-            Block("Wall_South", Env, new Vector3(0f, y, -halfZ), new Vector3(halfX * 2f, WallHeight, Thickness), Mats.Wall, World);
-            Block("Wall_West", Env, new Vector3(-halfX, y, 0f), new Vector3(Thickness, WallHeight, halfZ * 2f), Mats.Wall, World);
-            Block("Wall_East", Env, new Vector3(halfX, y, 0f), new Vector3(Thickness, WallHeight, halfZ * 2f), Mats.Wall, World);
+            WallBlock("Wall_North", new Vector3(0f, y, halfZ), new Vector3(halfX * 2f, WallHeight, Thickness));
+            WallBlock("Wall_South", new Vector3(0f, y, -halfZ), new Vector3(halfX * 2f, WallHeight, Thickness));
+            WallBlock("Wall_West", new Vector3(-halfX, y, 0f), new Vector3(Thickness, WallHeight, halfZ * 2f));
+            WallBlock("Wall_East", new Vector3(halfX, y, 0f), new Vector3(Thickness, WallHeight, halfZ * 2f));
 
             float lid = Thickness * 2f;
             InvisibleBox("Bounds_Ceiling", Env, new Vector3(0f, Ceiling, 0f), new Vector3(halfX * 2f + lid, 0.2f, halfZ * 2f + lid), World);
@@ -155,8 +156,10 @@ namespace BugReport.EditorTools.Levels
         private void FloorSegment(string name, float fromX, float toX)
         {
             if (toX - fromX < 0.01f) return;
+            floorSegments.Add((fromX, toX));
             var floor = Block(name, Env, new Vector3((fromX + toX) * 0.5f, -0.1f, 0f), new Vector3(toX - fromX, 0.2f, HalfZ * 2f), Mats.Floor, World);
             floor.GetComponent<MeshRenderer>().sharedMaterial = PresentationBuilder.GridFloor(toX - fromX, HalfZ * 2f);
+            floorBlocks.Add(floor);
         }
 
         /// <summary>A wall across the hall at <paramref name="x"/> with a doorway of <paramref name="doorWidth"/> around z = 0.</summary>
@@ -164,8 +167,8 @@ namespace BugReport.EditorTools.Levels
         {
             float half = doorWidth * 0.5f;
             float side = HalfZ - half;
-            Block(name + "_N", Env, new Vector3(x, WallHeight * 0.5f, half + side * 0.5f), new Vector3(Thickness, WallHeight, side), Mats.Wall, World);
-            Block(name + "_S", Env, new Vector3(x, WallHeight * 0.5f, -half - side * 0.5f), new Vector3(Thickness, WallHeight, side), Mats.Wall, World);
+            WallBlock(name + "_N", new Vector3(x, WallHeight * 0.5f, half + side * 0.5f), new Vector3(Thickness, WallHeight, side), dress: false);
+            WallBlock(name + "_S", new Vector3(x, WallHeight * 0.5f, -half - side * 0.5f), new Vector3(Thickness, WallHeight, side), dress: false);
         }
 
         // ---------------------------------------------------------------- glitchable objects
@@ -248,9 +251,9 @@ namespace BugReport.EditorTools.Levels
             const float doorHalf = 1.6f;
             Divider(name + "_DividerW", x - 2f, doorHalf * 2f);
             Divider(name + "_DividerE", x + 2f, doorHalf * 2f);
-            Block(name + "_CorridorN", Env, new Vector3(x, WallHeight * 0.5f, doorHalf + 0.2f), new Vector3(4f, WallHeight, 0.4f), Mats.Wall, World);
-            Block(name + "_CorridorSW", Env, new Vector3(x - 1.3f, WallHeight * 0.5f, -doorHalf - 0.2f), new Vector3(1.4f, WallHeight, 0.4f), Mats.Wall, World);
-            Block(name + "_CorridorSE", Env, new Vector3(x + 1.3f, WallHeight * 0.5f, -doorHalf - 0.2f), new Vector3(1.4f, WallHeight, 0.4f), Mats.Wall, World);
+            WallBlock(name + "_CorridorN", new Vector3(x, WallHeight * 0.5f, doorHalf + 0.2f), new Vector3(4f, WallHeight, 0.4f), dress: false);
+            WallBlock(name + "_CorridorSW", new Vector3(x - 1.3f, WallHeight * 0.5f, -doorHalf - 0.2f), new Vector3(1.4f, WallHeight, 0.4f), dress: false);
+            WallBlock(name + "_CorridorSE", new Vector3(x + 1.3f, WallHeight * 0.5f, -doorHalf - 0.2f), new Vector3(1.4f, WallHeight, 0.4f), dress: false);
 
             var piston = Block(name, Env, new Vector3(x, 1.5f, -3.4f), new Vector3(1f, 3f, 3.2f), Mats.Piston, World);
             var body = piston.AddComponent<Rigidbody>();

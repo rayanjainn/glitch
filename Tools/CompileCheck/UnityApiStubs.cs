@@ -202,7 +202,7 @@ namespace UnityEngine
         public static bool GetIgnoreLayerCollision(int a, int b) => throw null;
     }
     public static class Mathf
-    { public const float Deg2Rad = 0.0174532924f; 
+    { public const float Deg2Rad = 0.0174532924f; public const float Rad2Deg = 57.29578f; public static float Atan2(float y, float x) => throw null; public static int FloorToInt(float f) => throw null; public static float Sign(float f) => throw null; 
         public const float PI = 3.14159265f;
         public static float Max(float a, float b) => throw null; public static int Max(int a, int b) => throw null;
         public static float Clamp(float v, float a, float b) => throw null;
@@ -336,6 +336,7 @@ namespace UnityEngine
     public class Material : Object
     {
         public Material(Shader s) { }
+        public bool enableInstancing { get => throw null; set { } }
         public Shader shader { get => throw null; set { } }
         public string[] shaderKeywords { get => throw null; set { } }
         public MaterialGlobalIlluminationFlags globalIlluminationFlags { get => throw null; set { } }
@@ -485,7 +486,7 @@ namespace UnityEngine.Rendering.Universal
     public enum TonemappingMode { None, Neutral, ACES }
     public sealed class TonemappingModeParameter : VolumeParameter<TonemappingMode> { }
     public sealed class Tonemapping : VolumeComponent { public TonemappingModeParameter mode; }
-    public sealed class ColorAdjustments : VolumeComponent { public FloatParameter postExposure; public ClampedFloatParameter contrast, saturation; }
+    public sealed class ColorAdjustments : VolumeComponent { public FloatParameter postExposure; public ClampedFloatParameter contrast, saturation; public ColorParameter colorFilter; }
     public enum AntialiasingMode { None, FastApproximateAntialiasing, SubpixelMorphologicalAntiAliasing, TemporalAntiAliasing }
     public sealed class UniversalAdditionalCameraData : MonoBehaviour
     {
@@ -652,6 +653,7 @@ namespace UnityEditor
         public static void UnpackPrefabInstance(GameObject instanceRoot, PrefabUnpackMode unpackMode, InteractionMode action) { }
         public static GameObject SaveAsPrefabAsset(GameObject instanceRoot, string assetPath) => throw null;
         public static Object InstantiatePrefab(Object assetComponentOrGameObject, Transform parent) => throw null;
+        public static Object InstantiatePrefab(Object assetComponentOrGameObject) => throw null;
         public static void RecordPrefabInstancePropertyModifications(Object targetObject) { }
         public static bool IsPartOfPrefabInstance(Object componentOrGameObject) => throw null;
     }

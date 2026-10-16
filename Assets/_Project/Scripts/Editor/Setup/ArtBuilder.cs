@@ -212,6 +212,55 @@ namespace BugReport.EditorTools.Setup
             return root;
         }
 
+        // ---------------------------------------------------------------- measured placement (architecture)
+
+        /// <summary>Size of the dungeon model at scale 1, unrotated (measured from its renderers; zero if unavailable).</summary>
+        internal static Vector3 MeasureDungeonModel(string modelName)
+        {
+            if (!DungeonAvailable) return Vector3.zero;
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(DungeonModel(modelName));
+            if (source == null) return Vector3.zero;
+            var temp = (GameObject)PrefabUtility.InstantiatePrefab(source);
+            try
+            {
+                var size = WorldBounds(temp).size;
+                return size;
+            }
+            finally
+            {
+                Object.DestroyImmediate(temp);
+            }
+        }
+
+        /// <summary>
+        /// Places a dungeon-kit model so that its visible bounds are centred on <paramref name="center"/> in x/z and rest on
+        /// <paramref name="baseY"/>, after rotating by <paramref name="yaw"/> and scaling by <paramref name="scale"/> (per axis, in the
+        /// model's own axes). Placement uses measured bounds, never the pivot, so it is correct whatever the pack's pivot convention is.
+        /// Renderers only: no colliders. Returns null if the model is unavailable or empty.
+        /// </summary>
+        internal static GameObject PlaceDungeonModel(string modelName, Transform parent, Vector3 center, float baseY, float yaw, Vector3 scale, Material material)
+        {
+            if (!DungeonAvailable || material == null) return null;
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(DungeonModel(modelName));
+            if (source == null) return null;
+            var root = new GameObject("Kit_" + modelName) { isStatic = true };
+            root.transform.SetParent(parent, false);
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(source, root.transform);
+            PrefabUtility.UnpackPrefabInstance(model, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            Prepare(model, material, 0);
+            if (model.GetComponentsInChildren<Renderer>(false).Length == 0)
+            {
+                Object.DestroyImmediate(root);
+                return null;
+            }
+            model.transform.localScale = scale;
+            root.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            var bounds = WorldBounds(root);
+            root.transform.position += new Vector3(center.x - bounds.center.x, baseY - bounds.min.y, center.z - bounds.center.z);
+            foreach (var t in root.GetComponentsInChildren<Transform>(true)) t.gameObject.isStatic = true;
+            return root;
+        }
+
         // ---------------------------------------------------------------- kits (scenery)
 
         public enum Kit { Nature, Space, Graveyard, Prototype }

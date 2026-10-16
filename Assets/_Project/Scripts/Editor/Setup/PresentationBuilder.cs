@@ -272,21 +272,22 @@ namespace BugReport.EditorTools.Setup
             Ensure<Tonemapping>(profile, t => t.mode.Override(TonemappingMode.ACES));
             Ensure<Bloom>(profile, b =>
             {
-                b.intensity.Override(0.6f);
-                b.threshold.Override(1f);
-                b.scatter.Override(0.65f);
+                b.intensity.Override(0.9f);
+                b.threshold.Override(0.9f);
+                b.scatter.Override(0.7f);
             });
             Ensure<Vignette>(profile, v =>
             {
-                v.intensity.Override(0.22f);
-                v.smoothness.Override(0.4f);
+                v.intensity.Override(0.32f);
+                v.smoothness.Override(0.45f);
                 v.color.Override(Color.black);
             });
             Ensure<ColorAdjustments>(profile, c =>
             {
                 c.postExposure.Override(0.1f);
-                c.contrast.Override(8f);
-                c.saturation.Override(6f);
+                c.contrast.Override(18f);
+                c.saturation.Override(10f);
+                c.colorFilter.Override(new Color(1f, 0.96f, 0.9f));
             });
             Ensure<ChromaticAberration>(profile, c => c.intensity.Override(0f));
             Ensure<LensDistortion>(profile, l => l.intensity.Override(0f));
@@ -297,7 +298,13 @@ namespace BugReport.EditorTools.Setup
 
         private static void Ensure<T>(VolumeProfile profile, Action<T> defaults) where T : VolumeComponent
         {
-            if (profile.TryGet<T>(out _)) return;
+            // Values are re-applied on every build, so retuning here reaches profiles that already exist on disk.
+            if (profile.TryGet<T>(out var existing))
+            {
+                defaults(existing);
+                EditorUtility.SetDirty(existing);
+                return;
+            }
             var component = profile.Add<T>(false);
             defaults(component);
             component.name = typeof(T).Name;

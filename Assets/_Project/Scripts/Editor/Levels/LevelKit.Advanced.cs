@@ -45,7 +45,7 @@ namespace BugReport.EditorTools.Levels
 
         /// <summary>A static wall along x at <paramref name="z"/> between two x positions (splits the hall into lanes).</summary>
         public void LaneDivider(string name, float fromX, float toX, float z)
-            => Block(name, Env, new Vector3((fromX + toX) * 0.5f, WallHeight * 0.5f, z), new Vector3(toX - fromX, WallHeight, Thickness), Mats.Wall, World);
+            => WallBlock(name, new Vector3((fromX + toX) * 0.5f, WallHeight * 0.5f, z), new Vector3(toX - fromX, WallHeight, Thickness), dress: false);
 
         /// <summary>A solid, collision-transferable wall closing one lane (centre z, half width).</summary>
         public GameEntity LaneWall(string name, string displayName, float x, float z, float halfWidth)
